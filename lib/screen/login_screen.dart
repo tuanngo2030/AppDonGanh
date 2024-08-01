@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last
-
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -95,14 +94,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: Padding(
                             padding: const EdgeInsets.all(5.0),
-                            child: Text(
-                              "Quên mật khẩu ?",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(248, 158, 25, 1)),
-                            ))))
+                            child:GestureDetector(
+                              onTap: () {
+                                  Navigator.pushNamed(context, '/forgot_password');
+                                // TODO: Implement password reset logic here
+                              },
+                              child: Text(
+                                "Quên mật khẩu ?",
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromRGBO(248, 158, 25, 1)),
+                              ))))
+                            )
+                        
               ],
             ),
           ),
@@ -113,6 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: ElevatedButton(
               onPressed: () {
                 // TODO: Implement login logic here
+                 Navigator.pushNamed(context, '/ban_la');
               },
               child: Text(
                 "Đăng nhập",
@@ -174,25 +181,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       print("Login with facebook");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/fb_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/fb_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
                 InkWell(
                     onTap: () {
                       print("Login with google");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/gg_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/gg_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
                 InkWell(
                     onTap: () {
                       print("Login with twitter");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/tw_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/tw_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
               ],
             ),
           ),
