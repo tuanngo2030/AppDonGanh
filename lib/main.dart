@@ -3,6 +3,7 @@
 import 'package:don_ganh_app/screen/ban_la.dart';
 import 'package:don_ganh_app/screen/forgot_password.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
+import 'package:don_ganh_app/screen/home.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
 import 'package:don_ganh_app/screen/new_password.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/new_password': (context) => NewPassword(),
         '/ban_la': (context) => BanLa(),
         '/trang_xin_chao': (context_) => TrangXinChao(),
+      //  '/home': (context_) => Home(),
       },
     );
   }

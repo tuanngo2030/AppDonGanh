@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
-class gioithieu extends StatelessWidget {
+class gioithieu extends StatefulWidget {
   const gioithieu({super.key});
+  @override
+  State<gioithieu> createState() => _gioithieuState();
+}
 
+class _gioithieuState extends State<gioithieu> {
+  // chuyển trang sau 3 giây
+    @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 3), () {//số giây để chuyển
+      Navigator.pushReplacementNamed(context, '/trang_xin_chao');
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
