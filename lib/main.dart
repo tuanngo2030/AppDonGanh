@@ -3,7 +3,6 @@
 import 'package:don_ganh_app/screen/ban_la.dart';
 import 'package:don_ganh_app/screen/forgot_password.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
-import 'package:don_ganh_app/screen/home.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
 import 'package:don_ganh_app/screen/new_password.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
