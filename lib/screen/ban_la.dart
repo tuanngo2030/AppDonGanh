@@ -47,7 +47,7 @@ class BanLa extends StatelessWidget {
             UserOption(
               text: 'Khách mua hàng',
               onTap: () {
-                // Xử lý khi chọn "Khách mua hàng"
+                Navigator.pushNamed((context), "/bottom");
               },
             ),
             SizedBox(height: 20),

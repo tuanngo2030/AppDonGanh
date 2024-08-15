@@ -12,7 +12,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: SingleChildScrollView(
+       child: Column( 
         children: [
           Padding(
             padding: const EdgeInsets.all(60),
@@ -235,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ))
         ],
       ),
+      )
     );
   }
 }

@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors
+import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/screen/ban_la.dart';
 import 'package:don_ganh_app/screen/forgot_password.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/new_password': (context) => NewPassword(),
         '/ban_la': (context) => BanLa(),
         '/trang_xin_chao': (context_) => TrangXinChao(),
+         '/bottom': (context_) => BottomnavigationMenu(),
       //  '/home': (context_) => Home(),
       },
     );

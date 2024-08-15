@@ -14,7 +14,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: SingleChildScrollView(
+          child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(50),
@@ -221,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
 
-           Padding(
+          Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -231,29 +232,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       print("Login with facebook");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/fb_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/fb_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
                 InkWell(
                     onTap: () {
                       print("Login with google");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/gg_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/gg_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
                 InkWell(
                     onTap: () {
                       print("Login with twitter");
                     },
                     child: Container(
-                        child: Image.asset('lib/assets/tw_icon.png'),
-                        padding: EdgeInsets.all(20),
-                        )),
+                      child: Image.asset('lib/assets/tw_icon.png'),
+                      padding: EdgeInsets.all(20),
+                    )),
               ],
             ),
           ),
-
 
           Padding(
               padding: const EdgeInsets.only(top: 10.0),
@@ -285,7 +285,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ))
         ],
-      ),
+      )),
     );
   }
 }
