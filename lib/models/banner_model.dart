@@ -1,5 +1,5 @@
 class BannerModel {
-  final int id;
+  final String id;
   final String imageUrl;
 
   BannerModel({
@@ -8,6 +8,6 @@ class BannerModel {
     });
 
   factory BannerModel.fromJSON(Map<String, dynamic> data) {
-    return BannerModel(id : data['id'],imageUrl: data['url']);
+    return BannerModel(id : data['_id'], imageUrl : data['hinhAnh']);
   }
 }

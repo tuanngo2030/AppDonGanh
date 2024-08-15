@@ -1,10 +1,10 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'package:don_ganh_app/api_services/banner_api_service.dart';
-import 'package:don_ganh_app/models/banner_model.dart';
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:don_ganh_app/api_services/banner_api_service.dart';
+import 'package:don_ganh_app/models/banner_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<BannerModel>> bannerImage;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.w900,
                 ),
               ),
+
               Row(
                 children: [
                   Icon(
@@ -89,20 +91,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 8),
 
-                  //My Cart
+                  // Giỏ hàng của tôi
                   badges.Badge(
                     badgeContent: Text(
                       "0",
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w900),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     badgeStyle: badges.BadgeStyle(
-                        badgeColor: Color.fromRGBO(255, 0, 0, 1),
-                        borderSide: BorderSide(color: Colors.white),
-                        padding: EdgeInsets.all(8)),
+                      badgeColor: Color.fromRGBO(255, 0, 0, 1),
+                      borderSide: BorderSide(color: Colors.white),
+                      padding: EdgeInsets.all(8),
+                    ),
                     child: InkWell(
                       onTap: () {
-                        print("Go to my cart");
+                        print("Đi đến giỏ hàng của tôi");
                       },
                       child: Container(
                         width: 45,
@@ -123,44 +128,108 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: 15),
 
-              //Banner
+              // Banner
               FutureBuilder<List<BannerModel>>(
                 future: bannerImage,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(child: Text('Lỗi: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No images found'));
+                    return Center(child: Text('Không tìm thấy hình ảnh'));
                   }
 
-                  return CarouselSlider(
-                    options: CarouselOptions(
-                      autoPlay: true,
-                      autoPlayInterval: Duration(seconds: 5 ),
-                      enlargeCenterPage: true,
-                      viewportFraction: 1
-                    ),
-                    items: snapshot.data!.map((image) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(10)
+                  List<BannerModel> banners = snapshot.data!;
+                  return Column(
+                    children: [
+                      CarouselSlider(
+                        options: CarouselOptions(
+                          autoPlay: true,
+                          autoPlayInterval: Duration(seconds: 5),
+                          enlargeCenterPage: true,
+                          viewportFraction: 1,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentIndex = index;
+                            });
+                          },
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(image.imageUrl,
-                              fit: BoxFit.cover, 
-                              width: double.infinity,),
-                        ),
-                      );
-                    }).toList(),
+                        items: banners.map((banner) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0),
+                              child: Image.network(
+                                banner.imageUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      SizedBox(height: 8),
+                      
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: banners.asMap().entries.map((entry) {
+                          return GestureDetector(
+                            onTap: () => setState(() {
+                              _currentIndex = entry.key;
+                            }),
+                            child: Container(
+                              width: 8.0,
+                              height: 8.0,
+                              margin: EdgeInsets.symmetric(horizontal: 4.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: (Colors.black.withOpacity(
+                                    _currentIndex == entry.key ? 0.9 : 0.4)),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   );
                 },
-              )
+              ),
 
-              // Categories
+              // Danh mục
+              Padding(
+                padding: const EdgeInsets.only(top : 8.0),
+                child: Container(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "Danh mục",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Color.fromRGBO(41, 87, 35, 1),
+                          ),
+                        ),
+                      ),
+                
+                      SizedBox(width: 8),
+                      Text(
+                        "Tất cả",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                        )
+                    ],
+                  ),
+                ),
+              ),
+
+              // list categories
               
             ],
           ),
