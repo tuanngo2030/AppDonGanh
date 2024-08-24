@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:don_ganh_app/bottomnavigation.dart';
+import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/ban_la.dart';
+import 'package:don_ganh_app/screen/detail_product_screen.dart';
 import 'package:don_ganh_app/screen/forgot_password.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
@@ -17,6 +19,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,11 +33,11 @@ class MyApp extends StatelessWidget {
         '/new_password': (context) => NewPassword(),
         '/ban_la': (context) => BanLa(),
         '/trang_xin_chao': (context_) => TrangXinChao(),
-         '/bottom': (context_) => BottomnavigationMenu(),
+        '/bottom': (context_) => BottomnavigationMenu(),
+        '/manageraccount_screen': (context_) => ManageraccountScreen(),
+        '/bottomnavigation': (context_) => BottomnavigationMenu(),
+        // '/detail_product_screen': (context_) => DetailProductScreen(),
 
-
-      '/manageraccount_screen': (context_) => ManageraccountScreen(),
-      '/bottomnavigation': (context_) => BottomnavigationMenu(),
       },
     );
   }
