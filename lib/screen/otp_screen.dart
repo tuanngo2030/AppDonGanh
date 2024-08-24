@@ -1,21 +1,22 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:async';
-
+import 'package:don_ganh_app/api_services/otp_api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-class ForgotPassword extends StatelessWidget {
+class OtpScreen extends StatelessWidget {
+  final String email;
 
- final TextEditingController _controller1 = TextEditingController();
+  final TextEditingController _controller1 = TextEditingController();
   final TextEditingController _controller2 = TextEditingController();
   final TextEditingController _controller3 = TextEditingController();
   final TextEditingController _controller4 = TextEditingController();
-  
+
   final FocusNode _focusNode1 = FocusNode();
   final FocusNode _focusNode2 = FocusNode();
   final FocusNode _focusNode3 = FocusNode();
   final FocusNode _focusNode4 = FocusNode();
+
+  final OtpApiService _otpApiService = OtpApiService();
+
+  OtpScreen({required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class ForgotPassword extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'example@gmail.com',
+                email, // Display the dynamic email
                 style: TextStyle(
                     fontSize: 10, color: Color.fromARGB(255, 248, 159, 25)),
                 textAlign: TextAlign.center,
@@ -51,7 +52,7 @@ class ForgotPassword extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                    OTPDigitTextField(
+                  OTPDigitTextField(
                     controller: _controller1,
                     currentNode: _focusNode1,
                     nextNode: _focusNode2,
@@ -65,13 +66,13 @@ class ForgotPassword extends StatelessWidget {
                   OTPDigitTextField(
                     controller: _controller3,
                     currentNode: _focusNode3,
-                          previousNode: _focusNode2,
+                    previousNode: _focusNode2,
                     nextNode: _focusNode4,
                   ),
                   OTPDigitTextField(
                     controller: _controller4,
                     currentNode: _focusNode4,
-                          previousNode: _focusNode3,
+                    previousNode: _focusNode3,
                   ),
                 ],
               ),
@@ -87,19 +88,48 @@ class ForgotPassword extends StatelessWidget {
                     fontSize: 10, color: Color.fromARGB(255, 248, 159, 25)),
                 textAlign: TextAlign.center,
               ),
-                   SizedBox(height: 30),
+              SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Xử lý khi nhấn nút xác nhận
-                     Navigator.pushNamed(context, '/new_password');
-                    // Gửi email xác nhận code OTP
-                    // Thông báo đã gửi thành công
+                  onPressed: () async {
+                    String otp = _controller1.text +
+                        _controller2.text +
+                        _controller3.text +
+                        _controller4.text;
+
+                    try {
+                      bool isVerified =
+                          await _otpApiService.verifyOtp(otp, email);
+                      print('OTP entered: $otp');
+                      print('API verification result: $isVerified');
+
+                      if (isVerified) {
+                        Navigator.pushNamed(
+                          context,
+                          '/loginscreen',
+                          arguments: isVerified,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'OTP verification failed! Please try again.'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      print('Error during OTP verification: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'An error occurred. Please try again later.'),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                        255, 41, 87, 35), // Màu nền của nút
+                    backgroundColor: const Color.fromARGB(255, 41, 87, 35),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   child: const Text('Xác nhận',
@@ -121,9 +151,14 @@ class OTPDigitTextField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode currentNode;
   final FocusNode? nextNode;
-    final FocusNode? previousNode;
+  final FocusNode? previousNode;
 
-  OTPDigitTextField({required this.controller, required this.currentNode, this.nextNode,this.previousNode,});
+  OTPDigitTextField({
+    required this.controller,
+    required this.currentNode,
+    this.nextNode,
+    this.previousNode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +192,7 @@ class OTPDigitTextField extends StatelessWidget {
         onChanged: (value) {
           if (value.length == 1 && nextNode != null) {
             nextNode?.requestFocus();
-          }else if (value.isEmpty && previousNode != null) {
+          } else if (value.isEmpty && previousNode != null) {
             previousNode?.requestFocus();
           }
         },
@@ -165,62 +200,3 @@ class OTPDigitTextField extends StatelessWidget {
     );
   }
 }
-
-
-
-// class CountdownTimer extends StatefulWidget {
-//   @override
-//   _CountdownTimerState createState() => _CountdownTimerState();
-// }
-
-// class _CountdownTimerState extends State<CountdownTimer> {
-//   static const maxSeconds = 60;
-//   int _currentSeconds = maxSeconds;
-//   Timer? _timer;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     startTimer();
-//   }
-
-//   void startTimer() {
-//     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-//       if (_currentSeconds > 0) {
-//         setState(() {
-//           _currentSeconds--;
-//         });
-//       } else {
-//         timer.cancel();
-//       }
-//     });
-//   }
-
-//   @override
-//   void dispose() {
-//     _timer?.cancel();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     int minutes = _currentSeconds ~/ 60;
-//     int seconds = _currentSeconds % 60;
-//     String formattedTime = '$minutes:${seconds.toString().padLeft(2, '0')}';
-
-//     return Column(
-//       mainAxisAlignment: MainAxisAlignment.center,
-//       children: [
-//         Text(
-//           'Đếm ngược',
-//           style: TextStyle(fontSize: 24),
-//         ),
-//         SizedBox(height: 20),
-//         Text(
-//           formattedTime,
-//           style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-//         ),
-//       ],
-//     );
-//   }
-// }
