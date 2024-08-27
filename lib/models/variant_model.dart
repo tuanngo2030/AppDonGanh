@@ -39,7 +39,7 @@ class KetHopThuocTinh {
 
   factory KetHopThuocTinh.fromJSON(Map<String, dynamic> data){
     return KetHopThuocTinh(
-      id: data['id'], 
+      id: data['_id'], 
       giaTriThuocTinh:  GiaTriThuocTinh.fromJSON(data['IDGiaTriThuocTinh'])
     );
   }
