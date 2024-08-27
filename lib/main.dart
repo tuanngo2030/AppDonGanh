@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/ban_la.dart';
+import 'package:don_ganh_app/screen/cart_screen.dart';
 import 'package:don_ganh_app/screen/detail_product_screen.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/bottom': (context_) => BottomnavigationMenu(),
         '/manageraccount_screen': (context_) => ManageraccountScreen(),
         '/bottomnavigation': (context_) => BottomnavigationMenu(),
+        '/cart_screen': (context_) => CartScreen(),
         // '/detail_product_screen': (context_) => DetailProductScreen(),
         '/trang_xin_chao': (context) => TrangXinChao(),
         '/bottom': (context) => BottomnavigationMenu(),

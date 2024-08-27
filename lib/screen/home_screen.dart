@@ -117,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: InkWell(
                         onTap: () {
                           print("Đi đến giỏ hàng của tôi");
+                          Navigator.pushNamed(context, '/cart_screen');
                         },
                         child: Container(
                           width: 45,
