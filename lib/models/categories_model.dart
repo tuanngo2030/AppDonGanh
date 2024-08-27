@@ -1,5 +1,5 @@
 class CategoryModel {
-  final int id;
+  final String id;
   final String ten_danh_muc;
   final String image;
   final List<childCategories> danh_muc_con;
@@ -13,20 +13,20 @@ class CategoryModel {
 
   factory CategoryModel.fromJSON(Map<String, dynamic> data) {
       // Chuyển đổi danh_muc_con từ List<dynamic> thành List<childCategories>
-    // var danhMucConFromJson = data['danh_muc_con'] as List<dynamic>;
-    // List<childCategories> danhMucConList = danhMucConFromJson.map((item) => childCategories.fromJSON(item)).toList();
+    var danhMucConFromJson = data['DanhMucCon'] as List<dynamic>;
+    List<childCategories> danhMucConList = danhMucConFromJson.map((item) => childCategories.fromJSON(item)).toList();
 
     return CategoryModel(
-        id: data['id'],
-        ten_danh_muc: data['ten_danh_muc'],
-        image: data['url'],
-        danh_muc_con: data['danh_muc_con']);
+        id: data['IDDanhMuc'],
+        ten_danh_muc: data['TenDanhMuc'],
+        image: data['AnhDanhMuc'],
+        danh_muc_con: danhMucConList);
   }
 }
 
 
 class childCategories {
-  final int id;
+  final String id;
   final String ten_danh_muc_con;
   final String mo_ta;
 
@@ -35,4 +35,13 @@ class childCategories {
     required this.ten_danh_muc_con, 
     required this.mo_ta
   });
-}
+
+  factory childCategories.fromJSON(Map<String, dynamic> data) {
+     return childCategories(
+        id: data['IDDanhMucCon'],
+        ten_danh_muc_con: data['TenDanhMucCon'],
+        mo_ta: data['MieuTa'],
+      );
+  }
+  }
+

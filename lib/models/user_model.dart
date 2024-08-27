@@ -4,6 +4,7 @@ class NguoiDung {
   final String? tenNguoiDung;
   final int? soDienThoai;
   final String? gmail;
+  final String? GioiTinh;
   final String? matKhau;
   final DateTime? ngayTao;
   final String? ngaySinh;
@@ -24,6 +25,7 @@ class NguoiDung {
     this.tenNguoiDung,
     this.soDienThoai,
     this.gmail,
+    this.GioiTinh,
     this.matKhau,
     this.ngayTao,
     this.ngaySinh,
@@ -47,6 +49,7 @@ class NguoiDung {
       tenNguoiDung: json['tenNguoiDung'] as String?,
       soDienThoai: json['soDienThoai'] != null ? json['soDienThoai'] as int : null,
       gmail: json['gmail'] as String?,
+      GioiTinh: json['GioiTinh'] as String?,
       matKhau: json['matKhau'] as String?,
       ngayTao: json['ngayTao'] != null ? DateTime.parse(json['ngayTao']) : null,
       ngaySinh: json['ngaySinh'] as String?,
@@ -73,6 +76,7 @@ class NguoiDung {
       'tenNguoiDung': tenNguoiDung,
       'soDienThoai': soDienThoai,
       'gmail': gmail,
+      'GioiTinh': GioiTinh,
       'matKhau': matKhau,
       'ngayTao': ngayTao?.toIso8601String(),
       'ngaySinh': ngaySinh,

@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:don_ganh_app/api_services/user_api_service.dart';
+import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,20 +15,35 @@ class ManageraccountScreen extends StatefulWidget {
 class _ManageraccountScreen extends State<ManageraccountScreen> {
   File? _image;
   final UserImageUploadService _uploadService = UserImageUploadService();
+  final UserApiService _apiService = UserApiService();
   String _tenNguoiDung = 'Người dùng';
+  String _userId = '';
+  String? _profileImageUrl; 
 
   @override
   void initState() {
     super.initState();
-    _loadUserName();
+    _loadUserDetails();
   }
 
-  Future<void> _loadUserName() async {
+  Future<void> _loadUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _tenNguoiDung = prefs.getString('tenNguoiDung') ?? 'Người dùng';
-    });
-    print('Tên người dùng từ SharedPreferences: $_tenNguoiDung');
+    String? storedUserId = prefs.getString('userId');
+
+    if (storedUserId != null && storedUserId.isNotEmpty) {
+      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
+      if (user != null) {
+        setState(() {
+          _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
+          _userId = storedUserId; // Store the user ID
+          _profileImageUrl = user.anhDaiDien; // Update this line if the user model has the profile image URL
+        });
+      } else {
+        print('User details not found.');
+      }
+    } else {
+      print('User ID is not available.');
+    }
   }
 
   Future<void> _pickImage() async {
@@ -37,21 +55,27 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
         _image = File(pickedFile.path);
       });
 
-      try {
-        bool success = await _uploadService.uploadImage(_image!);
+      if (_userId.isNotEmpty) {
+        try {
+          bool success = await _uploadService.uploadImage(_image!, _userId);
 
-        if (success) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
+            );
+          }
+        } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
+            SnackBar(content: Text('Đã xảy ra lỗi: $e')),
           );
         }
-      } catch (e) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xảy ra lỗi: $e')),
+          SnackBar(content: Text('Không tìm thấy userId.')),
         );
       }
     } else {
@@ -73,8 +97,12 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
               child: CircleAvatar(
                 radius: 50,
                 backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-                backgroundImage: _image != null ? FileImage(_image!) : null,
-                child: _image == null
+                backgroundImage: _image != null
+                    ? FileImage(_image!)
+                    : _profileImageUrl != null
+                        ? NetworkImage(_profileImageUrl!)
+                        : null,
+                child: _image == null && _profileImageUrl == null
                     ? Icon(
                         Icons.camera_alt,
                         color: Colors.white,
@@ -96,7 +124,9 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             ListTile(
               leading: Image.asset("lib/assets/hoso_icon.png"),
               title: Text('Hồ sơ'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context,'/ProfileScreen');
+              },
             ),
             ListTile(
               leading: Image.asset("lib/assets/lienketthu_icon.png"),
@@ -126,7 +156,9 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
               title: Text('Đăng xuất'),
-              onTap: () {},
+              onTap: () {
+                
+              },
             ),
           ],
         ),
