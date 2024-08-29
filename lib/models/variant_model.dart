@@ -2,6 +2,7 @@ class VariantModel {
   final String id;
   final String idProduct;
   final String sku;
+  final int gia;
   final int soLuong;
   final List<KetHopThuocTinh> ketHopThuocTinh;
 
@@ -9,6 +10,7 @@ class VariantModel {
     required this.id,
     required this.idProduct,
     required this.sku,
+    required this.gia,
     required this.soLuong,
     required this.ketHopThuocTinh,
   });
@@ -23,6 +25,7 @@ class VariantModel {
       id: data['_id'],
       idProduct: data['IDSanPham'],
       sku: data['sku'],
+      gia: data['gia'],
       soLuong: data['soLuong'],
       ketHopThuocTinh: ketHopThuocTinh,
     );

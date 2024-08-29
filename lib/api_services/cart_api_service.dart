@@ -25,7 +25,7 @@ class CartApiService {
   }
 }
 
-Future<CartModel> addToCart(String userId, String idBienThe, int quantity) async {
+Future<CartModel> AddToCart(String userId, String idBienThe, int quantity, int donGia) async {
   final addToCartURL = 'https://imp-model-widely.ngrok-free.app/api/cart/gioHang?';
 
   Map<String,dynamic> data = {
@@ -34,11 +34,16 @@ Future<CartModel> addToCart(String userId, String idBienThe, int quantity) async
       {
         'idBienThe': idBienThe,
         'soLuong' : quantity,
+        'donGia' : donGia,
       }
     ]
   };
 
-  final response = await http.post(Uri.parse(addToCartURL));
+  final response = await http.post(
+      Uri.parse(addToCartURL),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(data),
+    );
 
   if(response.statusCode == 200){
      Map<String, dynamic> cartData = json.decode(response.body);

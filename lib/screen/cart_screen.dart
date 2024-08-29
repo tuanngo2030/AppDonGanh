@@ -34,7 +34,7 @@ class _CartScreenState extends State<CartScreen> {
           padding: const EdgeInsets.all(12.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/');
+              Navigator.pop(context);
             },
             child: Container(
               child: ImageIcon(
@@ -53,86 +53,108 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
       ),
-      body: FutureBuilder<CartModel>(
-        future: cartModel,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Lỗi: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('Không tìm thấy dữ liệu'));
-          }
-
-          CartModel cart = snapshot.data!;
-
-          return ListView(
-            children: [
-              ...cart.chiTietGioHang
-                  .map((item) => FutureBuilder<ProductModel>(
-                        future: fetchProduct(item.variantModel.idProduct),
-                        builder: (context, productSnapshot) {
-                          if (productSnapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          } else if (productSnapshot.hasError) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                  child: Text('Lỗi: ${productSnapshot.error}')),
-                            );
-                          } else if (!productSnapshot.hasData ||
-                              productSnapshot.data == null) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                  child: Text('Không tìm thấy sản phẩm')),
-                            );
-                          }
-
-                          ProductModel product = productSnapshot.data!;
-
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 100,
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          image: NetworkImage(
-                                              product.imageProduct),
-                                          fit: BoxFit.cover)),
-                                ),
-                                Column(
-                                  children: [
-                                    Text(
-                                      'Sản phẩm: ${product.nameProduct}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<CartModel>(
+                future: cartModel,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Lỗi: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data == null) {
+                    return Center(child: Text('Không tìm thấy dữ liệu'));
+                  }
+              
+                  CartModel cart = snapshot.data!;
+              
+                  return ListView(
+                    children: [
+                      ...cart.chiTietGioHang
+                          .map((item) => FutureBuilder<ProductModel>(
+                                future: fetchProduct(item.variantModel.idProduct),
+                                builder: (context, productSnapshot) {
+                                  if (productSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Center(child: CircularProgressIndicator()),
+                                    );
+                                  } else if (productSnapshot.hasError) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Center(
+                                          child: Text('Lỗi: ${productSnapshot.error}')),
+                                    );
+                                  } else if (!productSnapshot.hasData ||
+                                      productSnapshot.data == null) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Center(
+                                          child: Text('Không tìm thấy sản phẩm')),
+                                    );
+                                  }
+              
+                                  ProductModel product = productSnapshot.data!;
+              
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 100,
+                                          width: 100,
+                                          decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      product.imageProduct),
+                                                  fit: BoxFit.cover)),
+                                        ),
+                                        Column(
+                                          children: [
+                                            Text(
+                                              '${product.nameProduct}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Text('Số lượng: ${item.soLuong}'),
+                                            Text('Đơn giá: ${item.donGia}'),
+                                          ],
+                                        ),
+                                        Divider(),
+                                      ],
                                     ),
-                                    Text('Số lượng: ${item.soLuong}'),
-                                    Text('Đơn giá: ${item.donGia}'),
-                                    
-                                  ],
-                                ),
-                                Divider(),
-                              ],
-                            ),
-                          );
-                        },
-                      ))
-                  .toList(),
-            ],
-          );
-        },
+                                  );
+                                },
+                              ))
+                          .toList(),
+                    ],
+                  );
+                },
+              ),
+            ),
+
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey, width: 1),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                )
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

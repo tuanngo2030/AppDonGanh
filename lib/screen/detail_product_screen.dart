@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/variant_api_service.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/models/variant_model.dart';
@@ -16,12 +17,14 @@ class DetailProductScreen extends StatefulWidget {
 }
 
 class _DetailProductScreenState extends State<DetailProductScreen> {
+  int donGia = 0;
+  String selectedVariantId = '';
   int quantity = 1;
   late Future<List<VariantModel>> variantModel;
 
   @override
   void initState() {
-    variantModel = VariantApiService().getVariant();
+    variantModel = VariantApiService().getVariant(widget.product.id);
     super.initState();
   }
 
@@ -37,6 +40,19 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     });
   }
 
+  Future<void> addToCart(String userId, String variantId, int donGia) async {
+    try {
+      await CartApiService().AddToCart(userId, variantId, quantity, donGia);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi thêm vào giỏ hàng')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +63,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
           padding: const EdgeInsets.all(12.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/');
+              Navigator.pop(context);
             },
             child: Container(
               child: ImageIcon(
@@ -305,7 +321,11 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                             itemBuilder: (context, index) {
                                               return GestureDetector(
                                                 onTap: () {
-                                                  print("${variant[index].id}");
+                                                  setModalState((){
+                                                    selectedVariantId = variant[index].id;
+                                                    donGia = variant[index].gia;
+                                                    print(selectedVariantId + ' $donGia');
+                                                  });
                                                   
 
                                                 },
@@ -411,7 +431,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                       padding: const EdgeInsets.all(10),
                                       child: Center(
                                         child: ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            addToCart("66c45d3b1ee5471012d0540c", selectedVariantId, donGia);
+                                          },
                                           child: Text('Thêm Vào Giỏ Hàng'),
                                           style: ElevatedButton.styleFrom(
                                             minimumSize: Size.fromHeight(60),
