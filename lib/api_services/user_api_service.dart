@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,8 @@ class UserApiService {
       'https://imp-model-widely.ngrok-free.app/api/user/login';
   final String baseUrlid =
       'https://imp-model-widely.ngrok-free.app/api/user/showUserID';
+  final String diachiUrl =
+      'https://imp-model-widely.ngrok-free.app/api/user/updateUserDiaChi';
 
   Future<NguoiDung?> login(String gmail, String matKhau) async {
     final uri = Uri.parse(baseUrl);
@@ -97,4 +100,40 @@ class UserApiService {
 
     return null;
   }
+
+Future<bool> updateUserAddress(String userId, DiaChi diaChi) async {
+  final url = Uri.parse(diachiUrl);
+
+  try {
+    final response = await http.put(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'UserID': userId,
+        'diaChiMoi': {
+          'tinhThanhPho': diaChi.tinhThanhPho,
+          'quanHuyen': diaChi.quanHuyen,
+          'phuongXa': diaChi.phuongXa,
+          'duongThon': diaChi.duongThon,
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return data['success'] == true;
+    } else {
+      print('Error response status: ${response.statusCode}');
+      print('Error response body: ${response.body}');
+      throw Exception('Failed to update address');
+    }
+  } catch (e) {
+    print('Exception caught: $e');
+    throw Exception('Failed to update address');
+  }
+}
+
+
 }
