@@ -341,14 +341,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                height: 150,
-                                width: 200,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    products[index].imageProduct,
-                                    fit: BoxFit.cover,
+                              Flexible(
+                                child: Container(
+                                  height: 150,
+                                  width: 200,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      products[index].imageProduct,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -361,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         products[index].nameProduct,
                                         style: TextStyle(
                                           fontSize: 17,
+                                          overflow: TextOverflow.ellipsis,
                                           fontWeight: FontWeight.w900,
                                           color: Color.fromRGBO(41, 87, 35, 1),
                                         ),
@@ -398,10 +401,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
 
-                              //Button Buy Now
+                              //Button add to cart
                               GestureDetector(
                                 onTap: (){
-                                  print('xxx');
+                                  print('add to cart');
                                 },
                                 child: Container(
                                   height: 35,
