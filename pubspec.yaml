@@ -39,13 +39,13 @@ dependencies:
   url_launcher: ^6.0.20 
   image_picker: ^0.8.7+3
   json_annotation: ^4.5.0
-  shared_preferences: ^2.3.2
   jwt_decode: ^0.3.1
   get: ^4.6.5
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   carousel_slider: ^5.0.0
+  shared_preferences: ^2.3.2
 
   
 

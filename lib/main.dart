@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: gioithieu(),
+      home: BottomnavigationMenu(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),

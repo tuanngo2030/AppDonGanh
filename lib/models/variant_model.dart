@@ -6,26 +6,27 @@ class VariantModel {
   final List<KetHopThuocTinh> ketHopThuocTinh;
 
   VariantModel({
-      required this.id,
-      required this.idProduct,
-      required this.sku,
-      required this.soLuong,
-      required this.ketHopThuocTinh
-    });
+    required this.id,
+    required this.idProduct,
+    required this.sku,
+    required this.soLuong,
+    required this.ketHopThuocTinh,
+  });
 
-    factory VariantModel.fromJSON(Map<String, dynamic> data){
-       var ketHopThuocTinhFromJson = data['KetHopThuocTinh'] as List<dynamic>;
-       List<KetHopThuocTinh> ketHopThuocTinh = ketHopThuocTinhFromJson.map((item) => KetHopThuocTinh.fromJSON(item)).toList();
-        
+  factory VariantModel.fromJSON(Map<String, dynamic> data) {
+    var ketHopThuocTinhFromJson = data['KetHopThuocTinh'] as List<dynamic>;
+    List<KetHopThuocTinh> ketHopThuocTinh = ketHopThuocTinhFromJson
+        .map((item) => KetHopThuocTinh.fromJSON(item as Map<String, dynamic>))
+        .toList();
 
-      return VariantModel(
-        id: data['_id'], 
-        idProduct: data['IDSanPham'], 
-        sku: data['sku'], 
-        soLuong: data['soLuong'], 
-        ketHopThuocTinh: ketHopThuocTinh
-      );
-    }
+    return VariantModel(
+      id: data['_id'],
+      idProduct: data['IDSanPham'],
+      sku: data['sku'],
+      soLuong: data['soLuong'],
+      ketHopThuocTinh: ketHopThuocTinh,
+    );
+  }
 }
 
 class KetHopThuocTinh {
@@ -33,14 +34,14 @@ class KetHopThuocTinh {
   final GiaTriThuocTinh giaTriThuocTinh;
 
   KetHopThuocTinh({
-    required this.id, 
-    required this.giaTriThuocTinh
+    required this.id,
+    required this.giaTriThuocTinh,
   });
 
-  factory KetHopThuocTinh.fromJSON(Map<String, dynamic> data){
+  factory KetHopThuocTinh.fromJSON(Map<String, dynamic> data) {
     return KetHopThuocTinh(
-      id: data['_id'], 
-      giaTriThuocTinh:  GiaTriThuocTinh.fromJSON(data['IDGiaTriThuocTinh'])
+      id: data['_id'],
+      giaTriThuocTinh: GiaTriThuocTinh.fromJSON(data['IDGiaTriThuocTinh'] as Map<String, dynamic>),
     );
   }
 }

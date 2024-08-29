@@ -36,16 +36,18 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     return Scaffold(
       body: screens[selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.shifting,
+        iconSize: 30,
+        showSelectedLabels: false,
         unselectedItemColor: Colors.black,
-        selectedItemColor: Colors.green, // Màu của mục được chọn
         currentIndex: selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Shop"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorites"),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: "Notifications"),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Account"),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Shop", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorites", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: "Notifications", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Account", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
         ],
       ),
     );
