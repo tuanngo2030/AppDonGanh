@@ -43,8 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 Navigator.pushNamed(
   context,
-  '/otp_screen',
-  arguments: _emailController.text, // Email truyền vào
+  '/xacminhtk',
 );
 
   } else {

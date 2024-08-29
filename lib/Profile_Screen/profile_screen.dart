@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
+import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,8 +22,14 @@ class _ProfileScreen extends State<ProfileScreen> {
   String? _profileImageUrl;
   String _GioiTinh = 'Chưa xác định';
   String _ngaySinh = 'Chưa cập nhật';
-  // String _soDienThoai = 'Chưa cập nhật';
+  int _soDienThoai = 0;
   String _gmail = 'Chưa cập nhật';
+  DiaChi _diaChi = DiaChi(
+    tinhThanhPho: 'Chưa cập nhật',
+    quanHuyen: 'Chưa cập nhật',
+    phuongXa: 'Chưa cập nhật',
+    duongThon: 'Chưa cập nhật',
+  );
 
   @override
   void initState() {
@@ -39,12 +46,13 @@ class _ProfileScreen extends State<ProfileScreen> {
       if (user != null) {
         setState(() {
           _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
-          _userId = storedUserId; 
+          _userId = storedUserId;
           _GioiTinh = user.GioiTinh ?? 'Chưa xác định';
           _ngaySinh = user.ngaySinh ?? 'Chưa cập nhật';
-          // _soDienThoai = user.soDienThoai ?? 'Chưa cập nhật';
+          _soDienThoai = user.soDienThoai ?? 0;
           _gmail = user.gmail ?? 'Chưa cập nhật';
           _profileImageUrl = user.anhDaiDien;
+          _diaChi = user.diaChi ?? _diaChi;
         });
       } else {
         print('User details not found.');
@@ -93,6 +101,35 @@ class _ProfileScreen extends State<ProfileScreen> {
     }
   }
 
+  // void _showAddressDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Chi tiết địa chỉ'),
+  //         content: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Text('Tỉnh/Thành phố: ${_diaChi.tinhThanhPho}'),
+  //             Text('Quận/Huyện: ${_diaChi.quanHuyen}'),
+  //             Text('Phường/Xã: ${_diaChi.phuongXa}'),
+  //             Text('Đường: ${_diaChi.duongThon}'),
+  //           ],
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: Text('Đóng'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +138,7 @@ class _ProfileScreen extends State<ProfileScreen> {
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context,'/manageraccount_screen');
+              Navigator.pushNamed(context, '/bottom');
             },
             child: Image.asset(
               'lib/assets/arrow_back.png',
@@ -155,20 +192,48 @@ class _ProfileScreen extends State<ProfileScreen> {
             _buildProfileItem('Tên', _tenNguoiDung),
             _buildProfileItem('Giới tính', _GioiTinh),
             _buildProfileItem('Ngày sinh', _ngaySinh),
-            // _buildProfileItem('Điện thoại', _soDienThoai),
+            _buildProfileItem('Điện thoại', _soDienThoai.toString()),
             _buildProfileItem('Email', _gmail),
+            _buildProfileItem('Địa chỉ', _getDiaChiString()),
           ],
         ),
       ),
     );
   }
 
+  String _getDiaChiString() {
+    return '${_diaChi.tinhThanhPho}, ${_diaChi.quanHuyen}, ${_diaChi.phuongXa}, ${_diaChi.duongThon}';
+  }
+
   Widget _buildProfileItem(String title, String value) {
     return ListTile(
       title: Text(title),
-      trailing: Text(value),
+      trailing: SizedBox(
+        width: 150, // Đặt kích thước phù hợp với nhu cầu của bạn
+        child: Text(
+          value,
+          overflow: TextOverflow.ellipsis, // Để cắt bỏ văn bản nếu nó dài
+        ),
+      ),
       onTap: () {
-        // Xử lý khi nhấn vào mỗi mục, ví dụ như chỉnh sửa thông tin
+        if (title == 'Tên') {
+          Navigator.pushNamed(context, '/ten');
+        }
+        if (title == 'Giới tính') {
+          Navigator.pushNamed(context, '/gioitinh');
+        }
+        if (title == 'Ngày sinh') {
+          Navigator.pushNamed(context, '/NgaySinh');
+        }
+        if (title == 'Điện thoại') {
+          Navigator.pushNamed(context, '/sodienthoai');
+        }
+        if (title == 'Email') {
+          Navigator.pushNamed(context, '/gmail');
+        }
+        if (title == 'Địa chỉ') {
+          Navigator.pushNamed(context, '/diachiScreen');
+        }
       },
     );
   }
