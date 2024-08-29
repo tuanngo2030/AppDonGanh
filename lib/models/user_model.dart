@@ -1,3 +1,5 @@
+import 'package:don_ganh_app/models/dia_chi_model.dart';
+
 class NguoiDung {
   final String? id;
   final String? anhDaiDien;
@@ -9,7 +11,6 @@ class NguoiDung {
   final DateTime? ngayTao;
   final String? ngaySinh;
   final bool? hoKinhDoanh;
-  final List<String>? diaChi;
   final String? tinhTrang;
   final List<String>? phuongThucThanhToan;
   final String? role;
@@ -18,6 +19,7 @@ class NguoiDung {
   final bool? isVerified;
   final String? googleId;
   final String? facebookId;
+  final DiaChi? diaChi;
 
   NguoiDung({
     this.id,
@@ -30,7 +32,6 @@ class NguoiDung {
     this.ngayTao,
     this.ngaySinh,
     this.hoKinhDoanh,
-    this.diaChi,
     this.tinhTrang,
     this.phuongThucThanhToan,
     this.role,
@@ -39,6 +40,7 @@ class NguoiDung {
     this.isVerified,
     this.googleId,
     this.facebookId,
+    this.diaChi,
   });
 
   // Convert JSON to NguoiDung
@@ -54,7 +56,6 @@ class NguoiDung {
       ngayTao: json['ngayTao'] != null ? DateTime.parse(json['ngayTao']) : null,
       ngaySinh: json['ngaySinh'] as String?,
       hoKinhDoanh: json['hoKinhDoanh'] as bool? ?? false,
-      diaChi: json['diaChi'] != null ? List<String>.from(json['diaChi']) : null,
       tinhTrang: json['tinhTrang'] as String?,
       phuongThucThanhToan: json['phuongThucThanhToan'] != null
           ? List<String>.from(json['phuongThucThanhToan'])
@@ -62,9 +63,10 @@ class NguoiDung {
       role: json['role'] as String? ?? 'user',
       otp: json['otp'] as String?,
       otpExpiry: json['otpExpiry'] != null ? DateTime.parse(json['otpExpiry']) : null,
-    isVerified: json['isVerified'] != null ? json['isVerified'] as bool : false,
+      isVerified: json['isVerified'] != null ? json['isVerified'] as bool : false,
       googleId: json['googleId'] as String?,
       facebookId: json['facebookId'] as String?,
+      diaChi: json['diaChi'] != null ? DiaChi.fromJson(json['diaChi']) : null,
     );
   }
 
@@ -81,7 +83,6 @@ class NguoiDung {
       'ngayTao': ngayTao?.toIso8601String(),
       'ngaySinh': ngaySinh,
       'hoKinhDoanh': hoKinhDoanh,
-      'diaChi': diaChi,
       'tinhTrang': tinhTrang,
       'phuongThucThanhToan': phuongThucThanhToan,
       'role': role,
@@ -90,6 +91,7 @@ class NguoiDung {
       'isVerified': isVerified,
       'googleId': googleId,
       'facebookId': facebookId,
+      'diaChi': diaChi?.toJson(),
     };
   }
 }

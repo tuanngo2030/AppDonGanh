@@ -1,5 +1,13 @@
-import 'package:don_ganh_app/screen/ngay_sinh.dart';
-import 'package:don_ganh_app/screen/profile_screen.dart';
+import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
+import 'package:don_ganh_app/Profile_Screen/gioitinh_screen.dart';
+import 'package:don_ganh_app/Profile_Screen/gmailScreen.dart';
+import 'package:don_ganh_app/Profile_Screen/ngay_sinh_Screen.dart';
+import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
+import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
+import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
+import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/models/product_model.dart';
@@ -21,7 +29,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,25 +45,28 @@ class MyApp extends StatelessWidget {
         '/manageraccount_screen': (context_) => ManageraccountScreen(),
         '/bottomnavigation': (context_) => BottomnavigationMenu(),
         '/cart_screen': (context_) => CartScreen(),
-        // '/detail_product_screen': (context_) => DetailProductScreen(),
         '/trang_xin_chao': (context) => TrangXinChao(),
         '/bottom': (context) => BottomnavigationMenu(),
         '/manageraccount_screen': (context) => ManageraccountScreen(),
-        '/bottomnavigation': (context) => BottomnavigationMenu(),
-        '/NgaySinh':(context) => NgaySinh(),
-        '/ProfileScreen':(context) => ProfileScreen(),
+        '/ProfileScreen': (context) => ProfileScreen(),
+        '/ten': (context) => Tenscreen(),
+        '/NgaySinh': (context) => NgaySinh(),
+        '/sodienthoai': (context) => SodienthoaiScreen(),
+        '/gmail': (context) => Gmailscreen(),
+        '/diachiScreen': (context) => DiaChiScreen(),
+        '/gioitinh': (context) => GioitinhScreen(),
+        '/xacminhtk': (context) => XacMinhTkScreen(),
       },
       onGenerateRoute: (settings) {
-        if (settings.name == '/otp_screen') {
-          // Kiểm tra nếu arguments không phải là String hoặc null
+        if (settings.name == '/otpxacminhtk') {
           final email = settings.arguments as String?;
           if (email != null) {
             return MaterialPageRoute(
-              builder: (context) => OtpScreen(email: email),
+              builder: (context) => OtpXacMinhTkscreen(email: email),
             );
           }
         }
-        return null; 
+        return null;
       },
     );
   }
