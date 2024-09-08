@@ -37,14 +37,15 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Thanh toán'),
-          centerTitle: true,
-        ),
-        body: Column(
+Widget build(BuildContext context) {
+  return SafeArea(
+    child: Scaffold(
+      appBar: AppBar(
+        title: Text('Thanh toán'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -134,7 +135,9 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
                 ],
               ),
             ),
-            Expanded(
+            // Thay Expanded bằng SizedBox hoặc Container có chiều cao cố định
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6, // Chiều cao cố định
               child: PageView(
                 controller: _pageController,
                 physics: NeverScrollableScrollPhysics(),
@@ -147,8 +150,7 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
             ),
             // Nút Tiếp tục
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
               child: SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -174,6 +176,7 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -233,24 +233,39 @@ class _PayScreen2State extends State<PayScreen2> {
                 : null,
           ),
         ),
-        Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.fromBorderSide(BorderSide(
-                    color: Color.fromARGB(179, 177, 174, 174)
-                  )
-                )
-              ),
-            child: ElevatedButton(
-                onPressed: () {},
-                child: Text('Chọn mã'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
-                    foregroundColor: Colors.white,
-                  )
-                )
-              ),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.fromBorderSide(
+                      BorderSide(color: Color.fromARGB(179, 177, 174, 174)))),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 7, 
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Mã'),
+                    )
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Expanded(
+                      flex: 3,
+                      child: ElevatedButton(
+                          onPressed: () {},
+                          child: Text('Chọn mã'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                            foregroundColor: Colors.white,
+                          )),
+                    ),
+                  ),
+                ],
+              )),
+        ),
         Padding(
           padding: const EdgeInsets.only(top: 20),
           child: Column(
