@@ -121,17 +121,27 @@ Future<bool> updateUserAddress(String userId, DiaChi diaChi) async {
       }),
     );
 
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
+      // Giả sử phản hồi trả về đúng thông tin địa chỉ đã cập nhật
       final Map<String, dynamic> data = json.decode(response.body);
-      return data['success'] == true;
+      if (data.containsKey('_id')) {
+        print('Update successful: ${data.toString()}');
+        return true;
+      } else {
+        print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
+        return false;
+      }
     } else {
-      print('Error response status: ${response.statusCode}');
-      print('Error response body: ${response.body}');
-      throw Exception('Failed to update address');
+      print('Failed to update address. Status code: ${response.statusCode}');
+      print('Server response: ${response.body}');
+      return false;
     }
   } catch (e) {
     print('Exception caught: $e');
-    throw Exception('Failed to update address');
+    return false;
   }
 }
 
