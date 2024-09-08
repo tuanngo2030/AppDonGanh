@@ -29,7 +29,7 @@ class CartModel {
 class ChiTietGioHang {
   final String id;
   final VariantModel variantModel;
-  final int soLuong;
+   int soLuong;
   final int donGia;
 
   ChiTietGioHang({

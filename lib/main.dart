@@ -7,6 +7,7 @@ import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/pay_screen/pay_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/bottomnavigation.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: BottomnavigationMenu(),
+      home: PayProcessScreen(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
         '/diachiScreen': (context) => DiaChiScreen(),
         '/gioitinh': (context) => GioitinhScreen(),
         '/xacminhtk': (context) => XacMinhTkScreen(),
+        '/pay_screen': (context) => PayProcessScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

@@ -1,8 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
+import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/detail_product_screen.dart';
+import 'package:don_ganh_app/widget/badge_widget.dart';
+import 'package:don_ganh_app/widget/category_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:carousel_slider/carousel_slider.dart';
@@ -20,19 +24,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<BannerModel>> bannerImage;
-  late Future<List<CategoryModel>> categoriesModel;
   late Future<List<ProductModel>> productsModel;
   int _currentIndex = 0;
-
-
 
   @override
   void initState() {
     super.initState();
     bannerImage = BannerApiService().fetchBanner();
-    categoriesModel = CategoryApiService().fetchCategories();
     productsModel = ProductApiService().getListProduct();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,38 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    badges.Badge(
-                      badgeContent: Text(
-                        "0",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      badgeStyle: badges.BadgeStyle(
-                        badgeColor: Color.fromRGBO(255, 0, 0, 1),
-                        borderSide: BorderSide(color: Colors.white),
-                        padding: EdgeInsets.all(8),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          print("Đi đến giỏ hàng của tôi");
-                          Navigator.pushNamed(context, '/cart_screen');
-                        },
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Color.fromRGBO(41, 87, 35, 1),
-                          ),
-                          child: Icon(
-                            Icons.shopping_bag,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    BadgeWidget(),
                   ],
                 ),
                 SizedBox(height: 15),
@@ -233,52 +203,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // Categories
+                // Category
                 Container(
-                  height: 120,
-                  child: FutureBuilder<List<CategoryModel>>(
-                    future: categoriesModel,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Lỗi: ${snapshot.error}'));
-                      } else if (!snapshot.hasData ||
-                          snapshot.data == null ||
-                          snapshot.data!.isEmpty) {
-                        return Center(child: Text('Không tìm thấy dữ liệu'));
-                      }
-
-                      List<CategoryModel> categories = snapshot.data!;
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                                top: 20, left: 20, right: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: NetworkImage(
-                                    categories[index].image,
-                                  ),
-                                ),
-                                Text(
-                                  categories[index].ten_danh_muc,
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  height: 120, 
+                  child: CategoryWidget()
                 ),
 
                 Row(
