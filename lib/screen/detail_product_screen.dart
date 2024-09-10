@@ -4,6 +4,7 @@ import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/variant_api_service.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/models/variant_model.dart';
+import 'package:don_ganh_app/widget/badge_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:badges/badges.dart' as badges;
@@ -77,38 +78,39 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 15),
-            child: badges.Badge(
-              badgeContent: Text(
-                '0',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              badgeStyle: badges.BadgeStyle(
-                badgeColor: Color.fromRGBO(255, 0, 0, 1),
-                borderSide: BorderSide(color: Colors.white),
-                padding: EdgeInsets.all(8),
-              ),
-              child: InkWell(
-                onTap: () {
-                  print("Đi đến giỏ hàng của tôi");
-                  Navigator.pushNamed(context, '/cart_screen');
-                },
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: Color.fromRGBO(41, 87, 35, 1),
-                  ),
-                  child: Icon(
-                    Icons.shopping_bag,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            child: BadgeWidget(),
+            // badges.Badge(
+            //   badgeContent: Text(
+            //     '0',
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontWeight: FontWeight.w900,
+            //     ),
+            //   ),
+            //   badgeStyle: badges.BadgeStyle(
+            //     badgeColor: Color.fromRGBO(255, 0, 0, 1),
+            //     borderSide: BorderSide(color: Colors.white),
+            //     padding: EdgeInsets.all(8),
+            //   ),
+            //   child: InkWell(
+            //     onTap: () {
+            //       print("Đi đến giỏ hàng của tôi");
+            //       Navigator.pushNamed(context, '/cart_screen');
+            //     },
+            //     child: Container(
+            //       width: 45,
+            //       height: 45,
+            //       decoration: BoxDecoration(
+            //         borderRadius: BorderRadius.circular(25),
+            //         color: Color.fromRGBO(41, 87, 35, 1),
+            //       ),
+            //       child: Icon(
+            //         Icons.shopping_bag,
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           )
         ],
       ),
@@ -279,9 +281,17 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                               ),
                                             ),
                                           ),
-                                          Text(
-                                            '${widget.product.donGiaBan} đ/kg',
-                                            style: TextStyle(fontSize: 16),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                '${widget.product.donGiaBan} đ/kg',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              Text(
+                                                'Kho: ${widget.product.soLuongHienTai}',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -334,6 +344,10 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                     border: Border.all(
                                                         color: Colors.black,
                                                         width: 1),
+                                                    color: selectedVariantId ==
+                                                            variant[index].id
+                                                        ? Colors.green
+                                                        : Colors.white,
                                                   ),
                                                   child: Row(
                                                     crossAxisAlignment:
