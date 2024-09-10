@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
-import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class DiaChiScreen extends StatefulWidget {
   const DiaChiScreen({super.key});
@@ -12,18 +14,77 @@ class DiaChiScreen extends StatefulWidget {
 }
 
 class _DiaChiScreen extends State<DiaChiScreen> {
-  final UserApiService _apiService = UserApiService();
   String _userId = '';
-  DiaChi _diaChi = DiaChi(
-    tinhThanhPho: 'Chưa cập nhật',
-    quanHuyen: 'Chưa cập nhật',
-    phuongXa: 'Chưa cập nhật',
-    duongThon: 'Chưa cập nhật',
-  );
+  final TextEditingController _duongThonController = TextEditingController();
+
+  List<String> _tinhThanhPhoList = [];
+  List<String> _quanHuyenList = [];
+  List<String> _phuongXaList = [];
+
+  String? _selectedTinhThanhPho;
+  String? _selectedQuanHuyen;
+  String? _selectedPhuongXa;
+
   @override
   void initState() {
     super.initState();
     _loadUserDetails();
+    _fetchTinhThanhPho();
+    _fetchQuanHuyen();
+    _fetchPhuongXa();
+  }
+
+  Future<void> _fetchTinhThanhPho() async {
+    try {
+      final response =
+          await http.get(Uri.parse('https://provinces.open-api.vn/api/'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          _tinhThanhPhoList =
+              data.map((item) => item['name'] as String).toList();
+        });
+      } else {
+        print('Failed to load provinces, status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching provinces: $e');
+    }
+  }
+
+  Future<void> _fetchQuanHuyen() async {
+    try {
+      final response =
+          await http.get(Uri.parse('https://provinces.open-api.vn/api/d/'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          _quanHuyenList = data.map((item) => item['name'] as String).toList();
+        });
+      } else {
+        print('Failed to load districts');
+      }
+    } catch (e) {
+      print('Error fetching districts: $e');
+    }
+  }
+
+  Future<void> _fetchPhuongXa() async {
+    try {
+      final response =
+          await http.get(Uri.parse('https://provinces.open-api.vn/api/w/'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          _phuongXaList = data.map((item) => item['name'] as String).toList();
+        });
+      } else {
+        print('Failed to load wards');
+      }
+    } catch (e) {
+      print('Error fetching wards: $e');
+    }
   }
 
   Future<void> _loadUserDetails() async {
@@ -31,63 +92,152 @@ class _DiaChiScreen extends State<DiaChiScreen> {
     String? storedUserId = prefs.getString('userId');
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
-      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
-      if (user != null) {
-        setState(() {
-          _userId = storedUserId;
-          _diaChi = user.diaChi ?? _diaChi;
-        });
-      } else {
-        print('User details not found.');
-      }
+      setState(() {
+        _userId = storedUserId;
+      });
     } else {
       print('User ID is not available.');
+    }
+  }
+
+  Future<void> _updateAddress() async {
+    if (_userId.isNotEmpty &&
+        _selectedTinhThanhPho != null &&
+        _selectedQuanHuyen != null &&
+        _selectedPhuongXa != null &&
+        _duongThonController.text.isNotEmpty) {
+      DiaChi newAddress = DiaChi(
+        tinhThanhPho: _selectedTinhThanhPho!,
+        quanHuyen: _selectedQuanHuyen!,
+        phuongXa: _selectedPhuongXa!,
+        duongThon: _duongThonController.text,
+      );
+
+      try {
+        bool success =
+            await UserApiService().updateUserAddress(_userId, newAddress);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Địa chỉ đã được cập nhật thành công')),
+          );
+          Future.delayed(Duration(seconds: 1), () {
+            Navigator.pop(context);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật địa chỉ thất bại')),
+          );
+        }
+      } catch (e) {
+        print('Error updating address: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra khi cập nhật địa chỉ')),
+        );
+      }
+    } else {
+      print(
+          'Missing required fields. UserID: $_userId, Tỉnh/Thành phố: $_selectedTinhThanhPho, Quận/Huyện: $_selectedQuanHuyen, Phường/Xã: $_selectedPhuongXa, Đường/Thôn: ${_duongThonController.text}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-         appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Image.asset(
-              'lib/assets/arrow_back.png',
-              width: 30,
-              height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
-            ),
-          ),
-        ),
-        title: Text(
-          'Hồ sơ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
+      appBar: AppBar(
+        title: const Text('Cập nhật địa chỉ'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          Text('Tỉnh/Thành phố: ${_diaChi.tinhThanhPho}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Quận/Huyện: ${_diaChi.quanHuyen}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Phường/Xã: ${_diaChi.phuongXa}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Đường/Thôn: ${_diaChi.duongThon}',
-                style: TextStyle(fontSize: 16)),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownSearch<String>(
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                items: _tinhThanhPhoList,
+                filterFn: (item, filter) =>
+                    item.toLowerCase().contains(filter.toLowerCase()),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedTinhThanhPho = newValue;
+                    // _updateQuanHuyenList(); // Pass the selected province ID to fetch districts
+                  });
+                },
+                selectedItem: _selectedTinhThanhPho,
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Tỉnh/Thành phố',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              DropdownSearch<String>(
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                items: _quanHuyenList,
+                filterFn: (item, filter) =>
+                    item.toLowerCase().contains(filter.toLowerCase()),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedQuanHuyen = newValue;
+                    // _updatePhuongXaList(); // Pass the selected district ID to fetch wards
+                  });
+                },
+                selectedItem: _selectedQuanHuyen,
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Quận/Huyện',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              DropdownSearch<String>(
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                items: _phuongXaList,
+                filterFn: (item, filter) =>
+                    item.toLowerCase().contains(filter.toLowerCase()),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedPhuongXa = newValue;
+                  });
+                },
+                selectedItem: _selectedPhuongXa,
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Phường/Xã',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _duongThonController,
+                decoration: InputDecoration(
+                  labelText: 'Đường/Thôn',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _updateAddress,
+                  child: Text('Cập nhật địa chỉ'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

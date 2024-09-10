@@ -52,7 +52,6 @@ Widget build(BuildContext context) {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Step 1: Điền thông tin
                   Column(
                     children: [
                       Container(
@@ -80,7 +79,6 @@ Widget build(BuildContext context) {
                       color: _getColor(1),
                     ),
                   ),
-                  // Step 2: Phương thức thanh toán
                   Column(
                     children: [
                       Container(
@@ -104,14 +102,12 @@ Widget build(BuildContext context) {
                       ),
                     ],
                   ),
-                  // Đường kẻ
                   Expanded(
                     child: Container(
                       height: _getLineThickness(2),
                       color: _getColor(2),
                     ),
                   ),
-                  // Step 3: Thanh toán
                   Column(
                     children: [
                       Container(
@@ -135,9 +131,8 @@ Widget build(BuildContext context) {
                 ],
               ),
             ),
-            // Thay Expanded bằng SizedBox hoặc Container có chiều cao cố định
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.6, // Chiều cao cố định
+              height: MediaQuery.of(context).size.height * 0.6, 
               child: PageView(
                 controller: _pageController,
                 physics: NeverScrollableScrollPhysics(),
