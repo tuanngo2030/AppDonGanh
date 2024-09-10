@@ -27,7 +27,7 @@ class TrangXinChao extends StatelessWidget {
               ),
               const SizedBox(height: 10), // Add space between the two texts
               const Text(
-                'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
+                'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white,

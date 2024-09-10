@@ -1,5 +1,4 @@
 import 'package:don_ganh_app/api_services/user_api_service.dart';
-import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +13,11 @@ class SodienthoaiScreen extends StatefulWidget {
 class _SodienthoaiScreen extends State<SodienthoaiScreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
-  int _soDienThoai = 0;
+  String _soDienThoai = '';  // Change to String
+  final TextEditingController _soDienThoaiController = TextEditingController();
+  String? _selectedSdt;
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +33,8 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
       if (user != null) {
         setState(() {
           _userId = storedUserId;
-          _soDienThoai = user.soDienThoai ?? 0;
+          _soDienThoai = user.soDienThoai?.toString() ?? '';  // Store phone number as string
+          _soDienThoaiController.text = _soDienThoai;  // Set the controller to show the phone number
         });
       } else {
         print('User details not found.');
@@ -40,10 +44,57 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
     }
   }
 
+  Future<void> _updateSoDienThoai(String newSdt) async {
+    if (_userId.isNotEmpty) {
+      bool success = await _apiService.updateUserInformation(
+          _userId, 'soDienThoai', newSdt);
+
+      if (success) {
+        setState(() {
+          _soDienThoai = newSdt;  // Update the phone number in the UI
+        });
+        // Save the new phone number to SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('soDienThoai', newSdt);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật số điện thoại thành công')));
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pop(context);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật số điện thoại thất bại')));
+      }
+    }
+  }
+
+  String? _validateSoDienThoai(String? value) {
+    const pattern =
+        r'(^(?:[+0]9)?[0-9]{10,12}$)';
+    final regex = RegExp(pattern);
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập số điện thoại';
+    }
+    if (value.length != 10) {
+      return 'Số điện thoại phải có đúng 10 chữ số';
+    }
+    if (!value.startsWith('0')) {
+      return 'Số điện thoại phải bắt đầu bằng số 0';
+    }
+    final number = int.tryParse(value);
+    if (number == null) {
+      return 'Số điện thoại phải là số';
+    }
+        if (!regex.hasMatch(value))
+      return 'lỗi';
+    else
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -68,12 +119,47 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          Text('Số điện thoại: ${_soDienThoai}',
-                style: TextStyle(fontSize: 16)),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _soDienThoaiController,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSdt = value;
+                  });
+                },
+                validator: _validateSoDienThoai,
+                decoration: InputDecoration(
+                  labelText: 'Nhập số điện thoại mới',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: 'Nhập số điện thoại của bạn',
+                  counterText: 'Tối đa 10 ký tự',
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+                ),
+                keyboardType: TextInputType.number,
+                maxLength: 10,  // Restrict to 10 digits
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() == true) {
+                    _updateSoDienThoai(_selectedSdt!);
+                  }
+                },
+                child: const Text('Cập nhật Số điện thoại'),
+              ),
+            ],
+          ),
         ),
       ),
     );

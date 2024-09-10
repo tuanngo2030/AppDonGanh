@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
@@ -79,6 +78,8 @@ class _ProfileScreen extends State<ProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
             );
+            // Cập nhật lại hình ảnh từ backend
+            _loadUserDetails();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
@@ -100,35 +101,6 @@ class _ProfileScreen extends State<ProfileScreen> {
       );
     }
   }
-
-  // void _showAddressDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Chi tiết địa chỉ'),
-  //         content: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             Text('Tỉnh/Thành phố: ${_diaChi.tinhThanhPho}'),
-  //             Text('Quận/Huyện: ${_diaChi.quanHuyen}'),
-  //             Text('Phường/Xã: ${_diaChi.phuongXa}'),
-  //             Text('Đường: ${_diaChi.duongThon}'),
-  //           ],
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: Text('Đóng'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

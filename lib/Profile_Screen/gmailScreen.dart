@@ -1,5 +1,4 @@
 import 'package:don_ganh_app/api_services/user_api_service.dart';
-import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +14,10 @@ class _Gmailscreen extends State<Gmailscreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
   String _gmail = 'Chưa cập nhật';
+  final TextEditingController _gmailController = TextEditingController();
+  String? _selectedGmail;
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +34,7 @@ class _Gmailscreen extends State<Gmailscreen> {
         setState(() {
           _userId = storedUserId;
           _gmail = user.gmail ?? 'Chưa cập nhật';
+          _gmailController.text = _gmail; // Prepopulate the text field with the existing Gmail
         });
       } else {
         print('User details not found.');
@@ -40,10 +44,48 @@ class _Gmailscreen extends State<Gmailscreen> {
     }
   }
 
+  Future<void> _updateGmail(String newGmail) async {
+    if (_userId.isNotEmpty) {
+      bool success =
+          await _apiService.updateUserInformation(_userId, 'gmail', newGmail);
+
+      if (success) {
+        setState(() {
+          _gmail = newGmail;
+        });
+        // Lưu gmail mới vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('gmail', newGmail);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật gmail thành công')));
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pop(context);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật gmail thất bại')));
+      }
+    }
+  }
+
+  String? _validateGmail(String? value) {
+    // Regular expression to validate email format
+    const pattern =
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$';
+    final regExp = RegExp(pattern);
+
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập email';
+    } else if (!regExp.hasMatch(value)) {
+      return 'Email không hợp lệ';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -68,12 +110,54 @@ class _Gmailscreen extends State<Gmailscreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          Text('Email: ${_gmail}',
-                style: TextStyle(fontSize: 16)),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  TextFormField(
+                    controller: _gmailController,  // Prepopulate with the existing email
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGmail = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value != _gmail) {  // Only validate if the email has changed
+                        return _validateGmail(value);
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Nhập email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Nhập email của bạn',
+                      counterText: 'Tối đa 100 ký tự', // Custom character limit hint
+                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    maxLength: 100,
+                  )
+                ],
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() == true) {
+                    _updateGmail(_selectedGmail!);
+                  }
+                }, 
+                child: const Text('Cập nhật Gmail'),
+              ),
+            ],
+          ),
         ),
       ),
     );

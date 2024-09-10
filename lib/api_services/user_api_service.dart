@@ -12,6 +12,8 @@ class UserApiService {
       'https://imp-model-widely.ngrok-free.app/api/user/showUserID';
   final String diachiUrl =
       'https://imp-model-widely.ngrok-free.app/api/user/updateUserDiaChi';
+  final String updateUserUrl =
+      'https://imp-model-widely.ngrok-free.app/api/user/updateUser';
 
   Future<NguoiDung?> login(String gmail, String matKhau) async {
     final uri = Uri.parse(baseUrl);
@@ -101,49 +103,109 @@ class UserApiService {
     return null;
   }
 
-Future<bool> updateUserAddress(String userId, DiaChi diaChi) async {
-  final url = Uri.parse(diachiUrl);
+  Future<bool> updateUserAddress(String userId, DiaChi diaChi) async {
+    final url = Uri.parse(diachiUrl);
 
-  try {
-    final response = await http.put(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'UserID': userId,
-        'diaChiMoi': {
-          'tinhThanhPho': diaChi.tinhThanhPho,
-          'quanHuyen': diaChi.quanHuyen,
-          'phuongXa': diaChi.phuongXa,
-          'duongThon': diaChi.duongThon,
+    try {
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
         },
-      }),
-    );
+        body: jsonEncode(<String, dynamic>{
+          'UserID': userId,
+          'diaChiMoi': {
+            'tinhThanhPho': diaChi.tinhThanhPho,
+            'quanHuyen': diaChi.quanHuyen,
+            'phuongXa': diaChi.phuongXa,
+            'duongThon': diaChi.duongThon,
+          },
+        }),
+      );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      // Giả sử phản hồi trả về đúng thông tin địa chỉ đã cập nhật
-      final Map<String, dynamic> data = json.decode(response.body);
-      if (data.containsKey('_id')) {
-        print('Update successful: ${data.toString()}');
-        return true;
+      if (response.statusCode == 200) {
+        // Giả sử phản hồi trả về đúng thông tin địa chỉ đã cập nhật
+        final Map<String, dynamic> data = json.decode(response.body);
+        if (data.containsKey('_id')) {
+          print('Update successful: ${data.toString()}');
+          return true;
+        } else {
+          print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
+          return false;
+        }
       } else {
-        print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
+        print('Failed to update address. Status code: ${response.statusCode}');
+        print('Server response: ${response.body}');
         return false;
       }
-    } else {
-      print('Failed to update address. Status code: ${response.statusCode}');
-      print('Server response: ${response.body}');
+    } catch (e) {
+      print('Exception caught: $e');
       return false;
     }
-  } catch (e) {
-    print('Exception caught: $e');
-    return false;
   }
-}
 
+  Future<bool> updateUserInformation(String userId, String loaiThongTin, dynamic value) async {
+    final url = Uri.parse(updateUserUrl);
 
+    // Tạo body request dựa trên loại thông tin cần cập nhật
+    Map<String, dynamic> requestBody = {
+      'UserID': userId,
+      'LoaiThongTinUpdate': loaiThongTin,
+    };
+
+    switch (loaiThongTin) {
+      case 'tenNguoiDung':
+        requestBody['tenNguoiDung'] = value;
+        break;
+      case 'soDienThoai':
+        requestBody['soDienThoai'] = value;
+        break;
+      case 'gmail':
+        requestBody['gmail'] = value;
+        break;
+      case 'GioiTinh':
+        requestBody['GioiTinh'] = value;
+        break;
+      case 'matKhau':
+        requestBody['matKhau'] = value;
+        break;
+      case 'ngaySinh':
+        requestBody['ngaySinh'] = value;
+        break;
+      default:
+        print('Invalid update type');
+        return false;
+    }
+
+    try {
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('Response from API: $data');
+        if (data.containsKey('_id')) {
+          print('Update successful');
+          return true;
+        } else {
+          print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
+          return false;
+        }
+      } else {
+        print('Failed to update information. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error updating information: $e');
+      return false;
+    }
+  }
 }
