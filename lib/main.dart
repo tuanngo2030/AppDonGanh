@@ -6,7 +6,9 @@ import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/oder_status_screen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/pay_screen/oder_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/bottomnavThumua_screen.dart';
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: BottomnavthumuaScreen(),
+      home: BottomnavigationMenu(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -58,6 +60,8 @@ class MyApp extends StatelessWidget {
         '/diachiScreen': (context) => DiaChiScreen(),
         '/gioitinh': (context) => GioitinhScreen(),
         '/xacminhtk': (context) => XacMinhTkScreen(),
+        '/oder_screen': (context) => OderScreen(),
+        '/oder_status_screen': (context) => OderStatusScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
         '/bottomThumuan': (context) => BottomnavthumuaScreen()
       },

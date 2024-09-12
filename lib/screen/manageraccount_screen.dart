@@ -136,7 +136,9 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),
               title: Text('Đơn hàng'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context,'/oder_screen');
+              },
             ),
             ListTile(
               leading: Image.asset("lib/assets/caidat_icon.png"),
