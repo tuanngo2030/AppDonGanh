@@ -187,25 +187,26 @@ class _ProfileScreen extends State<ProfileScreen> {
           overflow: TextOverflow.ellipsis, // Để cắt bỏ văn bản nếu nó dài
         ),
       ),
-      onTap: () {
-        if (title == 'Tên') {
-          Navigator.pushNamed(context, '/ten');
-        }
-        if (title == 'Giới tính') {
-          Navigator.pushNamed(context, '/gioitinh');
-        }
-        if (title == 'Ngày sinh') {
-          Navigator.pushNamed(context, '/NgaySinh');
-        }
-        if (title == 'Điện thoại') {
-          Navigator.pushNamed(context, '/sodienthoai');
-        }
-        if (title == 'Email') {
-          Navigator.pushNamed(context, '/gmail');
-        }
-        if (title == 'Địa chỉ') {
-          Navigator.pushNamed(context, '/diachiScreen');
-        }
+      onTap: () async {
+     if (title == 'Tên') {
+        await Navigator.pushNamed(context, '/ten');
+      }
+      if (title == 'Giới tính') {
+        await Navigator.pushNamed(context, '/gioitinh');
+      }
+      if (title == 'Ngày sinh') {
+        await Navigator.pushNamed(context, '/NgaySinh');
+      }
+      if (title == 'Điện thoại') {
+        await Navigator.pushNamed(context, '/sodienthoai');
+      }
+      if (title == 'Email') {
+        await Navigator.pushNamed(context, '/gmail');
+      }
+      if (title == 'Địa chỉ') {
+        await Navigator.pushNamed(context, '/diachiScreen');
+      }
+       _loadUserDetails();
       },
     );
   }

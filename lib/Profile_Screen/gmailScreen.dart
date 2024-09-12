@@ -59,7 +59,7 @@ class _Gmailscreen extends State<Gmailscreen> {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cập nhật gmail thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-          Navigator.pop(context);
+         Navigator.pop(context);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -148,13 +148,17 @@ class _Gmailscreen extends State<Gmailscreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() == true) {
-                    _updateGmail(_selectedGmail!);
-                  }
-                }, 
-                child: const Text('Cập nhật Gmail'),
+              SizedBox(
+                     width: double.infinity,  
+                height: 50, 
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() == true) {
+                      _updateGmail(_selectedGmail!);
+                    }
+                  }, 
+                  child: const Text('Cập nhật Gmail', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                ),
               ),
             ],
           ),

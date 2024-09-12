@@ -55,7 +55,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
         await prefs.setString('gioiTinh', newGioiTinh);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-            Navigator.pop(context);
+             Navigator.pop(context);
           });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thất bại')));
@@ -116,11 +116,15 @@ class _GioitinhScreen extends State<GioitinhScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _selectedGioiTinh != null
-                  ? () => _updateGioiTinh(_selectedGioiTinh!)
-                  : null, // Nút chỉ có thể nhấn khi người dùng chọn giới tính
-              child: const Text('Cập nhật giới tính'),
+            SizedBox(
+                   width: double.infinity,  // Full width button
+                height: 50, 
+              child: ElevatedButton(
+                onPressed: _selectedGioiTinh != null
+                    ? () => _updateGioiTinh(_selectedGioiTinh!)
+                    : null, // Nút chỉ có thể nhấn khi người dùng chọn giới tính
+                child: const Text('Cập nhật giới tính', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+              ),
             ),
           ],
         ),

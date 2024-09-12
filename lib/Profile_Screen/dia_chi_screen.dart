@@ -246,7 +246,8 @@ class _DiaChiScreen extends State<DiaChiScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _updateAddress,
-                  child: const Text('Cập nhật địa chỉ'),
+                  child: const Text('Cập nhật địa chỉ',
+                   style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
                 ),
               ),
             ],

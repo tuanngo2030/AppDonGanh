@@ -59,7 +59,7 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cập nhật số điện thoại thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-          Navigator.pop(context);
+      Navigator.pop(context);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -150,13 +150,17 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
                 maxLength: 10,  // Restrict to 10 digits
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() == true) {
-                    _updateSoDienThoai(_selectedSdt!);
-                  }
-                },
-                child: const Text('Cập nhật Số điện thoại'),
+              SizedBox(
+                width: double.infinity,  // Full width button
+                height: 50, 
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() == true) {
+                      _updateSoDienThoai(_selectedSdt!);
+                    }
+                  },
+                  child: const Text('Cập nhật Số điện thoại', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                ),
               ),
             ],
           ),
