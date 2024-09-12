@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     tenNguoiDung: _usernameController.text,
     gmail: _emailController.text,
     matKhau: _passwordController.text,
-    soDienThoai: int.tryParse(_phoneController.text),
+    soDienThoai: _phoneController.text,
     ngayTao: DateTime.now(),
     // Thêm các trường khác nếu cần thiết
   );

@@ -6,6 +6,7 @@ import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
+import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
@@ -59,7 +60,8 @@ class MyApp extends StatelessWidget {
         '/gioitinh': (context) => GioitinhScreen(),
         '/xacminhtk': (context) => XacMinhTkScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
-        '/bottomThumuan': (context) => BottomnavthumuaScreen()
+        '/bottomThumuan': (context) => BottomnavthumuaScreen(),
+        '/chatscreen': (context) => ChatScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

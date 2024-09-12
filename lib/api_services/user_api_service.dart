@@ -51,7 +51,7 @@ class UserApiService {
               await prefs.setString('id', user.id ?? '');
               await prefs.setString('anhDaiDien', user.anhDaiDien ?? '');
               await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
-              await prefs.setInt('soDienThoai', user.soDienThoai ?? 0);
+              await prefs.setString('soDienThoai', user.soDienThoai ?? '');
               await prefs.setString('gmail', user.gmail ?? '');
               await prefs.setString('GioiTinh', user.GioiTinh ?? '');
               await prefs.setString('ngaySinh', user.ngaySinh ?? '');

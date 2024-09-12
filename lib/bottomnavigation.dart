@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:don_ganh_app/screen/favorite_screen.dart';
 import 'package:don_ganh_app/screen/home_screen.dart';
 import 'package:don_ganh_app/screen/manageraccount_screen.dart';
@@ -27,7 +28,7 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     HomeScreen(),
     ShopScreen(),
     FavoriteScreen(),
-    NotificationScreen(),
+    ChatScreen(),
     ManageraccountScreen()
   ];
 

@@ -4,7 +4,7 @@ class NguoiDung {
   final String? id;
   final String? anhDaiDien;
   final String? tenNguoiDung;
-  final int? soDienThoai;
+  final String? soDienThoai; 
   final String? gmail;
   final String? GioiTinh;
   final String? matKhau;
@@ -25,7 +25,7 @@ class NguoiDung {
     this.id,
     this.anhDaiDien,
     this.tenNguoiDung,
-    this.soDienThoai,
+    this.soDienThoai, 
     this.gmail,
     this.GioiTinh,
     this.matKhau,
@@ -49,7 +49,7 @@ class NguoiDung {
       id: json['_id'] as String?,
       anhDaiDien: json['anhDaiDien'] as String?,
       tenNguoiDung: json['tenNguoiDung'] as String?,
-      soDienThoai: json['soDienThoai'] != null ? json['soDienThoai'] as int : null,
+      soDienThoai: json['soDienThoai'] as String?, // Xử lý String thay vì int
       gmail: json['gmail'] as String?,
       GioiTinh: json['GioiTinh'] as String?,
       matKhau: json['matKhau'] as String?,
@@ -76,7 +76,7 @@ class NguoiDung {
       '_id': id,
       'anhDaiDien': anhDaiDien,
       'tenNguoiDung': tenNguoiDung,
-      'soDienThoai': soDienThoai,
+      'soDienThoai': soDienThoai, // Xử lý String thay vì int
       'gmail': gmail,
       'GioiTinh': GioiTinh,
       'matKhau': matKhau,

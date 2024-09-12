@@ -21,7 +21,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   String? _profileImageUrl;
   String _GioiTinh = 'Chưa xác định';
   String _ngaySinh = 'Chưa cập nhật';
-  int _soDienThoai = 0;
+  String _soDienThoai = 'Chưa cập nhật';
   String _gmail = 'Chưa cập nhật';
   DiaChi _diaChi = DiaChi(
     tinhThanhPho: 'Chưa cập nhật',
@@ -48,7 +48,7 @@ class _ProfileScreen extends State<ProfileScreen> {
           _userId = storedUserId;
           _GioiTinh = user.GioiTinh ?? 'Chưa xác định';
           _ngaySinh = user.ngaySinh ?? 'Chưa cập nhật';
-          _soDienThoai = user.soDienThoai ?? 0;
+          _soDienThoai = user.soDienThoai ?? 'Chưa cập nhật';
           _gmail = user.gmail ?? 'Chưa cập nhật';
           _profileImageUrl = user.anhDaiDien;
           _diaChi = user.diaChi ?? _diaChi;

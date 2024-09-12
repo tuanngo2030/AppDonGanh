@@ -43,7 +43,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
 
   Future<void> addToCart(String userId, String variantId, int donGia) async {
     try {
-      await CartApiService().AddToCart(userId, variantId, quantity, donGia);
+      await CartApiService().addToCart(userId, variantId, quantity, donGia);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
