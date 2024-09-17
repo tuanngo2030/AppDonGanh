@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         '/xacminhtk': (context) => XacMinhTkScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
         '/bottomThumuan': (context) => BottomnavthumuaScreen(),
-        '/chatscreen': (context) => ChatScreen(),
+        '/chatscreen': (context) => ChatScreen(title: 'Chat',),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
