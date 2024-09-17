@@ -8,6 +8,7 @@ import 'package:don_ganh_app/widget/badge_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailProductScreen extends StatefulWidget {
   final ProductModel product;
@@ -41,9 +42,15 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     });
   }
 
-  Future<void> addToCart(String userId, String variantId, int donGia) async {
+  Future<void> addToCart(String variantId, int donGia) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if (userId == null) {
+      throw Exception('User ID not found in SharedPreferences');
+    }
     try {
-      await CartApiService().AddToCart(userId, variantId, quantity, donGia);
+      await CartApiService().addToCart(userId, variantId, quantity, donGia);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
@@ -331,13 +338,13 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                             itemBuilder: (context, index) {
                                               return GestureDetector(
                                                 onTap: () {
-                                                  setModalState((){
-                                                    selectedVariantId = variant[index].id;
+                                                  setModalState(() {
+                                                    selectedVariantId =
+                                                        variant[index].id;
                                                     donGia = variant[index].gia;
-                                                    print(selectedVariantId + ' $donGia');
+                                                    print(selectedVariantId +
+                                                        ' $donGia');
                                                   });
-                                                  
-
                                                 },
                                                 child: Container(
                                                   decoration: BoxDecoration(
@@ -446,7 +453,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                       child: Center(
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            addToCart("66c45d3b1ee5471012d0540c", selectedVariantId, donGia);
+                                            addToCart(
+                                                selectedVariantId,
+                                                donGia);
                                           },
                                           child: Text('Thêm Vào Giỏ Hàng'),
                                           style: ElevatedButton.styleFrom(

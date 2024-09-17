@@ -28,12 +28,16 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
 
   // Hàm để cập nhật màu sắc dựa trên bước hiện tại
   Color _getColor(int step) {
-    return (step <= currentStep) ? Color.fromRGBO(59, 99, 53, 1) : Colors.grey;
+    return (step <= currentStep) ? Color.fromRGBO(59, 99, 53, 1) : Colors.white;
   }
 
   // Hàm để cập nhật độ dày của đường kết nối
-  double _getLineThickness(int step) {
-    return (step <= currentStep) ? 5.0 : 2.0;
+  Color _getColorStick(int step) {
+    return (step <= currentStep) ? Color.fromRGBO(59, 99, 53, 1) : Colors.grey;
+  }
+
+  Color _getColorIcon(int step) {
+    return (step <= currentStep) ? Colors.white : Color.fromRGBO(59, 99, 53, 1) ;
   }
 
   @override
@@ -47,90 +51,168 @@ Widget build(BuildContext context) {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getColor(0),
-                          border: Border.all(color: _getColor(0), width: 3),
-                        ),
-                        child: Icon(
-                          Icons.assignment_ind,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Điền thông tin'),
-                    ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _getColor(0),
+                    border: Border.all(color: _getColor(0), width: 1),
                   ),
-                  // Đường kẻ
-                  Expanded(
-                    child: Container(
-                      height: _getLineThickness(1),
-                      color: _getColor(1),
-                    ),
+                  child: Icon(
+                    Icons.assignment_ind,
+                    color: _getColorIcon(0),
+                    size: 24,
                   ),
-                  Column(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getColor(1),
-                          border: Border.all(color: _getColor(1), width: 3),
-                        ),
-                        child: Icon(
-                          Icons.payment,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Phương thức\nthanh toán',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                ),
+
+                Container(
+                  width: 80,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: _getColorStick(1)
                   ),
-                  Expanded(
-                    child: Container(
-                      height: _getLineThickness(2),
-                      color: _getColor(2),
-                    ),
+                ),
+
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _getColor(1),
+                    border: Border.all(color: _getColor(0), width: 1),
                   ),
-                  Column(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getColor(2),
-                          border: Border.all(color: _getColor(2), width: 3),
-                        ),
-                        child: Icon(
-                          Icons.money,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Thanh toán'),
-                    ],
+                  child: Icon(
+                    Icons.credit_card,
+                    color: _getColorIcon(1),
+                    size: 24,
                   ),
-                ],
-              ),
+                ),
+
+                Container(
+                  width: 80,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: _getColorStick(2)
+                  ),
+                ),
+
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _getColor(2),
+                    border: Border.all(color: _getColor(0), width: 1),
+                  ),
+                  child: Icon(
+                    Icons.payments_outlined,
+                    color: _getColorIcon(2),
+                    size: 24,
+                  ),
+                ),
+              ],
             ),
+
+             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+               Text("Điền thông tin", textAlign: TextAlign.start,),
+               SizedBox(width: 45,),
+               Text("Phương thức\nthanh toán", textAlign: TextAlign.center,),
+               SizedBox(width: 45,),
+               Text("Thanh toán"),
+              ],
+            ),
+
+
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            //   child: Row(
+            //     crossAxisAlignment: CrossAxisAlignment.center,
+            //     children: [
+            //       Column(
+            //         children: [
+            //           Container(
+            //             width: 50,
+            //             height: 50,
+            //             decoration: BoxDecoration(
+            //               shape: BoxShape.circle,
+            //               color: _getColor(0),
+            //               border: Border.all(color: _getColor(0), width: 3),
+            //             ),
+            //             child: Icon(
+            //               Icons.assignment_ind,
+            //               color: Colors.white,
+            //               size: 24,
+            //             ),
+            //           ),
+            //           SizedBox(height: 8),
+            //           Text('Điền thông tin'),
+            //         ],
+            //       ),
+            //       // Đường kẻ
+            //       Expanded(
+            //         child: Container(
+            //           height: _getLineThickness(1),
+            //           color: _getColor(1),
+            //         ),
+            //       ),
+            //       Column(
+            //         children: [
+            //           Container(
+            //             width: 50,
+            //             height: 50,
+            //             decoration: BoxDecoration(
+            //               shape: BoxShape.circle,
+            //               color: _getColor(1),
+            //               border: Border.all(color: _getColor(1), width: 3),
+            //             ),
+            //             child: Icon(
+            //               Icons.payment,
+            //               color: Colors.white,
+            //               size: 24,
+            //             ),
+            //           ),
+            //           SizedBox(height: 8),
+            //           Text(
+            //             'Phương thức\nthanh toán',
+            //             textAlign: TextAlign.center,
+            //           ),
+            //         ],
+            //       ),
+            //       Expanded(
+            //         child: Container(
+            //           height: _getLineThickness(2),
+            //           color: _getColor(2),
+            //         ),
+            //       ),
+            //       Column(
+            //         children: [
+            //           Container(
+            //             width: 50,
+            //             height: 50,
+            //             decoration: BoxDecoration(
+            //               shape: BoxShape.circle,
+            //               color: _getColor(2),
+            //               border: Border.all(color: _getColor(2), width: 3),
+            //             ),
+            //             child: Icon(
+            //               Icons.money,
+            //               color: Colors.white,
+            //               size: 24,
+            //             ),
+            //           ),
+            //           SizedBox(height: 8),
+            //           Text('Thanh toán'),
+            //         ],
+            //       ),
+            //     ],
+            //   ),
+            // ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.6, 
               child: PageView(

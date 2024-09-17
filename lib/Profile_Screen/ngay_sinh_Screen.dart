@@ -1,7 +1,7 @@
 import 'package:don_ganh_app/api_services/user_api_service.dart';
-import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NgaySinh extends StatefulWidget {
@@ -15,6 +15,9 @@ class _NgaySinh extends State<NgaySinh> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
   String _ngaySinh = 'Chưa cập nhật';
+  DateTime? _selectedDate;
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -40,10 +43,49 @@ class _NgaySinh extends State<NgaySinh> {
     }
   }
 
+  Future<void> _pickDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _ngaySinh = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
+  }
+
+  Future<void> _updateNgaySinh() async {
+    if (_userId.isNotEmpty && _selectedDate != null) {
+      bool success = await _apiService.updateUserInformation(
+          _userId, 'ngaySinh', _ngaySinh);
+
+      if (success) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('ngaySinh', _ngaySinh);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cập nhật ngày sinh thành công')),
+        );
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pop(context);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cập nhật ngày sinh thất bại')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -68,12 +110,41 @@ class _NgaySinh extends State<NgaySinh> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          Text('Ngày sinh: ${_ngaySinh}',
-                style: TextStyle(fontSize: 16)),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Ngày sinh: $_ngaySinh', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 20),
+              
+              // Button for selecting date
+              SizedBox(
+                width: double.infinity,  // Full width button
+                height: 50,  // Height of the button
+                child: ElevatedButton(
+                  onPressed: () => _pickDate(context),
+                  child: const Text('Chọn ngày sinh',
+                       style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+
+              // Button for updating date of birth
+              SizedBox(
+                width: double.infinity,  // Full width button
+                height: 50,  // Height of the button
+                child: ElevatedButton(
+                  onPressed: _updateNgaySinh,
+                  child: const Text('Cập nhật Ngày sinh',
+                   style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

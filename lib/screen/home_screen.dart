@@ -330,45 +330,47 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
 
                               //Button add to cart
-                              GestureDetector(
-                                onTap: (){
-                                  print('add to cart');
-                                },
-                                child: Container(
-                                  height: 35,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                      color: Color.fromRGBO(41, 87, 35, 1),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                          width: 60,
-                                          child: Icon(
-                                            Icons.shopping_cart,
-                                            color: Colors.white,
-                                          )),
-                                      Container(
-                                        height: double.infinity,
-                                        width: 1,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Center(
-                                        child: Container(
-                                          width: 100,
-                                          child: Text(
-                                            'Mua Ngay',
-                                            style: TextStyle(
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: (){
+                                    print('add to cart');
+                                  },
+                                  child: Container(
+                                    height: 35,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        color: Color.fromRGBO(41, 87, 35, 1),
+                                        borderRadius: BorderRadius.circular(20)),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                            width: 60,
+                                            child: Icon(
+                                              Icons.shopping_cart,
                                               color: Colors.white,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                            textAlign: TextAlign.center,
+                                            )),
+                                        Container(
+                                          height: double.infinity,
+                                          width: 1,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        Center(
+                                          child: Container(
+                                            width: 100,
+                                            child: Text(
+                                              'Mua Ngay',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               )

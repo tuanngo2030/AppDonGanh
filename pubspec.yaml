@@ -42,6 +42,7 @@ dependencies:
   jwt_decode: ^0.3.1
   get: ^4.6.5
   flutter_typeahead: ^4.0.0
+  intl: ^0.18.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
@@ -106,6 +107,11 @@ flutter:
         - asset: lib/assets/fonts/Roboto-Regular.ttf
         - asset: lib/assets/fonts/Roboto-Bold.ttf
           weight: 700
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

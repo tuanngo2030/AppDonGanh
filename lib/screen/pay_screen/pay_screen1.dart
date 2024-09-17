@@ -91,6 +91,7 @@ class _PayScreen1State extends State<PayScreen1> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
+                              keyboardType: TextInputType.number,
                               decoration: InputDecoration(
                                 labelText: 'Số điện thoại',
                               ),

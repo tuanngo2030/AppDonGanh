@@ -15,6 +15,8 @@ class _Tenscreen extends State<Tenscreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
   String _tenNguoiDung = 'Chưa cập nhật';
+    final TextEditingController _tenNguoiDungController = TextEditingController();
+  String? _selectedtenNguoiDung;
   @override
   void initState() {
     super.initState();
@@ -31,6 +33,7 @@ class _Tenscreen extends State<Tenscreen> {
         setState(() {
           _userId = storedUserId;
           _tenNguoiDung = user.tenNguoiDung ?? 'Chưa cập nhật';
+          _tenNguoiDungController.text=_tenNguoiDung;
         });
       } else {
         print('User details not found.');
@@ -39,7 +42,29 @@ class _Tenscreen extends State<Tenscreen> {
       print('User ID is not available.');
     }
   }
+ Future<void> _updateName(String newName) async {
+    if (_userId.isNotEmpty) {
+      bool success =
+          await _apiService.updateUserInformation(_userId, 'tenNguoiDung', newName);
 
+      if (success) {
+        setState(() {
+          _tenNguoiDung = newName;
+        });
+        // Lưu gmail mới vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('gmail', newName);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật họ và tên thành công')));
+        Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pop(context);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật họ và tên thất bại')));
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,8 +96,43 @@ class _Tenscreen extends State<Tenscreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Text('Họ và tên: ${_tenNguoiDung}',
-                style: TextStyle(fontSize: 16)),
+         Column(
+                children: [
+                  TextFormField(
+                    controller: _tenNguoiDungController,  // Prepopulate with the existing email
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedtenNguoiDung = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Nhập họ và tên',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: '$_tenNguoiDung',
+                      counterText: 'Tối đa 100 ký tự', // Custom character limit hint
+                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    maxLength: 100,
+                  )
+                ],
+              ),
+               const SizedBox(height: 20),
+              SizedBox(
+                 width: double.infinity,  // Full width button
+                height: 50, 
+                child: ElevatedButton(
+                  onPressed: () {
+                      _updateName(_selectedtenNguoiDung!);                
+                  }, 
+                  child: const Text('Cập nhật họ và tên', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                ),
+              ),
           ],
         ),
       ),

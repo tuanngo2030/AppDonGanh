@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
@@ -22,7 +21,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   String? _profileImageUrl;
   String _GioiTinh = 'Chưa xác định';
   String _ngaySinh = 'Chưa cập nhật';
-  int _soDienThoai = 0;
+  String _soDienThoai = 'Chưa cập nhật';
   String _gmail = 'Chưa cập nhật';
   DiaChi _diaChi = DiaChi(
     tinhThanhPho: 'Chưa cập nhật',
@@ -49,7 +48,7 @@ class _ProfileScreen extends State<ProfileScreen> {
           _userId = storedUserId;
           _GioiTinh = user.GioiTinh ?? 'Chưa xác định';
           _ngaySinh = user.ngaySinh ?? 'Chưa cập nhật';
-          _soDienThoai = user.soDienThoai ?? 0;
+          _soDienThoai = user.soDienThoai ?? 'Chưa cập nhật';
           _gmail = user.gmail ?? 'Chưa cập nhật';
           _profileImageUrl = user.anhDaiDien;
           _diaChi = user.diaChi ?? _diaChi;
@@ -79,6 +78,8 @@ class _ProfileScreen extends State<ProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
             );
+            // Cập nhật lại hình ảnh từ backend
+            _loadUserDetails();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
@@ -100,35 +101,6 @@ class _ProfileScreen extends State<ProfileScreen> {
       );
     }
   }
-
-  // void _showAddressDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Chi tiết địa chỉ'),
-  //         content: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             Text('Tỉnh/Thành phố: ${_diaChi.tinhThanhPho}'),
-  //             Text('Quận/Huyện: ${_diaChi.quanHuyen}'),
-  //             Text('Phường/Xã: ${_diaChi.phuongXa}'),
-  //             Text('Đường: ${_diaChi.duongThon}'),
-  //           ],
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: Text('Đóng'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -215,25 +187,26 @@ class _ProfileScreen extends State<ProfileScreen> {
           overflow: TextOverflow.ellipsis, // Để cắt bỏ văn bản nếu nó dài
         ),
       ),
-      onTap: () {
-        if (title == 'Tên') {
-          Navigator.pushNamed(context, '/ten');
-        }
-        if (title == 'Giới tính') {
-          Navigator.pushNamed(context, '/gioitinh');
-        }
-        if (title == 'Ngày sinh') {
-          Navigator.pushNamed(context, '/NgaySinh');
-        }
-        if (title == 'Điện thoại') {
-          Navigator.pushNamed(context, '/sodienthoai');
-        }
-        if (title == 'Email') {
-          Navigator.pushNamed(context, '/gmail');
-        }
-        if (title == 'Địa chỉ') {
-          Navigator.pushNamed(context, '/diachiScreen');
-        }
+      onTap: () async {
+     if (title == 'Tên') {
+        await Navigator.pushNamed(context, '/ten');
+      }
+      if (title == 'Giới tính') {
+        await Navigator.pushNamed(context, '/gioitinh');
+      }
+      if (title == 'Ngày sinh') {
+        await Navigator.pushNamed(context, '/NgaySinh');
+      }
+      if (title == 'Điện thoại') {
+        await Navigator.pushNamed(context, '/sodienthoai');
+      }
+      if (title == 'Email') {
+        await Navigator.pushNamed(context, '/gmail');
+      }
+      if (title == 'Địa chỉ') {
+        await Navigator.pushNamed(context, '/diachiScreen');
+      }
+       _loadUserDetails();
       },
     );
   }

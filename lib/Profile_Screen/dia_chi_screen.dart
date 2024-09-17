@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
+import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,32 @@ class _DiaChiScreen extends State<DiaChiScreen> {
     _fetchTinhThanhPho();
     _fetchQuanHuyen();
     _fetchPhuongXa();
+  }
+
+  Future<void> _loadUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedUserId = prefs.getString('userId');
+
+    if (storedUserId != null && storedUserId.isNotEmpty) {
+      setState(() {
+        _userId = storedUserId;
+      });
+
+      // Fetch user details including address
+      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
+      if (user != null) {
+        setState(() {
+          _selectedTinhThanhPho = user.diaChi?.tinhThanhPho;
+          _selectedQuanHuyen = user.diaChi?.quanHuyen;
+          _selectedPhuongXa = user.diaChi?.phuongXa;
+          _duongThonController.text = user.diaChi?.duongThon ?? '';
+        });
+      } else {
+        print('No address found for user.');
+      }
+    } else {
+      print('User ID is not available.');
+    }
   }
 
   Future<void> _fetchTinhThanhPho() async {
@@ -87,19 +114,6 @@ class _DiaChiScreen extends State<DiaChiScreen> {
     }
   }
 
-  Future<void> _loadUserDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedUserId = prefs.getString('userId');
-
-    if (storedUserId != null && storedUserId.isNotEmpty) {
-      setState(() {
-        _userId = storedUserId;
-      });
-    } else {
-      print('User ID is not available.');
-    }
-  }
-
   Future<void> _updateAddress() async {
     if (_userId.isNotEmpty &&
         _selectedTinhThanhPho != null &&
@@ -119,27 +133,28 @@ class _DiaChiScreen extends State<DiaChiScreen> {
 
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Địa chỉ đã được cập nhật thành công')),
+            const SnackBar(
+                content: Text('Địa chỉ đã được cập nhật thành công')),
           );
-          Future.delayed(Duration(seconds: 1), () {
+          Future.delayed(const Duration(seconds: 1), () {
             Navigator.pop(context);
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật địa chỉ thất bại')),
+            const SnackBar(content: Text('Cập nhật địa chỉ thất bại')),
           );
         }
       } catch (e) {
         print('Error updating address: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Có lỗi xảy ra khi cập nhật địa chỉ')),
+          const SnackBar(content: Text('Có lỗi xảy ra khi cập nhật địa chỉ')),
         );
       }
     } else {
       print(
           'Missing required fields. UserID: $_userId, Tỉnh/Thành phố: $_selectedTinhThanhPho, Quận/Huyện: $_selectedQuanHuyen, Phường/Xã: $_selectedPhuongXa, Đường/Thôn: ${_duongThonController.text}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
+        const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
       );
     }
   }
@@ -157,7 +172,7 @@ class _DiaChiScreen extends State<DiaChiScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DropdownSearch<String>(
-                popupProps: PopupProps.menu(
+                popupProps: const PopupProps.menu(
                   showSearchBox: true,
                 ),
                 items: _tinhThanhPhoList,
@@ -166,20 +181,19 @@ class _DiaChiScreen extends State<DiaChiScreen> {
                 onChanged: (newValue) {
                   setState(() {
                     _selectedTinhThanhPho = newValue;
-                    // _updateQuanHuyenList(); // Pass the selected province ID to fetch districts
                   });
                 },
                 selectedItem: _selectedTinhThanhPho,
-                dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownDecoratorProps: const DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
                     labelText: 'Tỉnh/Thành phố',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownSearch<String>(
-                popupProps: PopupProps.menu(
+                popupProps: const PopupProps.menu(
                   showSearchBox: true,
                 ),
                 items: _quanHuyenList,
@@ -188,20 +202,19 @@ class _DiaChiScreen extends State<DiaChiScreen> {
                 onChanged: (newValue) {
                   setState(() {
                     _selectedQuanHuyen = newValue;
-                    // _updatePhuongXaList(); // Pass the selected district ID to fetch wards
                   });
                 },
                 selectedItem: _selectedQuanHuyen,
-                dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownDecoratorProps: const DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
                     labelText: 'Quận/Huyện',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownSearch<String>(
-                popupProps: PopupProps.menu(
+                popupProps: const PopupProps.menu(
                   showSearchBox: true,
                 ),
                 items: _phuongXaList,
@@ -213,27 +226,28 @@ class _DiaChiScreen extends State<DiaChiScreen> {
                   });
                 },
                 selectedItem: _selectedPhuongXa,
-                dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownDecoratorProps: const DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
                     labelText: 'Phường/Xã',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
                 controller: _duongThonController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Đường/Thôn',
                   border: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _updateAddress,
-                  child: Text('Cập nhật địa chỉ'),
+                  child: const Text('Cập nhật địa chỉ',
+                   style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
                 ),
               ),
             ],

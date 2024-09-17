@@ -1,20 +1,29 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartApiService {
-  final String url =
-      'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/user/66c45d3b1ee5471012d0540c';
+  final String baseUrl = 'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/user/';
 
   Future<CartModel> getCart() async {
+    // Retrieve userId from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if (userId == null) {
+      throw Exception('User ID not found in SharedPreferences');
+    }
+
+    final String url = '$baseUrl$userId'; // Construct the URL with dynamic userId
+
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
-      print('Response body: ${response.body}'); // In ra dữ liệu nhận được
+      print('Response body: ${response.body}'); // Print received data
 
-      // Giải mã JSON thành một đối tượng Map<String, dynamic>.
       try {
         Map<String, dynamic> cartData = json.decode(response.body);
-        // Chuyển đổi JSON thành CartModel.
+        // Convert JSON to CartModel
         return CartModel.fromJSON(cartData);
       } catch (e) {
         print('Error decoding JSON: $e');
@@ -26,7 +35,7 @@ class CartApiService {
     }
   }
 
-  Future<CartModel> AddToCart(
+  Future<CartModel> addToCart(
       String userId, String idBienThe, int quantity, int donGia) async {
     final addToCartURL =
         'https://imp-model-widely.ngrok-free.app/api/cart/gioHang?';
@@ -61,7 +70,6 @@ class CartApiService {
     final deleteFromCartURL =
         'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/$idGioHang';
 
-    // Chuẩn bị phần thân của yêu cầu
     Map<String, dynamic> requestBody = {
       'idBienThe': idBienThe,
     };
@@ -83,7 +91,6 @@ class CartApiService {
   Future<void> updateCart(String idGioHang, String idBienThe, int soLuong, int donGia) async {
     final updateCartURL = 'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/$idGioHang';
 
-    // Chuẩn bị phần thân của yêu cầu
     Map<String, dynamic> requestBody = {
       'chiTietGioHang': [
         {

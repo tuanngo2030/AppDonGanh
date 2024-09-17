@@ -1,5 +1,4 @@
 import 'package:don_ganh_app/api_services/user_api_service.dart';
-import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +13,9 @@ class GioitinhScreen extends StatefulWidget {
 class _GioitinhScreen extends State<GioitinhScreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
-  String  _GioiTinh = 'Chưa cập nhật';
+  String _gioiTinh = 'Chưa cập nhật'; // Giá trị mặc định
+  String? _selectedGioiTinh; // Giá trị giới tính mới được chọn
+
   @override
   void initState() {
     super.initState();
@@ -26,11 +27,11 @@ class _GioitinhScreen extends State<GioitinhScreen> {
     String? storedUserId = prefs.getString('userId');
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
-      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
+      NguoiDung? user = await _apiService.fetchUserDetails(storedUserId);
       if (user != null) {
         setState(() {
           _userId = storedUserId;
-          _GioiTinh = user.GioiTinh ?? 'Chưa cập nhật';
+          _gioiTinh = user.GioiTinh ?? 'Chưa cập nhật';
         });
       } else {
         print('User details not found.');
@@ -40,10 +41,32 @@ class _GioitinhScreen extends State<GioitinhScreen> {
     }
   }
 
+  Future<void> _updateGioiTinh(String newGioiTinh) async {
+    if (_userId.isNotEmpty) {
+      bool success = await _apiService.updateUserInformation(_userId, 'GioiTinh', newGioiTinh);
+      
+      if (success) {
+        
+        setState(() {
+          _gioiTinh = newGioiTinh;
+        });
+        // Lưu giới tính mới vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('gioiTinh', newGioiTinh);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thành công')));
+        Future.delayed(const Duration(seconds: 1), () {
+             Navigator.pop(context);
+          });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thất bại')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -54,11 +77,11 @@ class _GioitinhScreen extends State<GioitinhScreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title: Text(
+        title: const Text(
           'Hồ sơ',
           style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
         ),
@@ -71,8 +94,38 @@ class _GioitinhScreen extends State<GioitinhScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Text('Giới Tính: ${_GioiTinh}',
-                style: TextStyle(fontSize: 16)),
+            Row(
+              children: [
+            Text('Giới Tính: ', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 20),
+                DropdownButton<String>(
+                  hint:Text('$_gioiTinh', style: const TextStyle(fontSize: 16)),
+                  value: _selectedGioiTinh,
+                  items: ['Nam', 'Nữ', 'Khác'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedGioiTinh = newValue;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+                   width: double.infinity,  // Full width button
+                height: 50, 
+              child: ElevatedButton(
+                onPressed: _selectedGioiTinh != null
+                    ? () => _updateGioiTinh(_selectedGioiTinh!)
+                    : null, // Nút chỉ có thể nhấn khi người dùng chọn giới tính
+                child: const Text('Cập nhật giới tính', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+              ),
+            ),
           ],
         ),
       ),
