@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -123,10 +124,21 @@ class _SettingScreenState extends State<SettingScreen> {
               SwitchListTile(
                 title: Text('Cho phép Đòn Gánh truy cập máy ảnh'),
                 value: quyenCam, 
-                onChanged: (bool value){
-                  setState(() {
-                    quyenCam = value;
-                  });
+                onChanged: (bool value) async {
+                  PermissionStatus status = await Permission.camera.request();
+
+                  if(status == PermissionStatus.granted){
+                    debugPrint('Permission granted');
+                    setState(() {
+                      quyenCam = value;
+                    });
+                  }if(status == PermissionStatus.denied){
+                    debugPrint('Permission denied');
+                  }if(status == PermissionStatus.limited){
+                    debugPrint('Permission limited');
+                  }if(status == PermissionStatus.restricted){
+                    debugPrint('Permission Restricted');
+                  }
                 },
               ),
               Container(

@@ -69,16 +69,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    Container(
-                      width: 40,
-                      height: 41,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
-                        color: Color.fromRGBO(41, 87, 35, 1),
-                      ),
-                      child: Icon(
-                        Icons.settings,
-                        color: Colors.white,
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.pushNamed(context, '/setting_screen');
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 41,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          color: Color.fromRGBO(41, 87, 35, 1),
+                        ),
+                        child: Icon(
+                          Icons.settings,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: TrangXinChao(),
+      home: SettingScreen(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -69,6 +69,7 @@ class MyApp extends StatelessWidget {
         '/bottomThumuan': (context) => BottomnavthumuaScreen(),
         '/chatscreen': (context) => ChatScreen(title: 'Chat',),
         '/oder_review_screen': (context) => OrderReviewScreen(),
+        '/setting_screen': (context) => SettingScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

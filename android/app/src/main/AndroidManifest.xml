@@ -1,8 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <!-- quyền cho thiết bị -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Android 12 or below -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <!-- Android 13 or below -->
+    <uses-permission android:name = "android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name = "android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name = "android.permission.READ_MEDIA_AUDIO"/>
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name = "android.permission.hardware.Camera"/>
     <application
         android:label="Đòn Gánh"
         android:name="${applicationName}"
