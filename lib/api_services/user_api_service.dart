@@ -58,7 +58,7 @@ class UserApiService {
               await prefs.setBool('hoKinhDoanh', user.hoKinhDoanh ?? false);
               String diaChi = jsonEncode(user.diaChi?.toJson() ?? {});
               await prefs.setString('diaChi', diaChi);
-              await prefs.setString('tinhTrang', user.tinhTrang ?? '');
+              await prefs.setInt('tinhTrang', user.tinhTrang ?? 0);
               await prefs.setStringList(
                   'phuongThucThanhToan', user.phuongThucThanhToan ?? []);
               await prefs.setString('role', user.role ?? 'user');

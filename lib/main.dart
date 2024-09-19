@@ -12,6 +12,7 @@ import 'package:don_ganh_app/screen/order_review_screen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/pay_screen/oder_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen.dart';
+import 'package:don_ganh_app/screen/setting_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/bottomnavThumua_screen.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: BottomnavigationMenu(),
+      home: TrangXinChao(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),

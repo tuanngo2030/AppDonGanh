@@ -11,7 +11,7 @@ class NguoiDung {
   final DateTime? ngayTao;
   final String? ngaySinh;
   final bool? hoKinhDoanh;
-  final String? tinhTrang;
+  final int? tinhTrang;
   final List<String>? phuongThucThanhToan;
   final String? role;
   final String? otp;
@@ -56,7 +56,7 @@ class NguoiDung {
       ngayTao: json['ngayTao'] != null ? DateTime.parse(json['ngayTao']) : null,
       ngaySinh: json['ngaySinh'] as String?,
       hoKinhDoanh: json['hoKinhDoanh'] as bool? ?? false,
-      tinhTrang: json['tinhTrang'] as String?,
+      tinhTrang: json['tinhTrang'],
       phuongThucThanhToan: json['phuongThucThanhToan'] != null
           ? List<String>.from(json['phuongThucThanhToan'])
           : null,
