@@ -35,8 +35,8 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
       if (user != null) {
         setState(() {
           _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
-          _userId = storedUserId; // Store the user ID
-          _profileImageUrl = user.anhDaiDien; // Update this line if the user model has the profile image URL
+          _userId = storedUserId; 
+          _profileImageUrl = user.anhDaiDien; 
         });
       } else {
         print('User details not found.');

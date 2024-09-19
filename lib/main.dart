@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: OrderReviewScreen(),
+      home: BottomnavigationMenu(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -63,11 +63,11 @@ class MyApp extends StatelessWidget {
         '/gioitinh': (context) => GioitinhScreen(),
         '/xacminhtk': (context) => XacMinhTkScreen(),
         '/oder_screen': (context) => OderScreen(),
-        '/oder_status_screen': (context) => OderStatusScreen(),
+        // '/oder_status_screen': (context) => OderStatusScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
         '/bottomThumuan': (context) => BottomnavthumuaScreen(),
-        '/chatscreen': (context) => ChatScreen(),
-        '/order_review_screen': (context) => OrderReviewScreen(),
+        '/chatscreen': (context) => ChatScreen(title: 'Chat',),
+        '/oder_review_screen': (context) => OrderReviewScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
