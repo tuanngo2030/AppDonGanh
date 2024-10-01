@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     bannerImage = BannerApiService().fetchBanner();
     productsModel = ProductApiService().getListProduct();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(width: 8),
                     GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         Navigator.pushNamed(context, '/setting_screen');
                       },
                       child: Container(
@@ -92,20 +91,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: Image.asset("lib/assets/ic_search.png"),
-                          ),
-                          hintText: "Tìm kiếm sản phẩm",
-                          border: OutlineInputBorder(
+                        child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/search_screen');
+                        },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25),
+                            border: Border.fromBorderSide(
+                                BorderSide(color: Colors.grey, width: 1))),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.search,
+                                color: Color.fromRGBO(142, 198, 65, 1),
+                                size: 35,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 7),
+                                child: Text(
+                                  "Tìm kiếm sản phẩm ",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         ),
                       ),
-                    ),
+                    )
+                        // TextField(
+                        //   decoration: InputDecoration(
+                        //     prefixIcon: Padding(
+                        //       padding: const EdgeInsets.all(5),
+                        //       child: Image.asset("lib/assets/ic_search.png"),
+                        //     ),
+                        //     hintText: "Tìm kiếm sản phẩm",
+                        //     border: OutlineInputBorder(
+                        //       borderRadius: BorderRadius.circular(25),
+                        //     ),
+                        //     contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        //   ),
+                        // ),
+                        ),
                     SizedBox(width: 8),
                     BadgeWidget(),
                   ],
@@ -209,10 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Category
-                Container(
-                  height: 120, 
-                  child: CategoryWidget()
-                ),
+                Container(height: 120, child: CategoryWidget()),
 
                 Row(
                   children: [
@@ -241,150 +270,218 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // List product
-                FutureBuilder<List<ProductModel>>(
-                  future: productsModel,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Lỗi: ${snapshot.error}'));
-                    } else if (!snapshot.hasData ||
-                        snapshot.data == null ||
-                        snapshot.data!.isEmpty) {
-                      return Center(child: Text('Không tìm thấy dữ liệu'));
-                    }
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30),
+                  child: FutureBuilder<List<ProductModel>>(
+                    future: productsModel,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Lỗi: ${snapshot.error}'));
+                      } else if (!snapshot.hasData ||
+                          snapshot.data == null ||
+                          snapshot.data!.isEmpty) {
+                        return Center(child: Text('Không tìm thấy dữ liệu'));
+                      }
 
-                    List<ProductModel> products = snapshot.data!;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics:
-                          NeverScrollableScrollPhysics(), // Tránh xung đột với cuộn của SingleChildScrollView
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 0.7),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            print("Detail Product");
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => DetailProductScreen(product : products[index])));
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Container(
-                                  height: 150,
-                                  width: 200,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.network(
-                                      products[index].imageProduct,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        products[index].nameProduct,
-                                        style: TextStyle(
-                                          fontSize: 17,
-                                          overflow: TextOverflow.ellipsis,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color.fromRGBO(41, 87, 35, 1),
+                      List<ProductModel> products = snapshot.data!;
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics:
+                            NeverScrollableScrollPhysics(), // Tránh xung đột với cuộn của SingleChildScrollView
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 0.7),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              print("Detail Product");
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DetailProductScreen(
+                                          product: products[index])));
+                            },
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Stack(children: [
+                                    Container(
+                                      height: 150,
+                                      width: 200,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.network(
+                                          products[index].imageProduct,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 8),
 
-                                    //rate
-                                    Container(
+                                    Positioned(
+                                        top: 15,
+                                        child: Container(
+                                          width: 50,
+                                          height: 25,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(5),
+                                                topRight: Radius.circular(10),
+                                                bottomRight:
+                                                    Radius.circular(10)),
+                                            color:
+                                                Color.fromRGBO(142, 198, 65, 1),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "- ${products[index].phanTramGiamGia}%",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                        )),
+
+                                    // Icon favorites
+                                    Positioned(
+                                        top: 10,
+                                        right: 5,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            print("Add to favorites");
+                                          },
+                                          child: Container(
+                                            height: 35,
+                                            width: 35,
+                                            decoration: BoxDecoration(
+                                                color: Color.fromRGBO(
+                                                    241, 247, 234, 1),
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.favorite_border_outlined,
+                                                color: Color.fromRGBO(
+                                                    142, 198, 65, 1),
+                                              ),
+                                            ),
+                                          ),
+                                        ))
+                                  ]),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          products[index].nameProduct,
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            overflow: TextOverflow.ellipsis,
+                                            fontWeight: FontWeight.w900,
+                                            color:
+                                                Color.fromRGBO(41, 87, 35, 1),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+
+                                      //rate
+                                      Container(
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            Text("5")
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 7.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '${products[index].donGiaBan} đ/kg',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400),
+                                      )
+                                    ],
+                                  ),
+                                ),
+
+                                //Button add to cart
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      print('add to cart');
+                                    },
+                                    child: Container(
+                                      height: 35,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          color: Color.fromRGBO(41, 87, 35, 1),
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
                                       child: Row(
                                         children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                                width: 60,
+                                                child: Icon(
+                                                  Icons.shopping_cart,
+                                                  color: Colors.white,
+                                                )),
                                           ),
-                                          Text("5")
+                                          Container(
+                                            height: double.infinity,
+                                            width: 1,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 3,
+                                            child: Center(
+                                              child: Container(
+                                                width: 100,
+                                                child: Text(
+                                                  'Mua Ngay',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-
-                              Padding(
-                                padding: const EdgeInsets.only(top: 7.0),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '${products[index].donGiaBan} đ/kg',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400),
-                                    )
-                                  ],
-                                ),
-                              ),
-
-                              //Button add to cart
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: (){
-                                    print('add to cart');
-                                  },
-                                  child: Container(
-                                    height: 35,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                        color: Color.fromRGBO(41, 87, 35, 1),
-                                        borderRadius: BorderRadius.circular(20)),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                            width: 60,
-                                            child: Icon(
-                                              Icons.shopping_cart,
-                                              color: Colors.white,
-                                            )),
-                                        Container(
-                                          height: double.infinity,
-                                          width: 1,
-                                          decoration: BoxDecoration(
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        Center(
-                                          child: Container(
-                                            width: 100,
-                                            child: Text(
-                                              'Mua Ngay',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 )
               ],
             ),

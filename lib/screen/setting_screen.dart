@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -66,10 +68,16 @@ class _SettingScreenState extends State<SettingScreen> {
               SwitchListTile(
                 title: Text('Cho phép Đòn Gánh truy cập Micro'),
                 value: quyenMic, 
-                onChanged: (bool value){
-                  setState(() {
-                    quyenMic = value;
-                  });
+                onChanged: (bool value) async {
+                  PermissionStatus  status = await Permission.microphone.request();
+                  if(status == PermissionStatus.granted){
+                    debugPrint('Permission granted');
+                    setState(() {
+                      quyenMic = value;
+                    });
+                  }if(status == PermissionStatus.denied){
+                    debugPrint('Permission denied');
+                  }
                 },
               ),
               Container(
@@ -95,10 +103,16 @@ class _SettingScreenState extends State<SettingScreen> {
               SwitchListTile(
                 title: Text('Cho phép Đòn Gánh truy cập thư viện ảnh'),
                 value: quyenLibra, 
-                onChanged: (bool value){
-                  setState(() {
-                    quyenLibra = value;
-                  });
+                onChanged: (bool value) async {
+                  PermissionStatus status = await Permission.photos.request();
+                  if(status == PermissionStatus.granted){
+                    debugPrint('Permission granted');
+                    setState(() {
+                      quyenLibra = value;
+                    });
+                  }if(status == PermissionStatus.denied){
+                    debugPrint('Permission denied');
+                  }
                 },
               ),
               Container(
@@ -126,7 +140,6 @@ class _SettingScreenState extends State<SettingScreen> {
                 value: quyenCam, 
                 onChanged: (bool value) async {
                   PermissionStatus status = await Permission.camera.request();
-
                   if(status == PermissionStatus.granted){
                     debugPrint('Permission granted');
                     setState(() {

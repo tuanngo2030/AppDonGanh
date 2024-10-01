@@ -168,6 +168,27 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       ),
                     ),
                     Positioned(
+                        top: 15,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: () {
+                            print("Add to favorites");
+                          },
+                          child: Container(
+                            height: 35,
+                            width: 35,
+                            decoration: BoxDecoration(
+                                color: Color.fromRGBO(241, 247, 234, 1),
+                                borderRadius: BorderRadius.circular(50)),
+                            child: Center(
+                              child: Icon(
+                                Icons.favorite_border_outlined,
+                                color: Color.fromRGBO(142, 198, 65, 1),
+                              ),
+                            ),
+                          ),
+                        )),
+                    Positioned(
                       bottom: 10,
                       child: Container(
                         height: 60,
@@ -454,8 +475,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                         child: ElevatedButton(
                                           onPressed: () {
                                             addToCart(
-                                                selectedVariantId,
-                                                donGia);
+                                                selectedVariantId, donGia);
                                           },
                                           child: Text('Thêm Vào Giỏ Hàng'),
                                           style: ElevatedButton.styleFrom(

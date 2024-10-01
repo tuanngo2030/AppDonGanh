@@ -5,13 +5,16 @@ import 'package:don_ganh_app/Profile_Screen/ngay_sinh_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
+import 'package:don_ganh_app/reponsive.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
+import 'package:don_ganh_app/screen/creat_blog_screen.dart';
 import 'package:don_ganh_app/screen/oder_status_screen.dart';
 import 'package:don_ganh_app/screen/order_review_screen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/pay_screen/oder_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen.dart';
+import 'package:don_ganh_app/screen/search_screen.dart';
 import 'package:don_ganh_app/screen/setting_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/bottomnavThumua_screen.dart';
@@ -40,7 +43,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SettingScreen(),
+      home: ReponsiveScreen(
+        Mobile: CreatBlogScreen(), 
+        Tablet: SettingScreen(), 
+        Desktop: RegisterScreen()
+      ),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -70,6 +77,8 @@ class MyApp extends StatelessWidget {
         '/chatscreen': (context) => ChatScreen(title: 'Chat',),
         '/oder_review_screen': (context) => OrderReviewScreen(),
         '/setting_screen': (context) => SettingScreen(),
+        '/search_screen' :(context) => SearchScreen(),
+        '/creat_blog_screen' :(context) => CreatBlogScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
