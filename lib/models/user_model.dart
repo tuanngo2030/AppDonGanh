@@ -1,5 +1,3 @@
-import 'package:don_ganh_app/models/dia_chi_model.dart';
-
 class NguoiDung {
   final String? id;
   final String? anhDaiDien;
@@ -19,7 +17,6 @@ class NguoiDung {
   final bool? isVerified;
   final String? googleId;
   final String? facebookId;
-  final DiaChi? diaChi;
 
   NguoiDung({
     this.id,
@@ -40,7 +37,6 @@ class NguoiDung {
     this.isVerified,
     this.googleId,
     this.facebookId,
-    this.diaChi,
   });
 
   // Convert JSON to NguoiDung
@@ -49,7 +45,7 @@ class NguoiDung {
       id: json['_id'] as String?,
       anhDaiDien: json['anhDaiDien'] as String?,
       tenNguoiDung: json['tenNguoiDung'] as String?,
-      soDienThoai: json['soDienThoai'] as String?, // Xử lý String thay vì int
+      soDienThoai: json['soDienThoai'] as String?,
       gmail: json['gmail'] as String?,
       GioiTinh: json['GioiTinh'] as String?,
       matKhau: json['matKhau'] as String?,
@@ -66,7 +62,6 @@ class NguoiDung {
       isVerified: json['isVerified'] != null ? json['isVerified'] as bool : false,
       googleId: json['googleId'] as String?,
       facebookId: json['facebookId'] as String?,
-      diaChi: json['diaChi'] != null ? DiaChi.fromJson(json['diaChi']) : null,
     );
   }
 
@@ -76,7 +71,7 @@ class NguoiDung {
       '_id': id,
       'anhDaiDien': anhDaiDien,
       'tenNguoiDung': tenNguoiDung,
-      'soDienThoai': soDienThoai, // Xử lý String thay vì int
+      'soDienThoai': soDienThoai,
       'gmail': gmail,
       'GioiTinh': GioiTinh,
       'matKhau': matKhau,
@@ -91,7 +86,6 @@ class NguoiDung {
       'isVerified': isVerified,
       'googleId': googleId,
       'facebookId': facebookId,
-      'diaChi': diaChi?.toJson(),
     };
   }
 }

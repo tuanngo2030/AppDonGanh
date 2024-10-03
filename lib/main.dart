@@ -43,11 +43,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ReponsiveScreen(
-        Mobile: CreatBlogScreen(), 
-        Tablet: SettingScreen(), 
-        Desktop: RegisterScreen()
-      ),
+      // home: ReponsiveScreen(
+      //   Mobile: CreatBlogScreen(), 
+      //   Tablet: SettingScreen(), 
+      //   Desktop: RegisterScreen()
+      // ),
+      home: gioithieu(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
         '/NgaySinh': (context) => NgaySinh(),
         '/sodienthoai': (context) => SodienthoaiScreen(),
         '/gmail': (context) => Gmailscreen(),
-        '/diachiScreen': (context) => DiaChiScreen(),
+        '/diachiScreen': (context) => AddressScreen(),
         '/gioitinh': (context) => GioitinhScreen(),
         '/xacminhtk': (context) => XacMinhTkScreen(),
         '/oder_screen': (context) => OderScreen(),

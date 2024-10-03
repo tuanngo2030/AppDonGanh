@@ -6,7 +6,7 @@ import 'package:don_ganh_app/models/variant_model.dart';
 class OrderModel {
   final String id;
   final NguoiDung userId;
-  final DiaChi diaChi;
+  final diaChiList diaChi;
   final int TongTien;
   final int TrangThai;
   final bool thanhToan;
@@ -36,7 +36,7 @@ class OrderModel {
     return OrderModel(
       id: json['_id'] ?? '',
       userId: NguoiDung.fromJson(json['userId'] as Map<String, dynamic>),
-      diaChi: DiaChi.fromJson(json['diaChi'] as Map<String, dynamic>),
+      diaChi: diaChiList.fromJson(json['diaChi'] as Map<String, dynamic>),
       TongTien: json['TongTien'] ?? 0,
       TrangThai: json['TrangThai'] ?? 4,
       thanhToan: json['ThanhToan'] ?? false,

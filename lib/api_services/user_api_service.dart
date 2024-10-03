@@ -10,8 +10,7 @@ class UserApiService {
       'https://imp-model-widely.ngrok-free.app/api/user/login';
   final String baseUrlid =
       'https://imp-model-widely.ngrok-free.app/api/user/showUserID';
-  final String diachiUrl =
-      'https://imp-model-widely.ngrok-free.app/api/user/updateUserDiaChi';
+
   final String updateUserUrl =
       'https://imp-model-widely.ngrok-free.app/api/user/updateUser';
 
@@ -56,8 +55,6 @@ class UserApiService {
               await prefs.setString('GioiTinh', user.GioiTinh ?? '');
               await prefs.setString('ngaySinh', user.ngaySinh ?? '');
               await prefs.setBool('hoKinhDoanh', user.hoKinhDoanh ?? false);
-              String diaChi = jsonEncode(user.diaChi?.toJson() ?? {});
-              await prefs.setString('diaChi', diaChi);
               await prefs.setInt('tinhTrang', user.tinhTrang ?? 0);
               await prefs.setStringList(
                   'phuongThucThanhToan', user.phuongThucThanhToan ?? []);
@@ -101,50 +98,6 @@ class UserApiService {
     }
 
     return null;
-  }
-
-  Future<bool> updateUserAddress(String userId, DiaChi diaChi) async {
-    final url = Uri.parse(diachiUrl);
-
-    try {
-      final response = await http.put(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'UserID': userId,
-          'diaChiMoi': {
-            'tinhThanhPho': diaChi.tinhThanhPho,
-            'quanHuyen': diaChi.quanHuyen,
-            'phuongXa': diaChi.phuongXa,
-            'duongThon': diaChi.duongThon,
-          },
-        }),
-      );
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        // Giả sử phản hồi trả về đúng thông tin địa chỉ đã cập nhật
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data.containsKey('_id')) {
-          print('Update successful: ${data.toString()}');
-          return true;
-        } else {
-          print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
-          return false;
-        }
-      } else {
-        print('Failed to update address. Status code: ${response.statusCode}');
-        print('Server response: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Exception caught: $e');
-      return false;
-    }
   }
 
   Future<bool> updateUserInformation(String userId, String loaiThongTin, dynamic value) async {
