@@ -7,7 +7,7 @@ class PayProcessScreen extends StatefulWidget {
   @override
   _PayProcessScreenState createState() => _PayProcessScreenState();
 }
-
+ 
 class _PayProcessScreenState extends State<PayProcessScreen> {
   PageController _pageController = PageController(initialPage: 0);
   int currentStep = 0;

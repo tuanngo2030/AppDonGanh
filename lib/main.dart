@@ -2,6 +2,7 @@ import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/gioitinh_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/gmailScreen.dart';
 import 'package:don_ganh_app/Profile_Screen/ngay_sinh_Screen.dart';
+import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
       //   Tablet: SettingScreen(), 
       //   Desktop: RegisterScreen()
       // ),
-      home: gioithieu(),
+      home: PayProcessScreen(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
         '/setting_screen': (context) => SettingScreen(),
         '/search_screen' :(context) => SearchScreen(),
         '/creat_blog_screen' :(context) => CreatBlogScreen(),
+        '/payment_screen' :(context) => PaymentMethodsScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
