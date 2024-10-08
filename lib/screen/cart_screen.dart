@@ -68,7 +68,7 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-    int calculateTotalPrice() {
+  int calculateTotalPrice() {
     int total = 0;
     for (int i = 0; i < cartModel!.chiTietGioHang.length; i++) {
       if (isChecked[i]) {
@@ -124,7 +124,7 @@ class _CartScreenState extends State<CartScreen> {
                                       alignment: Alignment.center,
                                       child: Checkbox(
                                         value: isChecked[index],
-                                        onChanged: (bool? value){
+                                        onChanged: (bool? value) {
                                           setState(() {
                                             isChecked[index] = value!;
                                           });
@@ -269,28 +269,53 @@ class _CartScreenState extends State<CartScreen> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text("Tổng tiền hàng:",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            Text(
+                              "Tổng tiền hàng:",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
                             Align(
                               alignment: Alignment.centerRight,
                               child: Text(
                                 '${calculateTotalPrice()} đ',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 20,
-                                  color: Colors.amber
-                                ),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 20,
+                                    color: Colors.amber),
                               ),
                             ),
                           ],
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/pay_screen');
+                            // Thu thập các sản phẩm đã được chọn
+                            List<ChiTietGioHang> selectedItems = [];
+                            for (int i = 0;
+                                i < cartModel!.chiTietGioHang.length;
+                                i++) {
+                              if (isChecked[i]) {
+                                selectedItems.add(cartModel!.chiTietGioHang[i]);
+                              }
+                            }
+
+                            if (selectedItems.isEmpty) {
+                              // Hiển thị thông báo nếu không có sản phẩm nào được chọn
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Vui lòng chọn ít nhất một sản phẩm để mua.')),
+                              );
+                              return;
+                            }
+
+                            // Điều hướng đến PayScreen và truyền danh sách sản phẩm đã chọn
+                            Navigator.pushNamed(
+                              context,
+                              '/pay_screen',
+                              arguments: selectedItems,
+                            );
                           },
                           child: Text("Mua ngay"),
                           style: ElevatedButton.styleFrom(

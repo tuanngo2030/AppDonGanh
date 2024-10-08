@@ -6,23 +6,31 @@ import 'package:don_ganh_app/models/variant_model.dart';
 class OrderModel {
   final String id;
   final NguoiDung userId;
+  // final String orderId;
   final diaChiList diaChi;
-  final int TongTien;
   final int TrangThai;
   final bool thanhToan;
-  final List<ChiTietHoaDon> chiTietHoaDon;
+  final double TongTien;
+  final String khuyenmaiId;
+  final String transactionId;
+  final List<ChiTietHoaDon>? chiTietHoaDon;
   final String GhiChu;
+  final String YeuCauNhanHang;
   final DateTime NgayTao;
 
   OrderModel({
     required this.id,
     required this.userId,
+    // required this.orderId,
     required this.diaChi,
-    required this.TongTien,
     required this.TrangThai,
     required this.thanhToan,
-    required this.chiTietHoaDon,
+    required this.TongTien,
+    required this.khuyenmaiId,
+    required this.transactionId,
+    this.chiTietHoaDon,
     required this.GhiChu,
+    required this.YeuCauNhanHang,
     required this.NgayTao,
   });
 
@@ -42,6 +50,9 @@ class OrderModel {
       thanhToan: json['ThanhToan'] ?? false,
       chiTietHoaDon: listCart,
       GhiChu: json['GhiChu'] ?? '',
+      transactionId: json['transactionId'] ?? '',
+      khuyenmaiId: json['khuyenmaiId'],
+      YeuCauNhanHang: json['YeuCauNhanHang'],
       NgayTao: DateTime.tryParse(json['NgayTao'] ?? DateTime.now().toString()) ?? DateTime.now(),
     );
   }
