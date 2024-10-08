@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:don_ganh_app/api_services/address_api.dart';
 import 'package:don_ganh_app/api_services/diachi_api.dart';
+import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
@@ -19,33 +22,34 @@ class _PayScreen1State extends State<PayScreen1> {
   String groupValue = "Anh";
   String groupValueRequest = "Giao hàng tại nhà";
 
-  // Các biến trạng thái cho địa chỉ
+  // Variables for address selection
   String? selectedTinhThanhPho;
   String? selectedQuanHuyen;
   String? selectedPhuongXa;
 
-  // Controllers cho các trường nhập liệu
+  // Controllers for input fields
   final TextEditingController hoTenController = TextEditingController();
   final TextEditingController soDienThoaiController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController ghiChuController = TextEditingController();
   final TextEditingController duongThonController = TextEditingController();
 
-  // Danh sách các items cho DropdownSearch
+  // Lists for DropdownSearch
   List<String> _tinhThanhPhoList = [];
   List<String> _quanHuyenList = [];
   List<String> _phuongXaList = [];
 
   bool _isLoading = true;
+  bool _isOrderProcessing = false; // For handling order processing state
 
   @override
   void initState() {
     super.initState();
     _initializeDropdowns();
-    _loadSavedAddress(); // Tải địa chỉ đã lưu từ SharedPreferences nếu có
+    _loadSavedAddress(); // Load saved address from SharedPreferences if available
   }
 
-  // Phương thức khởi tạo các danh sách tỉnh/thành phố
+  // Initialize province/city list
   Future<void> _initializeDropdowns() async {
     try {
       _tinhThanhPhoList = await dcApiService().getProvinces();
@@ -63,13 +67,13 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Phương thức lấy danh sách Quận/Huyện dựa trên Tỉnh/Thành Phố đã chọn
+  // Fetch districts based on selected province/city
   Future<void> _fetchQuanHuyen(String tinhThanhPho) async {
     try {
       _quanHuyenList = await dcApiService().getDistricts(tinhThanhPho);
       setState(() {
-        selectedQuanHuyen = null; // Reset khi thay đổi Tỉnh/Thành Phố
-        selectedPhuongXa = null; // Reset khi thay đổi Quận/Huyện
+        selectedQuanHuyen = null; // Reset when province/city changes
+        selectedPhuongXa = null; // Reset when district changes
         _phuongXaList = [];
       });
     } catch (e) {
@@ -80,12 +84,12 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Phương thức lấy danh sách Phường/Xã dựa trên Quận/Huyện đã chọn
+  // Fetch wards based on selected district
   Future<void> _fetchPhuongXa(String quanHuyen) async {
     try {
       _phuongXaList = await dcApiService().getWards(quanHuyen);
       setState(() {
-        selectedPhuongXa = null; // Reset khi thay đổi Quận/Huyện
+        selectedPhuongXa = null; // Reset when district changes
       });
     } catch (e) {
       print('Error fetching wards: $e');
@@ -95,7 +99,7 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Phương thức hiển thị dialog chọn địa chỉ
+  // Show address selection dialog
   Future<void> _showDiaChiDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedUserId = prefs.getString('userId');
@@ -107,70 +111,77 @@ class _PayScreen1State extends State<PayScreen1> {
       return;
     }
 
-    // Gọi API để lấy danh sách địa chỉ
-    List<diaChiList> addresses =
-        await DiaChiApiService().getDiaChiByUserId(storedUserId);
+    try {
+      // Fetch address list from API
+      List<diaChiList> addresses =
+          await DiaChiApiService().getDiaChiByUserId(storedUserId);
 
-    if (addresses.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Chọn địa chỉ'),
-          content: Container(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: addresses.length,
-              itemBuilder: (context, index) {
-                final address = addresses[index];
-                return ListTile(
-                  title: Text(address.name ?? 'Tên không có'),
-                  subtitle: Text(
-                    '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
-                  ),
-                  onTap: () async {
-                    setState(() {
-                      selectedTinhThanhPho = address.tinhThanhPho ?? '';
-                      selectedQuanHuyen = address.quanHuyen ?? '';
-                      selectedPhuongXa = address.phuongXa ?? '';
-
-                      hoTenController.text = address.name ?? '';
-                      soDienThoaiController.text = address.soDienThoai ?? '';
-                      duongThonController.text = address.duongThon ?? '';
-                    });
-
-                    // Cập nhật danh sách Quận/Huyện và Phường/Xã dựa trên địa chỉ đã chọn
-                    if (selectedTinhThanhPho != null &&
-                        selectedTinhThanhPho!.isNotEmpty) {
-                      await _fetchQuanHuyen(selectedTinhThanhPho!);
-                    }
-                    if (selectedQuanHuyen != null &&
-                        selectedQuanHuyen!.isNotEmpty) {
-                      await _fetchPhuongXa(selectedQuanHuyen!);
-                    }
-
-                    // Lưu địa chỉ đã chọn vào SharedPreferences
-                    await _saveAddressToPreferences();
-
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
-            ),
-          ),
+      if (addresses.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
         );
-      },
-    );
+        return;
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Chọn địa chỉ'),
+            content: Container(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: addresses.length,
+                itemBuilder: (context, index) {
+                  final address = addresses[index];
+                  return ListTile(
+                    title: Text(address.name ?? 'Tên không có'),
+                    subtitle: Text(
+                      '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
+                    ),
+                    onTap: () async {
+                      setState(() {
+                        selectedTinhThanhPho = address.tinhThanhPho ?? '';
+                        selectedQuanHuyen = address.quanHuyen ?? '';
+                        selectedPhuongXa = address.phuongXa ?? '';
+
+                        hoTenController.text = address.name ?? '';
+                        soDienThoaiController.text = address.soDienThoai ?? '';
+                        duongThonController.text = address.duongThon ?? '';
+                      });
+
+                      // Update district and ward lists based on selected address
+                      if (selectedTinhThanhPho != null &&
+                          selectedTinhThanhPho!.isNotEmpty) {
+                        await _fetchQuanHuyen(selectedTinhThanhPho!);
+                      }
+                      if (selectedQuanHuyen != null &&
+                          selectedQuanHuyen!.isNotEmpty) {
+                        await _fetchPhuongXa(selectedQuanHuyen!);
+                      }
+
+                      // Save selected address to SharedPreferences
+                      await _saveAddressToPreferences();
+
+                      Navigator.of(context).pop();
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      print('Error fetching addresses: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
+      );
+    }
   }
 
-  // Lưu địa chỉ vào SharedPreferences
+  // Save address to SharedPreferences
   Future<void> _saveAddressToPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedTinhThanhPho', selectedTinhThanhPho ?? '');
@@ -183,7 +194,7 @@ class _PayScreen1State extends State<PayScreen1> {
     await prefs.setString('ghiChu', ghiChuController.text);
   }
 
-  // Tải địa chỉ đã lưu từ SharedPreferences
+  // Load saved address from SharedPreferences
   Future<void> _loadSavedAddress() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -206,23 +217,121 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Phương thức lấy dữ liệu sản phẩm
+  // Fetch product data
   Future<ProductModel> fetchProduct(String productID) async {
     return await ProductApiService().getProductByID(productID);
+  }
+
+  // Method to create an order
+  Future<void> _createOrder(List<ChiTietGioHang> selectedItems) async {
+    setState(() {
+      _isOrderProcessing = true;
+    });
+
+    // Gather information from the form
+    String hoTen = hoTenController.text.trim();
+    String soDienThoai = soDienThoaiController.text.trim();
+    String email = emailController.text.trim();
+    String yeuCauNhanHang = groupValueRequest;
+    String? tinhThanhPho = selectedTinhThanhPho;
+    String? quanHuyen = selectedQuanHuyen;
+    String? phuongXa = selectedPhuongXa;
+    String duongThonXom = duongThonController.text.trim();
+    String ghiChu = ghiChuController.text.trim();
+
+    // Validate input data
+    if (hoTen.isEmpty ||
+        soDienThoai.isEmpty ||
+        email.isEmpty ||
+        tinhThanhPho == null ||
+        tinhThanhPho.isEmpty ||
+        quanHuyen == null ||
+        quanHuyen.isEmpty ||
+        phuongXa == null ||
+        phuongXa.isEmpty ||
+        duongThonXom.isEmpty) {
+      setState(() {
+        _isOrderProcessing = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
+      );
+      return;
+    }
+
+    // Calculate total price
+    int totalPrice = selectedItems.fold(
+        0, (sum, item) => sum + (item.soLuong * item.donGia));
+
+    try {
+      // Ideally, fetch the userId from a secure source or user session
+      String userId = '6704927d180c651b4b821869'; // Example userId
+      String diaChiMoi =
+          '$tinhThanhPho, $quanHuyen, $phuongXa, $duongThonXom'; // Create new address string
+
+      // Convert cart details to a list of maps for the API
+      List<Map<String, dynamic>> chiTietGioHang = selectedItems.map((item) => {
+            'idBienThe': item.variantModel.id,
+            'soLuong': item.soLuong,
+            'donGia': item.donGia,
+          }).toList();
+      
+      // Example transactionId, replace with actual logic
+      String transactionId = '151';
+
+      // Call API to create the order
+      var response = await OrderApiService().createUserDiaChivaThongTinGiaoHang(
+        userId: userId,
+        diaChiMoi: diaChiMoi,
+        ghiChu: ghiChu,
+        khuyenmaiId: null, // Pass promotion ID if any
+        TongTien: totalPrice.toDouble(),
+        ChiTietGioHang: chiTietGioHang,
+        transactionId: transactionId,
+        giohangId: "670492efb57221ab50c0baef",
+        YeuCauNhanHang: yeuCauNhanHang,
+      );
+
+      // Check response and proceed accordingly
+      if (response != null && response.id != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đặt hàng thành công!')),
+        );
+
+        // Navigate to order confirmation page
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/order_confirmation',
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đặt hàng thất bại: Lỗi không xác định.')),
+        );
+      }
+    } catch (e) {
+      print('Lỗi khi tạo hóa đơn: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
+      );
+    } finally {
+      setState(() {
+        _isOrderProcessing = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final List<ChiTietGioHang> selectedItems =
         ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
-
     return Scaffold(
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  // List sản phẩm sẽ thanh toán
+                  // List of products to be paid
                   Container(
                     height: 200,
                     width: double.infinity,
@@ -233,9 +342,17 @@ class _PayScreen1State extends State<PayScreen1> {
                         return FutureBuilder<ProductModel>(
                           future: fetchProduct(item.variantModel.idProduct),
                           builder: (context, productSnapshot) {
-                            if (!productSnapshot.hasData) {
-                              return Center(child: CircularProgressIndicator());
+                            if (productSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                  child: CircularProgressIndicator());
+                            } else if (productSnapshot.hasError) {
+                              return Center(
+                                  child: Text('Lỗi tải sản phẩm.'));
+                            } else if (!productSnapshot.hasData) {
+                              return Center(child: Text('Không có dữ liệu.'));
                             }
+
                             ProductModel product = productSnapshot.data!;
                             return Padding(
                               padding: const EdgeInsets.symmetric(
@@ -252,7 +369,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(right: 12),
+                                        padding:
+                                            const EdgeInsets.only(right: 12),
                                         child: Container(
                                           height: 100,
                                           width: 100,
@@ -284,7 +402,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                             SizedBox(height: 4),
                                             Row(
                                               children: item
-                                                  .variantModel.ketHopThuocTinh
+                                                  .variantModel
+                                                  .ketHopThuocTinh
                                                   .map((thuocTinh) {
                                                 return Padding(
                                                   padding:
@@ -292,7 +411,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                                           right: 8.0),
                                                   child: Text(
                                                     thuocTinh
-                                                        .giaTriThuocTinh.GiaTri,
+                                                        .giaTriThuocTinh
+                                                        .GiaTri,
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                     ),
@@ -315,8 +435,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                                   Text(
                                                     "${item.soLuong}",
                                                     textAlign: TextAlign.center,
-                                                    style:
-                                                        TextStyle(fontSize: 14),
+                                                    style: TextStyle(
+                                                        fontSize: 14),
                                                   ),
                                                 ],
                                               ),
@@ -334,11 +454,12 @@ class _PayScreen1State extends State<PayScreen1> {
                       },
                     ),
                   ),
-                  // Thông tin khách hàng và chọn địa chỉ
+                  // Customer information and address selection
                   Container(
                     decoration: BoxDecoration(
                         border: Border(
-                      top: BorderSide(color: Color.fromARGB(255, 204, 202, 202)),
+                      top: BorderSide(
+                          color: Color.fromARGB(255, 204, 202, 202)),
                     )),
                     child: Padding(
                       padding: const EdgeInsets.all(24),
@@ -354,15 +475,15 @@ class _PayScreen1State extends State<PayScreen1> {
                           Text(
                             '*Những thông tin ở đây là thông tin mặc định của quý khách và những thay đổi ở đây sẽ không được lưu.',
                             style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.normal),
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal),
                           ),
                           SizedBox(height: 16),
                           // Radio Buttons for Gender
                           Row(
                             children: [
                               Radio<String>(
-                                activeColor:
-                                    Color.fromRGBO(59, 99, 53, 1),
+                                activeColor: Color.fromRGBO(59, 99, 53, 1),
                                 value: "Anh",
                                 groupValue: groupValue,
                                 onChanged: (value) {
@@ -377,8 +498,7 @@ class _PayScreen1State extends State<PayScreen1> {
                               ),
                               SizedBox(width: 20),
                               Radio<String>(
-                                activeColor:
-                                    Color.fromRGBO(59, 99, 53, 1),
+                                activeColor: Color.fromRGBO(59, 99, 53, 1),
                                 value: "Chị",
                                 groupValue: groupValue,
                                 onChanged: (value) {
@@ -412,7 +532,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Họ và tên',
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius:
+                                            BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -428,7 +549,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Số điện thoại',
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius:
+                                            BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -444,7 +566,8 @@ class _PayScreen1State extends State<PayScreen1> {
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius:
+                                      BorderRadius.circular(8),
                                 ),
                               ),
                             ),
@@ -455,7 +578,8 @@ class _PayScreen1State extends State<PayScreen1> {
                             child: Text(
                               "Yêu cầu nhận hàng",
                               style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500),
                             ),
                           ),
                           // Radio Buttons for Delivery Request
@@ -507,9 +631,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                       showSearchBox: true,
                                     ),
                                     items: _tinhThanhPhoList,
-                                    // selectedItem: selectedTinhThanhPho.isNotEmpty
-                                    //     ? selectedTinhThanhPho
-                                    //     : null,
+                                    selectedItem:
+                                        selectedTinhThanhPho!.isNotEmpty
+                                            ? selectedTinhThanhPho
+                                            : null,
                                     onChanged: (newValue) async {
                                       setState(() {
                                         selectedTinhThanhPho = newValue;
@@ -522,8 +647,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                         await _fetchQuanHuyen(newValue);
                                       }
                                     },
-                                    dropdownDecoratorProps: DropDownDecoratorProps(
-                                      dropdownSearchDecoration: InputDecoration(
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                      dropdownSearchDecoration:
+                                          InputDecoration(
                                         labelText: 'Tỉnh/Thành Phố',
                                         border: OutlineInputBorder(),
                                       ),
@@ -540,9 +667,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                       showSearchBox: true,
                                     ),
                                     items: _quanHuyenList,
-                                    // selectedItem: selectedQuanHuyen.isNotEmpty
-                                    //     ? selectedQuanHuyen
-                                    //     : null,
+                                    // selectedItem:
+                                    //     selectedQuanHuyen!.isNotEmpty
+                                    //         ? selectedQuanHuyen
+                                    //         : null,
                                     onChanged: (newValue) async {
                                       setState(() {
                                         selectedQuanHuyen = newValue;
@@ -553,8 +681,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                         await _fetchPhuongXa(newValue);
                                       }
                                     },
-                                    dropdownDecoratorProps: DropDownDecoratorProps(
-                                      dropdownSearchDecoration: InputDecoration(
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                      dropdownSearchDecoration:
+                                          InputDecoration(
                                         labelText: "Quận/Huyện",
                                         border: OutlineInputBorder(),
                                       ),
@@ -575,16 +705,19 @@ class _PayScreen1State extends State<PayScreen1> {
                                       showSearchBox: true,
                                     ),
                                     items: _phuongXaList,
-                                    // selectedItem: selectedPhuongXa.contains()
-                                    //     ? selectedPhuongXa
-                                    //     : null,
+                                    // selectedItem:
+                                    //     selectedPhuongXa!.isNotEmpty
+                                    //         ? selectedPhuongXa
+                                    //         : null,
                                     onChanged: (newValue) {
                                       setState(() {
                                         selectedPhuongXa = newValue;
                                       });
                                     },
-                                    dropdownDecoratorProps: DropDownDecoratorProps(
-                                      dropdownSearchDecoration: InputDecoration(
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                      dropdownSearchDecoration:
+                                          InputDecoration(
                                         labelText: "Phường/Xã",
                                         border: OutlineInputBorder(),
                                       ),
@@ -601,7 +734,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Đường/Thôn xóm',
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius:
+                                            BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -610,7 +744,7 @@ class _PayScreen1State extends State<PayScreen1> {
                             ],
                           ),
                           SizedBox(height: 16),
-                          // Ghi chú cho người bán
+                          // Notes for the seller
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
@@ -628,13 +762,37 @@ class _PayScreen1State extends State<PayScreen1> {
                               minLines: 5,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8)),
+                                    borderRadius:
+                                        BorderRadius.circular(8)),
                                 hintText: 'Gõ vào đây',
                                 contentPadding: EdgeInsets.all(16),
                               ),
                             ),
                           ),
                           SizedBox(height: 20),
+                          // Submit Button
+                          _isOrderProcessing
+                              ? Center(child: CircularProgressIndicator())
+                              : ElevatedButton(
+                                  onPressed: () {
+                                    _createOrder(selectedItems);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 50, vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Đặt hàng",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  ),
+                                ),
                         ],
                       ),
                     ),
