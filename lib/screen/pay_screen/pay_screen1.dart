@@ -1,3 +1,6 @@
+import 'package:don_ganh_app/api_services/product_api_service.dart';
+import 'package:don_ganh_app/models/cart_model.dart';
+import 'package:don_ganh_app/models/product_model.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
@@ -9,16 +12,132 @@ class PayScreen1 extends StatefulWidget {
 }
 
 class _PayScreen1State extends State<PayScreen1> {
+
   String groupValue = "Anh";
   String groupValueRequest = "Giao hàng tại nhà";
+
+    Future<ProductModel> fetchProduct(String productID) async {
+    return await ProductApiService().getProductByID(productID);
+  }
   @override
   Widget build(BuildContext context) {
+         final List<ChiTietGioHang> selectedItems =
+        ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
     return Container(
       child: SingleChildScrollView(
         child: Column(
           children: [
             //List product will pay
-            // ----------------------------------------------------------------
+           Container(
+              height: 200,
+              width: double.infinity,
+              child:  ListView.builder(
+                    itemCount: selectedItems!.length,
+                    itemBuilder: (context, index) {
+                      final item = selectedItems![index];
+
+                      return FutureBuilder<ProductModel>(
+                        future: fetchProduct(item.variantModel.idProduct),
+                        builder: (context, productSnapshot) {
+                          if (!productSnapshot.hasData) {
+                            return CircularProgressIndicator(); // Show a loading indicator while fetching product details
+                          }
+
+                          ProductModel product = productSnapshot.data!;
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            child: Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: Container(
+                                        height: 100,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                product.imageProduct),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${product.nameProduct}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Row(
+                                            children: item
+                                                .variantModel.ketHopThuocTinh
+                                                .map((thuocTinh) {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0),
+                                                child: Text(
+                                                  '${thuocTinh.giaTriThuocTinh.GiaTri}',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text('Đơn giá: ${item.donGia} đ/kg'),
+                                          SizedBox(height: 4),
+                                          Container(
+                                            width: 120,
+                                            height: 30,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  "${item.soLuong}",
+                                                  textAlign: TextAlign.center,
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+           ),
             Container(
               decoration: BoxDecoration(
                   border: Border(
