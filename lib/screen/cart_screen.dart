@@ -28,6 +28,10 @@ class _CartScreenState extends State<CartScreen> {
         isChecked = List<bool>.filled(cart.chiTietGioHang.length, false);
       });
       return cart;
+    }).catchError((error) {
+      // Xử lý lỗi nếu cần
+      print('Error fetching cart: $error');
+      
     });
   }
 
@@ -46,7 +50,8 @@ class _CartScreenState extends State<CartScreen> {
 
     // Then call API to update on server
     try {
-      await CartApiService().updateCart(idGioHang, idBienThe, soLuong, donGia);
+      await CartApiService()
+          .updateCart(idGioHang, idBienThe, soLuong, donGia);
     } catch (e) {
       print("Failed to update: $e");
       // Revert changes if API update fails
@@ -64,6 +69,9 @@ class _CartScreenState extends State<CartScreen> {
       setState(() {
         cartModel?.chiTietGioHang
             .removeWhere((item) => item.variantModel.id == idBienThe);
+        // Cập nhật lại danh sách checkbox khi xóa sản phẩm
+        isChecked =
+            List<bool>.filled(cartModel?.chiTietGioHang.length ?? 0, false);
       });
     } catch (e) {
       print("Failed to remove: $e");
@@ -72,7 +80,7 @@ class _CartScreenState extends State<CartScreen> {
 
   int calculateTotalPrice() {
     int total = 0;
-    for (int i = 0; i < cartModel!.chiTietGioHang.length; i++) {
+    for (int i = 0; i < (cartModel?.chiTietGioHang.length ?? 0); i++) {
       if (isChecked[i]) {
         final item = cartModel!.chiTietGioHang[i];
         total += item.soLuong * item.donGia;
@@ -88,119 +96,152 @@ class _CartScreenState extends State<CartScreen> {
         centerTitle: true,
         title: Text('Giỏ hàng'),
       ),
-      body: cartModel == null
-          ? Center(
-              child:
-                  CircularProgressIndicator()) // Show a loading indicator while fetching the cart
-          : cartModel!.chiTietGioHang.isEmpty
-          ?Center(
-                  child: Text(
-                    'Giỏ hàng trống',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: cartModel!.chiTietGioHang.length,
-                    itemBuilder: (context, index) {
-                      final item = cartModel!.chiTietGioHang[index];
+      body: FutureBuilder<CartModel>(
+        future: cartModelFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Hiển thị loading khi đang tải dữ liệu
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            // Hiển thị thông báo lỗi nếu có lỗi xảy ra
+            return Center(
+              child: Text(
+                'Đã xảy ra lỗi khi tải giỏ hàng.',
+                style: TextStyle(fontSize: 18, color: Colors.red),
+              ),
+            );
+          } else if (snapshot.hasData) {
+            CartModel cart = snapshot.data!;
+            if (cart.chiTietGioHang.isEmpty) {
+              // Hiển thị thông báo giỏ hàng trống
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Giỏ hàng trống',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/bottomnavigation'); // Điều hướng đến trang mua sắm
+                      },
+                      child: Text('Tiếp tục mua sắm'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              // Nếu giỏ hàng không trống, hiển thị danh sách sản phẩm và phần thanh toán
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: cart.chiTietGioHang.length,
+                      itemBuilder: (context, index) {
+                        final item = cart.chiTietGioHang[index];
 
-                      return FutureBuilder<ProductModel>(
-                        future: fetchProduct(item.variantModel.idProduct),
-                        builder: (context, productSnapshot) {
-                          if (!productSnapshot.hasData) {
-                            return  SizedBox.shrink();;
-                          }
+                        return FutureBuilder<ProductModel>(
+                          future: fetchProduct(item.variantModel.idProduct),
+                          builder: (context, productSnapshot) {
+                            if (!productSnapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
 
-                          ProductModel product = productSnapshot.data!;
+                            ProductModel product = productSnapshot.data!;
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            child: Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.center,
-                                      child: Checkbox(
-                                        value: isChecked[index],
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            isChecked[index] = value!;
-                                          });
-                                        },
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              child: Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Checkbox(
+                                          value: isChecked[index],
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              isChecked[index] = value!;
+                                            });
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 12),
-                                      child: Container(
-                                        height: 100,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                product.imageProduct),
-                                            fit: BoxFit.cover,
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 12),
+                                        child: Container(
+                                          height: 100,
+                                          width: 100,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            image: DecorationImage(
+                                              image:
+                                                  NetworkImage(product.imageProduct),
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '${product.nameProduct}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${product.nameProduct}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: 4),
-                                          Row(
-                                            children: item
-                                                .variantModel.ketHopThuocTinh
-                                                .map((thuocTinh) {
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 8.0),
-                                                child: Text(
-                                                  '${thuocTinh.giaTriThuocTinh.GiaTri}',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
+                                            SizedBox(height: 4),
+                                            Row(
+                                              children: item
+                                                  .variantModel
+                                                  .ketHopThuocTinh
+                                                  .map((thuocTinh) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 8.0),
+                                                  child: Text(
+                                                    '${thuocTinh.giaTriThuocTinh.GiaTri}',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text('Đơn giá: ${item.donGia} đ/kg'),
-                                          SizedBox(height: 4),
-                                          Container(
-                                            width: double.infinity,
-                                            height: 100,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  flex: 1,
-                                                  child: IconButton(
+                                                );
+                                              }).toList(),
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text('Đơn giá: ${item.donGia} đ/kg'),
+                                            SizedBox(height: 4),
+                                            Container(
+                                              width: double.infinity,
+                                              height: 50,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  IconButton(
                                                     iconSize: 20,
                                                     onPressed: () {
                                                       if (item.soLuong > 1) {
@@ -208,7 +249,7 @@ class _CartScreenState extends State<CartScreen> {
                                                           item.soLuong--;
                                                         });
                                                         updateItem(
-                                                            cartModel!.id,
+                                                            cart.id,
                                                             item.variantModel.id,
                                                             item.soLuong,
                                                             item.donGia);
@@ -216,137 +257,150 @@ class _CartScreenState extends State<CartScreen> {
                                                     },
                                                     icon: Icon(Icons.remove),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  flex: 1,
-                                                  child: Text(
+                                                  Text(
                                                     "${item.soLuong}",
                                                     textAlign: TextAlign.center,
-                                                    style:
-                                                        TextStyle(fontSize: 14),
+                                                    style: TextStyle(
+                                                        fontSize: 14),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  flex: 1,
-                                                  child: IconButton(
+                                                  IconButton(
                                                     iconSize: 20,
                                                     onPressed: () {
                                                       setState(() {
                                                         item.soLuong++;
                                                       });
                                                       updateItem(
-                                                          cartModel!.id,
+                                                          cart.id,
                                                           item.variantModel.id,
                                                           item.soLuong,
                                                           item.donGia);
                                                     },
                                                     icon: Icon(Icons.add),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child: IconButton(
-                                        icon: Icon(Icons.delete),
-                                        onPressed: () {
-                                          removeItem(cartModel!.id,
-                                              item.variantModel.id);
-                                        },
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                          icon: Icon(Icons.delete),
+                                          onPressed: () {
+                                            removeItem(
+                                                cart.id, item.variantModel.id);
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  height: 100,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Tổng tiền hàng:",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                '${calculateTotalPrice()} đ',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20,
-                                    color: Colors.amber),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Thu thập các sản phẩm đã được chọn
-                            List<ChiTietGioHang> selectedItems = [];
-                            for (int i = 0;
-                                i < cartModel!.chiTietGioHang.length;
-                                i++) {
-                              if (isChecked[i]) {
-                                selectedItems.add(cartModel!.chiTietGioHang[i]);
-                              }
-                            }
-
-                            if (selectedItems.isEmpty) {
-                              // Hiển thị thông báo nếu không có sản phẩm nào được chọn
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Vui lòng chọn ít nhất một sản phẩm để mua.')),
-                              );
-                              return;
-                            }
-
-                            // Điều hướng đến PayScreen và truyền danh sách sản phẩm đã chọn
-                            Navigator.pushNamed(
-                              context,
-                              '/pay_screen',
-                              arguments: selectedItems,
                             );
                           },
-                          child: Text("Mua ngay"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-                            foregroundColor: Colors.white,
-                          ),
-                        )
-                      ],
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Container(
+                    height: 100,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Tổng tiền hàng:",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  '${calculateTotalPrice()} đ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20,
+                                      color: Colors.amber),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Thu thập các sản phẩm đã được chọn
+                                List<ChiTietGioHang> selectedItems = [];
+                                for (int i = 0;
+                                    i < cart.chiTietGioHang.length;
+                                    i++) {
+                                  if (isChecked[i]) {
+                                    selectedItems.add(cart.chiTietGioHang[i]);
+                                  }
+                                }
+
+                                if (selectedItems.isEmpty) {
+                                  // Hiển thị thông báo nếu không có sản phẩm nào được chọn
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Vui lòng chọn ít nhất một sản phẩm để mua.')),
+                                  );
+                                  return;
+                                }
+
+                                // Điều hướng đến PayScreen và truyền danh sách sản phẩm đã chọn
+                                Navigator.pushNamed(
+                                  context,
+                                  '/pay_screen',
+                                  arguments: selectedItems,
+                                );
+                              },
+                              child: Text("Mua ngay"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromRGBO(41, 87, 35, 1),
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+          } else {
+            // Nếu không có dữ liệu, hiển thị thông báo giỏ hàng trống
+            return Center(
+              child: Text(
+                'Giỏ hàng trống',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

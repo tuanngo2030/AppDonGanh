@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class PayScreen3 extends StatefulWidget {
-  const PayScreen3({super.key});
+  final VoidCallback nextStep;
+  const PayScreen3({super.key, required this.nextStep});
 
   @override
   State<PayScreen3> createState() => _PayScreen3State();
@@ -250,11 +251,32 @@ class _PayScreen3State extends State<PayScreen3> {
               ),
               child: WebViewWidget(controller: _webViewController),
             ),
-          )
+          ),
     
-          // ElevatedButton(onPressed: (){
-          //    Navigator.pushNamed(context, '/webview');
-          // }, child: const Text('Go to WebView'))
+           Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: widget.nextStep,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Thanh toán',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

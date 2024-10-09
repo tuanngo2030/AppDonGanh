@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class PayScreen2 extends StatefulWidget {
-  const PayScreen2({super.key});
+  final VoidCallback nextStep;
+  const PayScreen2({super.key, required this.nextStep});
 
   @override
   State<PayScreen2> createState() => _PayScreen2State();
@@ -108,6 +109,32 @@ class _PayScreen2State extends State<PayScreen2> {
               selectedPaymentMethod == null
                   ? buildPaymentMethodsList()
                   : buildSelectedMethodDetails(),
+
+               // Nút Tiếp tục
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: widget.nextStep,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Tiếp tục',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             ],
           ),
         ),

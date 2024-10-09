@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PayScreen1 extends StatefulWidget {
-  const PayScreen1({super.key});
+  final VoidCallback nextStep;
+  const PayScreen1({super.key, required this.nextStep});
 
   @override
   State<PayScreen1> createState() => _PayScreen1State();
@@ -264,18 +265,33 @@ class _PayScreen1State extends State<PayScreen1> {
         0, (sum, item) => sum + (item.soLuong * item.donGia));
 
     try {
-      // Ideally, fetch the userId from a secure source or user session
-      String userId = '6704927d180c651b4b821869'; // Example userId
+      // Retrieve userId from SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('userId');
+
+      if (userId == null) {
+        setState(() {
+          _isOrderProcessing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
+        );
+        return;
+      }
+
       String diaChiMoi =
           '$tinhThanhPho, $quanHuyen, $phuongXa, $duongThonXom'; // Create new address string
 
       // Convert cart details to a list of maps for the API
-      List<Map<String, dynamic>> chiTietGioHang = selectedItems.map((item) => {
-            'idBienThe': item.variantModel.id,
-            'soLuong': item.soLuong,
-            'donGia': item.donGia,
-          }).toList();
-      
+      List<Map<String, dynamic>> chiTietGioHang = selectedItems
+          .map((item) => {
+                'idBienThe': item.variantModel.id,
+                'soLuong': item.soLuong,
+                'donGia': item.donGia,
+              })
+          .toList();
+
       // Example transactionId, replace with actual logic
       String transactionId = '151';
 
@@ -344,11 +360,9 @@ class _PayScreen1State extends State<PayScreen1> {
                           builder: (context, productSnapshot) {
                             if (productSnapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return Center(
-                                  child: CircularProgressIndicator());
+                              return Center(child: CircularProgressIndicator());
                             } else if (productSnapshot.hasError) {
-                              return Center(
-                                  child: Text('Lỗi tải sản phẩm.'));
+                              return Center(child: Text('Lỗi tải sản phẩm.'));
                             } else if (!productSnapshot.hasData) {
                               return Center(child: Text('Không có dữ liệu.'));
                             }
@@ -402,8 +416,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                             SizedBox(height: 4),
                                             Row(
                                               children: item
-                                                  .variantModel
-                                                  .ketHopThuocTinh
+                                                  .variantModel.ketHopThuocTinh
                                                   .map((thuocTinh) {
                                                 return Padding(
                                                   padding:
@@ -411,8 +424,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                                           right: 8.0),
                                                   child: Text(
                                                     thuocTinh
-                                                        .giaTriThuocTinh
-                                                        .GiaTri,
+                                                        .giaTriThuocTinh.GiaTri,
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                     ),
@@ -435,8 +447,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                                   Text(
                                                     "${item.soLuong}",
                                                     textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                        fontSize: 14),
+                                                    style:
+                                                        TextStyle(fontSize: 14),
                                                   ),
                                                 ],
                                               ),
@@ -458,8 +470,8 @@ class _PayScreen1State extends State<PayScreen1> {
                   Container(
                     decoration: BoxDecoration(
                         border: Border(
-                      top: BorderSide(
-                          color: Color.fromARGB(255, 204, 202, 202)),
+                      top:
+                          BorderSide(color: Color.fromARGB(255, 204, 202, 202)),
                     )),
                     child: Padding(
                       padding: const EdgeInsets.all(24),
@@ -475,8 +487,7 @@ class _PayScreen1State extends State<PayScreen1> {
                           Text(
                             '*Những thông tin ở đây là thông tin mặc định của quý khách và những thay đổi ở đây sẽ không được lưu.',
                             style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal),
+                                fontSize: 12, fontWeight: FontWeight.normal),
                           ),
                           SizedBox(height: 16),
                           // Radio Buttons for Gender
@@ -532,8 +543,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Họ và tên',
                                       border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -549,8 +559,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Số điện thoại',
                                       border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -566,8 +575,7 @@ class _PayScreen1State extends State<PayScreen1> {
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),
@@ -578,8 +586,7 @@ class _PayScreen1State extends State<PayScreen1> {
                             child: Text(
                               "Yêu cầu nhận hàng",
                               style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500),
+                                  fontSize: 16, fontWeight: FontWeight.w500),
                             ),
                           ),
                           // Radio Buttons for Delivery Request
@@ -591,28 +598,27 @@ class _PayScreen1State extends State<PayScreen1> {
                                   child: Row(
                                     children: [
                                       Radio<String>(
-                                  activeColor:
-                                      Color.fromRGBO(59, 99, 53, 1),
-                                  value: "Giao hàng tại nhà",
-                                  groupValue: groupValueRequest,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      groupValueRequest = value!;
-                                    });
-                                  },
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Giao hàng tại nhà",
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ),
+                                        activeColor:
+                                            Color.fromRGBO(59, 99, 53, 1),
+                                        value: "Giao hàng tại nhà",
+                                        groupValue: groupValueRequest,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            groupValueRequest = value!;
+                                          });
+                                        },
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          "Giao hàng tại nhà",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
                               ),
-                              
                               SizedBox(width: 20),
                               Expanded(
                                 flex: 1,
@@ -620,23 +626,23 @@ class _PayScreen1State extends State<PayScreen1> {
                                   child: Row(
                                     children: [
                                       Radio<String>(
-                                  activeColor:
-                                      Color.fromRGBO(59, 99, 53, 1),
-                                  value: "Nhận tại cửa hàng",
-                                  groupValue: groupValueRequest,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      groupValueRequest = value!;
-                                    });
-                                  },
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Nhận tại cửa hàng",
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ),
+                                        activeColor:
+                                            Color.fromRGBO(59, 99, 53, 1),
+                                        value: "Nhận tại cửa hàng",
+                                        groupValue: groupValueRequest,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            groupValueRequest = value!;
+                                          });
+                                        },
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          "Nhận tại cửa hàng",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -674,8 +680,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     },
                                     dropdownDecoratorProps:
                                         DropDownDecoratorProps(
-                                      dropdownSearchDecoration:
-                                          InputDecoration(
+                                      dropdownSearchDecoration: InputDecoration(
                                         labelText: 'Tỉnh/Thành Phố',
                                         border: OutlineInputBorder(),
                                       ),
@@ -708,8 +713,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     },
                                     dropdownDecoratorProps:
                                         DropDownDecoratorProps(
-                                      dropdownSearchDecoration:
-                                          InputDecoration(
+                                      dropdownSearchDecoration: InputDecoration(
                                         labelText: "Quận/Huyện",
                                         border: OutlineInputBorder(),
                                       ),
@@ -741,8 +745,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     },
                                     dropdownDecoratorProps:
                                         DropDownDecoratorProps(
-                                      dropdownSearchDecoration:
-                                          InputDecoration(
+                                      dropdownSearchDecoration: InputDecoration(
                                         labelText: "Phường/Xã",
                                         border: OutlineInputBorder(),
                                       ),
@@ -759,8 +762,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     decoration: InputDecoration(
                                       labelText: 'Đường/Thôn xóm',
                                       border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
@@ -787,8 +789,7 @@ class _PayScreen1State extends State<PayScreen1> {
                               minLines: 5,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(8)),
+                                    borderRadius: BorderRadius.circular(8)),
                                 hintText: 'Gõ vào đây',
                                 contentPadding: EdgeInsets.all(16),
                               ),
@@ -798,26 +799,30 @@ class _PayScreen1State extends State<PayScreen1> {
                           // Submit Button
                           _isOrderProcessing
                               ? Center(child: CircularProgressIndicator())
-                              : ElevatedButton(
-                                  onPressed: () {
-                                    _createOrder(selectedItems);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 50, vertical: 15),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                              : SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                    onPressed: widget.nextStep,
+                                    // _createOrder(selectedItems);
+                                      
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Color.fromRGBO(59, 99, 53, 1),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Tiếp tục',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    "Đặt hàng",
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  ),
-                                ),
+                              ),
                         ],
                       ),
                     ),

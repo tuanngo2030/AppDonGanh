@@ -32,7 +32,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
 
   void plusQuantity() {
     setState(() {
-      quantity++;
+      if(quantity < 10)  quantity++;
     });
   }
 
@@ -86,38 +86,6 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 15),
             child: BadgeWidget(),
-            // badges.Badge(
-            //   badgeContent: Text(
-            //     '0',
-            //     style: TextStyle(
-            //       color: Colors.white,
-            //       fontWeight: FontWeight.w900,
-            //     ),
-            //   ),
-            //   badgeStyle: badges.BadgeStyle(
-            //     badgeColor: Color.fromRGBO(255, 0, 0, 1),
-            //     borderSide: BorderSide(color: Colors.white),
-            //     padding: EdgeInsets.all(8),
-            //   ),
-            //   child: InkWell(
-            //     onTap: () {
-            //       print("Đi đến giỏ hàng của tôi");
-            //       Navigator.pushNamed(context, '/cart_screen');
-            //     },
-            //     child: Container(
-            //       width: 45,
-            //       height: 45,
-            //       decoration: BoxDecoration(
-            //         borderRadius: BorderRadius.circular(25),
-            //         color: Color.fromRGBO(41, 87, 35, 1),
-            //       ),
-            //       child: Icon(
-            //         Icons.shopping_bag,
-            //         color: Colors.white,
-            //       ),
-            //     ),
-            //   ),
-            // ),
           )
         ],
       ),

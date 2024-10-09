@@ -129,42 +129,42 @@ Widget build(BuildContext context) {
             ),
 
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.6, 
+              height: MediaQuery.of(context).size.height * 0.8, 
               child: PageView(
                 controller: _pageController,
                 physics: NeverScrollableScrollPhysics(),
                 children: [
-                  PayScreen1(),
-                  PayScreen2(),
-                  PayScreen3(),
+                  PayScreen1(nextStep: _nextStep),
+                  PayScreen2(nextStep: _nextStep),
+                  PayScreen3(nextStep: _nextStep),
                 ],
               ),
             ),
             // Nút Tiếp tục
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _nextStep,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Tiếp tục',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            //   child: SizedBox(
+            //     width: double.infinity,
+            //     height: 50,
+            //     child: ElevatedButton(
+            //       onPressed: _nextStep,
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(8),
+            //         ),
+            //       ),
+            //       child: Text(
+            //         'Tiếp tục',
+            //         style: TextStyle(
+            //           color: Colors.white,
+            //           fontSize: 18,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
