@@ -314,19 +314,19 @@ class _PayScreen1State extends State<PayScreen1> {
           SnackBar(content: Text('Đặt hàng thành công!')),
         );
 
-        // Navigate to order confirmation page
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/order_confirmation',
-          (route) => false,
-        );
+        // // Navigate to order confirmation page
+        // Navigator.pushNamedAndRemoveUntil(
+        //   context,
+        //   '/order_confirmation',
+        //   (route) => false,
+        // );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Đặt hàng thất bại: Lỗi không xác định.')),
         );
       }
     } catch (e) {
-      print('Lỗi khi tạo hóa đơn: $e');
+      print('Lỗi khi tạo hóa đơn flutter: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
       );

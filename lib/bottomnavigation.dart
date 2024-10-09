@@ -36,20 +36,87 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: screens[selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.shifting,
-        iconSize: 30,
-        showSelectedLabels: false,
-        unselectedItemColor: Colors.black,
-        currentIndex: selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Shop", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorites", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: "Notifications", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Account", backgroundColor: Color.fromRGBO(41, 87, 35, 1)),
-        ],
+      bottomNavigationBar: ClipRRect(
+         borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0), // Bo góc trên bên trái
+          topRight: Radius.circular(10.0), // Bo góc trên bên phải
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.shifting,
+          iconSize: 30,
+          showSelectedLabels: false,
+          unselectedItemColor: Colors.white,
+          currentIndex: selectedIndex,
+          backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.home_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+              ),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+              icon: Icon(Icons.shopping_cart_outlined),
+              activeIcon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.shopping_cart_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+              ),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+              icon: Icon(Icons.favorite_outline),
+              activeIcon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.favorite_outline, color: Color.fromRGBO(41, 87, 35, 1)),
+              ),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+              icon: Icon(Icons.chat_outlined),
+              activeIcon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.chat_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+              ),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+              icon: Icon(Icons.person_pin_outlined),
+              activeIcon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.person_pin_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+              ),
+              label: "Home",
+            ),
+          ],
+        ),
       ),
     );
   }

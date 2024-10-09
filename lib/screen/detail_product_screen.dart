@@ -24,15 +24,20 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   int quantity = 1;
   late Future<List<VariantModel>> variantModel;
 
+  String mainImageUrl = '';
+  List<String> supplementaryImages = [];
+
   @override
   void initState() {
-    variantModel = VariantApiService().getVariant(widget.product.id);
     super.initState();
+    mainImageUrl = widget.product.imageProduct;
+    supplementaryImages = widget.product.ImgBoSung.map((img) => img.url).toList();
+    variantModel = VariantApiService().getVariant(widget.product.id);
   }
 
   void plusQuantity() {
     setState(() {
-      if(quantity < 10)  quantity++;
+      if (quantity < 10) quantity++;
     });
   }
 
@@ -41,6 +46,22 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
       if (quantity > 1) quantity--;
     });
   }
+
+void _swapImage(int index) {
+  setState(() {
+    // Lấy URL của hình ảnh được chọn
+    String selectedImage = supplementaryImages[index];
+    
+    // Lấy URL của hình ảnh chính hiện tại
+    String oldMainImage = mainImageUrl;
+    
+    // Thay đổi hình ảnh chính thành hình ảnh được chọn
+    mainImageUrl = selectedImage;
+    
+    // Thay thế hình ảnh được chọn bằng hình ảnh cũ của hình ảnh chính
+    supplementaryImages[index] = oldMainImage;
+  });
+}
 
   Future<void> addToCart(String variantId, int donGia) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -75,8 +96,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
             },
             child: Container(
               child: ImageIcon(
-                AssetImage('lib/assets/arrow_back.png'), // Hình ảnh logo
-                size: 49, // Kích thước hình ảnh
+                AssetImage('lib/assets/arrow_back.png'),
+                size: 49,
               ),
             ),
           ),
@@ -106,7 +127,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                               topLeft: Radius.circular(10),
                               topRight: Radius.circular(10)),
                           image: DecorationImage(
-                            image: NetworkImage(widget.product.imageProduct),
+                            image: NetworkImage(mainImageUrl),
                             fit: BoxFit.cover,
                           )),
                     ),
@@ -170,17 +191,22 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                           height: 50,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: widget.product.ImgBoSung.length,
+                            itemCount: supplementaryImages.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                width: 50,
-                                margin: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  image: DecorationImage(
-                                      image: NetworkImage(
-                                          widget.product.ImgBoSung[index].url),
-                                      fit: BoxFit.cover),
+                              return GestureDetector(
+                                onTap: (){
+                                  _swapImage(index);
+                                },
+                                child: Container(
+                                  width: 50,
+                                  margin: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    image: DecorationImage(
+                                        image: NetworkImage(
+                                            supplementaryImages[index]),
+                                        fit: BoxFit.cover),
+                                  ),
                                 ),
                               );
                             },
@@ -441,15 +467,19 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                       padding: const EdgeInsets.all(10),
                                       child: Center(
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            addToCart(
-                                                selectedVariantId, donGia);
-                                          },
+                                          onPressed: selectedVariantId.isEmpty
+                                              ? null
+                                              : () {
+                                                  addToCart(selectedVariantId,
+                                                      donGia);
+                                                },
                                           child: Text('Thêm Vào Giỏ Hàng'),
                                           style: ElevatedButton.styleFrom(
                                             minimumSize: Size.fromHeight(60),
                                             backgroundColor:
-                                                Color.fromRGBO(41, 87, 35, 1),
+                                               selectedVariantId.isEmpty
+                                                          ? Colors.grey
+                                                          : Color.fromRGBO(41, 87, 35, 1),
                                             foregroundColor: Colors.white,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
