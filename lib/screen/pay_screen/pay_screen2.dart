@@ -1,3 +1,4 @@
+import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
 import 'package:flutter/material.dart';
 
 class PayScreen2 extends StatefulWidget {
@@ -7,7 +8,7 @@ class PayScreen2 extends StatefulWidget {
   @override
   State<PayScreen2> createState() => _PayScreen2State();
 }
-
+ 
 class _PayScreen2State extends State<PayScreen2> {
   String? selectedPaymentMethod;
 
@@ -187,29 +188,46 @@ class _PayScreen2State extends State<PayScreen2> {
 
   // Widget function for Payment Method ListTile
   Widget buildPaymentMethod({
-    required String assetPath,
-    required String title,
-    String? subtitle,
-    required String value,
-  }) {
-    return GestureDetector(
-      onTap: () {
+  required String assetPath,
+  required String title,
+  String? subtitle,
+  required String value,
+}) {
+  return GestureDetector(
+    onTap: () {
+      if (value == 'BankAccount') {
+        // Điều hướng sang PaymentMethodsScreen khi chọn "Tài khoản ngân hàng"
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentMethodsScreen(),
+          ),
+        ).then((selectedId) {
+          if (selectedId != null) {
+            setState(() {
+              this.selectedPaymentMethod = selectedId.toString(); // Lưu ID đã chọn
+            });
+          }
+        });
+      } else {
         setState(() {
           selectedPaymentMethod = value;
         });
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 8),
-        child: ListTile(
-          leading: Image.asset(assetPath, width: 40, height: 40),
-          title: Text(title),
-          subtitle: subtitle != null
-              ? Text(subtitle, style: TextStyle(fontSize: 12))
-              : null,
-        ),
+      }
+    },
+    child: Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: Image.asset(assetPath, width: 40, height: 40),
+        title: Text(title),
+        subtitle: subtitle != null
+            ? Text(subtitle, style: TextStyle(fontSize: 12))
+            : null,
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // Details of the selected payment method
   Widget buildSelectedMethodDetails() {
@@ -241,6 +259,7 @@ class _PayScreen2State extends State<PayScreen2> {
         paymentDetails = 'Tài khoản ngân hàng';
         paymentSubtitle = 'Chấp nhận MB Bank, PVcom Bank';
         assetPath = 'lib/assets/ic_bank.png';
+        
         break;
       case 'VNPAYQR':
         paymentDetails = 'VNPAY QR';
