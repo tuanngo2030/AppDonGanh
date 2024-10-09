@@ -18,6 +18,7 @@ import 'package:don_ganh_app/screen/search_screen.dart';
 import 'package:don_ganh_app/screen/setting_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/bottomnavThumua_screen.dart';
+import 'package:don_ganh_app/widget/web_view.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/models/product_model.dart';
@@ -80,6 +81,8 @@ class MyApp extends StatelessWidget {
         '/setting_screen': (context) => SettingScreen(),
         '/search_screen' :(context) => SearchScreen(),
         '/creat_blog_screen' :(context) => CreatBlogScreen(),
+        '/webview' :(context) => WebViewPage(),
+
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

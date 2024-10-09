@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
@@ -90,6 +92,13 @@ class _CartScreenState extends State<CartScreen> {
           ? Center(
               child:
                   CircularProgressIndicator()) // Show a loading indicator while fetching the cart
+          : cartModel!.chiTietGioHang.isEmpty
+          ?Center(
+                  child: Text(
+                    'Giỏ hàng trống',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                )
           : Column(
               children: [
                 Expanded(
@@ -102,7 +111,7 @@ class _CartScreenState extends State<CartScreen> {
                         future: fetchProduct(item.variantModel.idProduct),
                         builder: (context, productSnapshot) {
                           if (!productSnapshot.hasData) {
-                            return CircularProgressIndicator(); // Show a loading indicator while fetching product details
+                            return  SizedBox.shrink();;
                           }
 
                           ProductModel product = productSnapshot.data!;
@@ -182,48 +191,57 @@ class _CartScreenState extends State<CartScreen> {
                                           Text('Đơn giá: ${item.donGia} đ/kg'),
                                           SizedBox(height: 4),
                                           Container(
-                                            width: 120,
-                                            height: 30,
+                                            width: double.infinity,
+                                            height: 100,
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
-                                                IconButton(
-                                                  iconSize: 20,
-                                                  onPressed: () {
-                                                    if (item.soLuong > 1) {
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: IconButton(
+                                                    iconSize: 20,
+                                                    onPressed: () {
+                                                      if (item.soLuong > 1) {
+                                                        setState(() {
+                                                          item.soLuong--;
+                                                        });
+                                                        updateItem(
+                                                            cartModel!.id,
+                                                            item.variantModel.id,
+                                                            item.soLuong,
+                                                            item.donGia);
+                                                      }
+                                                    },
+                                                    icon: Icon(Icons.remove),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Text(
+                                                    "${item.soLuong}",
+                                                    textAlign: TextAlign.center,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: IconButton(
+                                                    iconSize: 20,
+                                                    onPressed: () {
                                                       setState(() {
-                                                        item.soLuong--;
+                                                        item.soLuong++;
                                                       });
                                                       updateItem(
                                                           cartModel!.id,
                                                           item.variantModel.id,
                                                           item.soLuong,
                                                           item.donGia);
-                                                    }
-                                                  },
-                                                  icon: Icon(Icons.remove),
-                                                ),
-                                                Text(
-                                                  "${item.soLuong}",
-                                                  textAlign: TextAlign.center,
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                ),
-                                                IconButton(
-                                                  iconSize: 20,
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      item.soLuong++;
-                                                    });
-                                                    updateItem(
-                                                        cartModel!.id,
-                                                        item.variantModel.id,
-                                                        item.soLuong,
-                                                        item.donGia);
-                                                  },
-                                                  icon: Icon(Icons.add),
+                                                    },
+                                                    icon: Icon(Icons.add),
+                                                  ),
                                                 ),
                                               ],
                                             ),

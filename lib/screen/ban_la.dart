@@ -7,57 +7,59 @@ class BanLa extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 41, 87, 35),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // logo
-              Image.asset("lib/assets/logo_xinchao.png"),
-              const Text(
-                'Đòn gánh xin chào!',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // logo
+                Image.asset("lib/assets/logo_xinchao.png"),
+                const Text(
+                  'Đòn gánh xin chào!',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10), // Add space between the two texts
-              const Text(
-                'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
+                const SizedBox(height: 10), // Add space between the two texts
+                const Text(
+                  'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 40), // Add space between texts and buttons
-              const Text(
-                'Bạn là ?',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 40), // Add space between texts and buttons
+                const Text(
+                  'Bạn là ?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
+                  SizedBox(height: 20),
+              UserOption(
+                text: 'Khách mua hàng',
+                onTap: () {
+                  Navigator.pushNamed((context), "/bottom");
+                },
               ),
-                SizedBox(height: 20),
-            UserOption(
-              text: 'Khách mua hàng',
-              onTap: () {
-                Navigator.pushNamed((context), "/bottom");
-              },
+              SizedBox(height: 20),
+              UserOption(
+                text: 'Hộ kinh doanh',
+                onTap: () {
+                  // Xử lý khi chọn "Hộ kinh doanh"
+                },
+              ),
+              ],
             ),
-            SizedBox(height: 20),
-            UserOption(
-              text: 'Hộ kinh doanh',
-              onTap: () {
-                // Xử lý khi chọn "Hộ kinh doanh"
-              },
-            ),
-            ],
           ),
         ),
       ),

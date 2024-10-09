@@ -585,36 +585,61 @@ class _PayScreen1State extends State<PayScreen1> {
                           // Radio Buttons for Delivery Request
                           Row(
                             children: [
-                              Radio<String>(
-                                activeColor:
-                                    Color.fromRGBO(59, 99, 53, 1),
-                                value: "Giao hàng tại nhà",
-                                groupValue: groupValueRequest,
-                                onChanged: (value) {
-                                  setState(() {
-                                    groupValueRequest = value!;
-                                  });
-                                },
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Radio<String>(
+                                  activeColor:
+                                      Color.fromRGBO(59, 99, 53, 1),
+                                  value: "Giao hàng tại nhà",
+                                  groupValue: groupValueRequest,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      groupValueRequest = value!;
+                                    });
+                                  },
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "Giao hàng tại nhà",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              Text(
-                                "Giao hàng tại nhà",
-                                style: TextStyle(fontSize: 15),
-                              ),
+                              
                               SizedBox(width: 20),
-                              Radio<String>(
-                                activeColor:
-                                    Color.fromRGBO(59, 99, 53, 1),
-                                value: "Nhận tại cửa hàng",
-                                groupValue: groupValueRequest,
-                                onChanged: (value) {
-                                  setState(() {
-                                    groupValueRequest = value!;
-                                  });
-                                },
-                              ),
-                              Text(
-                                "Nhận tại cửa hàng",
-                                style: TextStyle(fontSize: 15),
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Radio<String>(
+                                  activeColor:
+                                      Color.fromRGBO(59, 99, 53, 1),
+                                  value: "Nhận tại cửa hàng",
+                                  groupValue: groupValueRequest,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      groupValueRequest = value!;
+                                    });
+                                  },
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "Nhận tại cửa hàng",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),

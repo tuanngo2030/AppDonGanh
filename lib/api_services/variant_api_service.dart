@@ -3,7 +3,7 @@ import 'package:don_ganh_app/models/variant_model.dart';
 import 'package:http/http.dart' as http;
 
 class VariantApiService {
-  final String url = "https://imp-model-widely.ngrok-free.app/api/sanpham/getlistBienTheInSanPham";
+  final String url = "https://imp-model-widely.ngrok-free.app/api/sanpham/getlistBienThe/";
   Future<List<VariantModel>> getVariant(String idProduct) async {
     final response = await http.get(Uri.parse('$url$idProduct'));
 

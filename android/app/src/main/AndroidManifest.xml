@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name = "android.permission.hardware.Camera"/>
     <application
+        android:usesCleartextTraffic="true"
         android:label="Đòn Gánh"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

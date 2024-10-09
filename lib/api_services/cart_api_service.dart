@@ -29,7 +29,8 @@ class CartApiService {
         print('Error decoding JSON: $e');
         throw Exception('Failed to decode JSON');
       }
-    } else {
+    }
+     else {
       print('Response body: ${response.body}');
       throw Exception('Failed to load cart');
     }
