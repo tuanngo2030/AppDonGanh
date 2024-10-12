@@ -75,9 +75,9 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text('${widget.orderModel.userId.tenNguoiDung}'),
-                  Text('${widget.orderModel.userId.soDienThoai}'),
-                  Text('${widget.orderModel.diaChi.duongThon}, ${widget.orderModel.diaChi.phuongXa}, ${widget.orderModel.diaChi.tinhThanhPho}'),
+                  // Text('${widget.orderModel.userId.tenNguoiDung}'),
+                  // Text('${widget.orderModel.userId.soDienThoai}'),
+                  // Text('${widget.orderModel.diaChi.duongThon}, ${widget.orderModel.diaChi.phuongXa}, ${widget.orderModel.diaChi.tinhThanhPho}'),
                   SizedBox(height: 20),
           
                   SizedBox(height: 20),

@@ -29,7 +29,7 @@ class CartModel {
 class ChiTietGioHang {
   final String id;
   final VariantModel variantModel;
-   int soLuong;
+  int soLuong;
   final int donGia;
 
   ChiTietGioHang({
@@ -46,5 +46,14 @@ class ChiTietGioHang {
       soLuong: data['soLuong'],
       donGia: data['donGia'],
     );
+  }
+
+   Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'idBienThe': variantModel.toJson(), // Gọi phương thức toJson của VariantModel
+      'soLuong': soLuong,
+      'donGia': donGia,
+    };
   }
 }

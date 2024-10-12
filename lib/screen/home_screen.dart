@@ -433,6 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 35,
                                       width: double.infinity,
                                       decoration: BoxDecoration(
+                                        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 1.5)),
                                           color: Color.fromRGBO(41, 87, 35, 1),
                                           borderRadius:
                                               BorderRadius.circular(20)),
@@ -443,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             child: Container(
                                                 width: 60,
                                                 child: Icon(
-                                                  Icons.shopping_cart,
+                                                  Icons.shopping_cart_outlined,
                                                   color: Colors.white,
                                                 )),
                                           ),

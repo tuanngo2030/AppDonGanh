@@ -36,52 +36,57 @@ class OrderApiService {
   }
 
    
-  // Hàm tạo hóa đơn
-  Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
-    required String userId,
-    required String diaChiMoi,
-    required String ghiChu,
-    String? khuyenmaiId,
-    required String giohangId,
-    required double TongTien,
-    required String transactionId,
-    required List<Map<String, dynamic>> ChiTietGioHang, // Thêm chi tiết giỏ hàng
-    required String YeuCauNhanHang, // Thêm yêu cầu nhận hàng
-  }) async {
-    final String url = "https://imp-model-widely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
+ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
+  required String userId,
+  required diaChiList diaChiMoi,
+  required String ghiChu,
+  required String khuyenmaiId,
+  required String giohangId,
+  required double TongTien,
+  required int transactionId,
+  required List<ChiTietGioHang> selectedItems,
+  required String YeuCauNhanHang,
+}) async {
+  final String url = "https://imp-model-widely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
 
-    final Map<String, dynamic> body = {
-      'userId': userId,
-      'diaChiMoi': diaChiMoi,
-      'ghiChu': ghiChu,
-      'khuyenmaiId': khuyenmaiId,
-      'ChiTietGioHang': ChiTietGioHang,
-      'YeuCauNhanHang': YeuCauNhanHang,
-      'giohangId': giohangId,
-      'TongTien': TongTien,
-      'transactionId': transactionId,
-    };
+  final Map<String, dynamic> body = {
+    'userId': userId,
+    'diaChiMoi': diaChiMoi.toJson(),
+    'ghiChu': ghiChu,
+    'khuyenmaiId': khuyenmaiId,
+    'ChiTietGioHang': selectedItems.map((item) => item.toJson()).toList(),
+    'YeuCauNhanHang': YeuCauNhanHang,
+    'giohangId': giohangId,
+    'TongTien': TongTien,
+    'transactionId': transactionId,
+  };
 
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(body),
-    );
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: json.encode(body),
+  );
 
-    if (response.statusCode == 201) {
-      try {
-        final data = json.decode(response.body);
-        print('Create HoaDon Response: $data');
-        return OrderModel.fromJson(data);
-      } catch (e) {
-        print('Error decoding JSON: $e');
-        throw Exception('Failed to decode JSON');
-      }
-    } else {
-      print('Failed to create HoaDon: ${response.body}');
-      throw Exception('Failed to create HoaDon');
-    }
+  print('Response Status: ${response.statusCode}');
+  print('Response Body: ${response.body}');
+
+  if (response.statusCode != 200) {
+    print('Failed to create HoaDon: ${response.statusCode} ${response.body}');
+    throw Exception('Failed to create HoaDon');
   }
+
+  if (response.body.isEmpty) {
+    throw Exception('Response body is empty');
+  }
+
+  try {
+    final data = json.decode(response.body);
+    return OrderModel.fromJson(data);
+  } catch (e) {
+    print('Error decoding JSON: $e');
+    throw Exception('Failed to decode JSON');
+  }
+}
 }

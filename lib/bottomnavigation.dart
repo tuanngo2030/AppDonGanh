@@ -38,8 +38,8 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
       body: screens[selectedIndex],
       bottomNavigationBar: ClipRRect(
          borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.0), // Bo góc trên bên trái
-          topRight: Radius.circular(10.0), // Bo góc trên bên phải
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.shifting,

@@ -43,6 +43,13 @@ class _PayScreen1State extends State<PayScreen1> {
   bool _isLoading = true;
   bool _isOrderProcessing = false; // For handling order processing state
 
+  // Selected items and products map
+  List<ChiTietGioHang> selectedItems = [];
+  Map<String, ProductModel> _productsMap = {};
+
+  // To ensure products are fetched only once
+  bool _productsFetched = false;
+
   @override
   void initState() {
     super.initState();
@@ -50,10 +57,46 @@ class _PayScreen1State extends State<PayScreen1> {
     _loadSavedAddress(); // Load saved address from SharedPreferences if available
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_productsFetched) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is List<ChiTietGioHang>) {
+        selectedItems = args;
+        print('Selected Items: ${selectedItems.length}');
+        selectedItems.forEach((item) {
+          print('Product ID: ${item.variantModel.idProduct}');
+        });
+        _fetchAllProducts();
+      } else {
+        // Handle the case where arguments are missing or of incorrect type
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không tìm thấy sản phẩm.')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      _productsFetched = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    hoTenController.dispose();
+    soDienThoaiController.dispose();
+    emailController.dispose();
+    ghiChuController.dispose();
+    duongThonController.dispose();
+    super.dispose();
+  }
+
   // Initialize province/city list
   Future<void> _initializeDropdowns() async {
     try {
       _tinhThanhPhoList = await dcApiService().getProvinces();
+      print('Fetched Provinces: $_tinhThanhPhoList');
       setState(() {
         _isLoading = false;
       });
@@ -68,10 +111,48 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
+  // Fetch all products based on selectedItems
+  Future<void> _fetchAllProducts() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Extract unique product IDs
+    Set<String> productIds =
+        selectedItems.map((item) => item.variantModel.idProduct).toSet();
+    print('Unique Product IDs: $productIds');
+
+    try {
+      // Fetch all products concurrently
+      List<Future<ProductModel>> fetchFutures =
+          productIds.map((id) => fetchProduct(id)).toList();
+
+      List<ProductModel> products = await Future.wait(fetchFutures);
+      print('Fetched Products: ${products.map((p) => p.id).toList()}');
+
+      // Create a map from product ID to ProductModel
+      _productsMap = {for (var product in products) product.id: product};
+      print('_productsMap: $_productsMap');
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching products: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi tải thông tin sản phẩm.')),
+      );
+    }
+  }
+
   // Fetch districts based on selected province/city
   Future<void> _fetchQuanHuyen(String tinhThanhPho) async {
     try {
       _quanHuyenList = await dcApiService().getDistricts(tinhThanhPho);
+      print('Fetched Districts for $tinhThanhPho: $_quanHuyenList');
       setState(() {
         selectedQuanHuyen = null; // Reset when province/city changes
         selectedPhuongXa = null; // Reset when district changes
@@ -89,6 +170,7 @@ class _PayScreen1State extends State<PayScreen1> {
   Future<void> _fetchPhuongXa(String quanHuyen) async {
     try {
       _phuongXaList = await dcApiService().getWards(quanHuyen);
+      print('Fetched Wards for $quanHuyen: $_phuongXaList');
       setState(() {
         selectedPhuongXa = null; // Reset when district changes
       });
@@ -220,127 +302,149 @@ class _PayScreen1State extends State<PayScreen1> {
 
   // Fetch product data
   Future<ProductModel> fetchProduct(String productID) async {
-    return await ProductApiService().getProductByID(productID);
+    try {
+      ProductModel product =
+          await ProductApiService().getProductByID(productID);
+      print('Fetched Product: ${product.id}');
+      return product;
+    } catch (e) {
+      print('Error fetching product ID $productID: $e');
+      throw e;
+    }
   }
 
   // Method to create an order
-  Future<void> _createOrder(List<ChiTietGioHang> selectedItems) async {
+Future<void> _createOrder() async {
+  setState(() {
+    _isOrderProcessing = true; // Bắt đầu quá trình xử lý đơn hàng
+  });
+
+  // Thu thập thông tin từ form
+  String hoTen = hoTenController.text.trim();
+  String soDienThoai = soDienThoaiController.text.trim();
+  String email = emailController.text.trim();
+  String yeuCauNhanHang = groupValueRequest; // Lấy yêu cầu nhận hàng
+  String? tinhThanhPho = selectedTinhThanhPho;
+  String? quanHuyen = selectedQuanHuyen;
+  String? phuongXa = selectedPhuongXa;
+  String duongThonXom = duongThonController.text.trim();
+  String ghiChu = ghiChuController.text.trim();
+
+  // Kiểm tra dữ liệu nhập vào
+  if (_validateInput(hoTen, soDienThoai, email, tinhThanhPho, quanHuyen, phuongXa, duongThonXom)) {
     setState(() {
-      _isOrderProcessing = true;
+      _isOrderProcessing = false;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
+    );
+    return;
+  }
 
-    // Gather information from the form
-    String hoTen = hoTenController.text.trim();
-    String soDienThoai = soDienThoaiController.text.trim();
-    String email = emailController.text.trim();
-    String yeuCauNhanHang = groupValueRequest;
-    String? tinhThanhPho = selectedTinhThanhPho;
-    String? quanHuyen = selectedQuanHuyen;
-    String? phuongXa = selectedPhuongXa;
-    String duongThonXom = duongThonController.text.trim();
-    String ghiChu = ghiChuController.text.trim();
+  // Tính tổng tiền
+  double totalPrice = selectedItems.fold(0, (sum, item) => sum + (item.soLuong * item.donGia));
+  print('Total Price: $totalPrice');
 
-    // Validate input data
-    if (hoTen.isEmpty ||
-        soDienThoai.isEmpty ||
-        email.isEmpty ||
-        tinhThanhPho == null ||
-        tinhThanhPho.isEmpty ||
-        quanHuyen == null ||
-        quanHuyen.isEmpty ||
-        phuongXa == null ||
-        phuongXa.isEmpty ||
-        duongThonXom.isEmpty) {
+  try {
+    // Lấy userId từ SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if (userId == null) {
       setState(() {
         _isOrderProcessing = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
+        SnackBar(content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
       );
       return;
     }
 
-    // Calculate total price
-    int totalPrice = selectedItems.fold(
-        0, (sum, item) => sum + (item.soLuong * item.donGia));
+    // Tạo đối tượng địa chỉ mới
+    diaChiList newAddress = diaChiList(
+      tinhThanhPho: tinhThanhPho,
+      quanHuyen: quanHuyen,
+      phuongXa: phuongXa,
+      duongThon: duongThonXom,
+      name: hoTen,
+      soDienThoai: soDienThoai,
+    );
 
-    try {
-      // Retrieve userId from SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userId = prefs.getString('userId');
+    // Chuyển đổi chi tiết giỏ hàng thành danh sách maps cho API
+    List<ChiTietGioHang> chiTietGioHang = selectedItems.map((item) => ChiTietGioHang(
+      id: item.id,
+      variantModel: item.variantModel,
+      soLuong: item.soLuong,
+      donGia: item.donGia,
+    )).toList();
+    print('Cart Details: ${chiTietGioHang.map((item) => item.toJson()).toList()}');
 
-      if (userId == null) {
-        setState(() {
-          _isOrderProcessing = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
-        );
-        return;
-      }
+    // ID giao dịch mẫu, thay thế bằng logic thực tế
+    int transactionId = 151;
 
-      String diaChiMoi =
-          '$tinhThanhPho, $quanHuyen, $phuongXa, $duongThonXom'; // Create new address string
+    // Gọi API để tạo đơn hàng
+    var response = await OrderApiService().createUserDiaChivaThongTinGiaoHang(
+      userId: userId,
+      diaChiMoi: newAddress,
+      ghiChu: ghiChu,
+      khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
+      TongTien: totalPrice,
+      selectedItems: chiTietGioHang,
+      transactionId: transactionId,
+      giohangId: "670492efb57221ab50c0baef",
+      YeuCauNhanHang: yeuCauNhanHang,
+    );
 
-      // Convert cart details to a list of maps for the API
-      List<Map<String, dynamic>> chiTietGioHang = selectedItems
-          .map((item) => {
-                'idBienThe': item.variantModel.id,
-                'soLuong': item.soLuong,
-                'donGia': item.donGia,
-              })
-          .toList();
+    // print('Order Response: $response');
 
-      // Example transactionId, replace with actual logic
-      String transactionId = '151';
-
-      // Call API to create the order
-      var response = await OrderApiService().createUserDiaChivaThongTinGiaoHang(
-        userId: userId,
-        diaChiMoi: diaChiMoi,
-        ghiChu: ghiChu,
-        khuyenmaiId: null, // Pass promotion ID if any
-        TongTien: totalPrice.toDouble(),
-        ChiTietGioHang: chiTietGioHang,
-        transactionId: transactionId,
-        giohangId: "670492efb57221ab50c0baef",
-        YeuCauNhanHang: yeuCauNhanHang,
-      );
-
-      // Check response and proceed accordingly
-      if (response != null && response.id != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đặt hàng thành công!')),
-        );
-
-        // // Navigate to order confirmation page
-        // Navigator.pushNamedAndRemoveUntil(
-        //   context,
-        //   '/order_confirmation',
-        //   (route) => false,
-        // );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đặt hàng thất bại: Lỗi không xác định.')),
-        );
-      }
-    } catch (e) {
-      print('Lỗi khi tạo hóa đơn flutter: $e');
+    // Kiểm tra phản hồi và xử lý
+    if (response != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
+        SnackBar(content: Text('Đặt hàng thành công!')),
       );
-    } finally {
-      setState(() {
-        _isOrderProcessing = false;
-      });
+      widget.nextStep(); // Chuyển sang bước tiếp theo
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đặt hàng thất bại: ${response}')),
+      );
     }
+  } catch (e) {
+    print('Lỗi khi tạo hóa đơn flutter: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
+    );
+  } finally {
+    setState(() {
+      _isOrderProcessing = false; // Kết thúc quá trình xử lý
+    });
   }
+}
+
+
+// Phương thức kiểm tra dữ liệu đầu vào
+bool _validateInput(String hoTen, String soDienThoai, String email, String? tinhThanhPho, String? quanHuyen, String? phuongXa, String duongThonXom) {
+  return hoTen.isEmpty ||
+      soDienThoai.isEmpty ||
+      email.isEmpty ||
+      tinhThanhPho == null ||
+      tinhThanhPho.isEmpty ||
+      quanHuyen == null ||
+      quanHuyen.isEmpty ||
+      phuongXa == null ||
+      phuongXa.isEmpty ||
+      duongThonXom.isEmpty;
+}
 
   @override
   Widget build(BuildContext context) {
-    final List<ChiTietGioHang> selectedItems =
-        ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
+    // Remove the local declaration of selectedItems in build
+    // final List<ChiTietGioHang> selectedItems =
+    //     ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
+
+    print('Building PayScreen1');
+    print('Selected Items Count: ${selectedItems.length}');
+    print('Products Map Keys: ${_productsMap.keys.toList()}');
+
     return Scaffold(
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -355,113 +459,151 @@ class _PayScreen1State extends State<PayScreen1> {
                       itemCount: selectedItems.length,
                       itemBuilder: (context, index) {
                         final item = selectedItems[index];
-                        return FutureBuilder<ProductModel>(
-                          future: fetchProduct(item.variantModel.idProduct),
-                          builder: (context, productSnapshot) {
-                            if (productSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            } else if (productSnapshot.hasError) {
-                              return Center(child: Text('Lỗi tải sản phẩm.'));
-                            } else if (!productSnapshot.hasData) {
-                              return Center(child: Text('Không có dữ liệu.'));
-                            }
+                        final product =
+                            _productsMap[item.variantModel.idProduct];
 
-                            ProductModel product = productSnapshot.data!;
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              child: Card(
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 12),
-                                        child: Container(
-                                          height: 100,
-                                          width: 100,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            image: DecorationImage(
-                                              image: NetworkImage(
-                                                  product.imageProduct),
-                                              fit: BoxFit.cover,
+                        if (product == null) {
+                          print(
+                              'Product not found for ID: ${item.variantModel.idProduct}');
+                          // Handle the case where the product was not fetched successfully
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            child: Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Colors.grey[300],
+                                      ),
+                                      child:
+                                          Icon(Icons.error, color: Colors.red),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Sản phẩm không tồn tại',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
                                             ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Không tìm thấy thông tin sản phẩm.',
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        ],
                                       ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              product.nameProduct,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: 4),
-                                            Row(
-                                              children: item
-                                                  .variantModel.ketHopThuocTinh
-                                                  .map((thuocTinh) {
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 8.0),
-                                                  child: Text(
-                                                    thuocTinh
-                                                        .giaTriThuocTinh.GiaTri,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                                'Đơn giá: ${item.donGia} đ/kg'),
-                                            SizedBox(height: 4),
-                                            Container(
-                                              width: 120,
-                                              height: 30,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    "${item.soLuong}",
-                                                    textAlign: TextAlign.center,
-                                                    style:
-                                                        TextStyle(fontSize: 14),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: Container(
+                                      height: 100,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              product.imageProduct),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          product.nameProduct,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        SizedBox(height: 4),
+                                        Row(
+                                          children: item
+                                              .variantModel.ketHopThuocTinh
+                                              .map((thuocTinh) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 8.0),
+                                              child: Text(
+                                                thuocTinh
+                                                    .giaTriThuocTinh.GiaTri,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text('Đơn giá: ${item.donGia} đ/kg'),
+                                        SizedBox(height: 4),
+                                        Container(
+                                          width: 120,
+                                          height: 30,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "${item.soLuong}",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -697,10 +839,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                       showSearchBox: true,
                                     ),
                                     items: _quanHuyenList,
-                                    // selectedItem:
-                                    //     selectedQuanHuyen!.isNotEmpty
-                                    //         ? selectedQuanHuyen
-                                    //         : null,
+                                    selectedItem: selectedQuanHuyen != null &&
+                                            selectedQuanHuyen!.isNotEmpty
+                                        ? selectedQuanHuyen
+                                        : null,
                                     onChanged: (newValue) async {
                                       setState(() {
                                         selectedQuanHuyen = newValue;
@@ -734,10 +876,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                       showSearchBox: true,
                                     ),
                                     items: _phuongXaList,
-                                    // selectedItem:
-                                    //     selectedPhuongXa!.isNotEmpty
-                                    //         ? selectedPhuongXa
-                                    //         : null,
+                                    selectedItem: selectedPhuongXa != null &&
+                                            selectedPhuongXa!.isNotEmpty
+                                        ? selectedPhuongXa
+                                        : null,
                                     onChanged: (newValue) {
                                       setState(() {
                                         selectedPhuongXa = newValue;
@@ -800,12 +942,12 @@ class _PayScreen1State extends State<PayScreen1> {
                           _isOrderProcessing
                               ? Center(child: CircularProgressIndicator())
                               : SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                    onPressed: widget.nextStep,
-                                    // _createOrder(selectedItems);
-                                      
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _createOrder();
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           Color.fromRGBO(59, 99, 53, 1),
@@ -822,7 +964,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                       ),
                                     ),
                                   ),
-                              ),
+                                ),
                         ],
                       ),
                     ),

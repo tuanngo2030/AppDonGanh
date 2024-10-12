@@ -30,6 +30,17 @@ class VariantModel {
       ketHopThuocTinh: ketHopThuocTinh,
     );
   }
+
+   Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'IDSanPham': idProduct,
+      'sku': sku,
+      'gia': gia,
+      'soLuong': soLuong,
+      'KetHopThuocTinh': ketHopThuocTinh.map((item) => item.toJson()).toList(), // Gọi phương thức toJson của KetHopThuocTinh
+    };
+  }
 }
 
 class KetHopThuocTinh {
@@ -46,6 +57,13 @@ class KetHopThuocTinh {
       id: data['_id'],
       giaTriThuocTinh: GiaTriThuocTinh.fromJSON(data['IDGiaTriThuocTinh'] as Map<String, dynamic>),
     );
+  }
+
+   Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'IDGiaTriThuocTinh': giaTriThuocTinh.toJson(), // Gọi phương thức toJson của GiaTriThuocTinh
+    };
   }
 }
 
@@ -69,6 +87,15 @@ class GiaTriThuocTinh{
       ThuocTinhID: data['ThuocTinhID'], 
       GiaTri: data['GiaTri']
     );
+  }
+
+   Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'IDGiaTriThuocTinh': IDGiaTriThuocTinh,
+      'ThuocTinhID': ThuocTinhID,
+      'GiaTri': GiaTri,
+    };
   }
 
 }

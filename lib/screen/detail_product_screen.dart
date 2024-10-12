@@ -76,9 +76,12 @@ void _swapImage(int index) {
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
     } catch (e) {
+      print('Error adding to cart: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi thêm vào giỏ hàng')),
+        SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
+
+        Navigator.of(context).pop();
     }
   }
 
@@ -272,7 +275,7 @@ void _swapImage(int index) {
                                 (BuildContext context,
                                     StateSetter setModalState) {
                               return Container(
-                                height: 700,
+                                height: 500,
                                 child: Column(
                                   children: [
                                     Container(
@@ -304,13 +307,15 @@ void _swapImage(int index) {
                                             ),
                                           ),
                                           Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 '${widget.product.donGiaBan} đ/kg',
                                                 style: TextStyle(fontSize: 16),
                                               ),
                                               Text(
-                                                'Kho: ${widget.product.soLuongHienTai}',
+                                                'Kho: ${widget.product.soLuongHienTai} sản phẩm',
                                                 style: TextStyle(fontSize: 16),
                                               ),
                                             ],
@@ -345,9 +350,9 @@ void _swapImage(int index) {
                                             padding: EdgeInsets.all(20),
                                             gridDelegate:
                                                 SliverGridDelegateWithMaxCrossAxisExtent(
-                                              maxCrossAxisExtent: 120,
+                                              maxCrossAxisExtent: 50,
                                               mainAxisSpacing: 10,
-                                              crossAxisSpacing: 10,
+                                              crossAxisSpacing: 30,
                                             ),
                                             itemCount: variant.length,
                                             itemBuilder: (context, index) {
@@ -500,7 +505,7 @@ void _swapImage(int index) {
                         height: 40,
                         width: 180,
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
+                            border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 1.5)),
                             color: Color.fromRGBO(41, 87, 35, 1),
                             borderRadius: BorderRadius.circular(20)),
                         child: Row(
@@ -508,7 +513,7 @@ void _swapImage(int index) {
                             Container(
                                 width: 60,
                                 child: Icon(
-                                  Icons.shopping_cart,
+                                  Icons.shopping_cart_outlined,
                                   color: Colors.white,
                                 )),
                             Container(

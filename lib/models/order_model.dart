@@ -5,17 +5,21 @@ import 'package:don_ganh_app/models/variant_model.dart';
 
 class OrderModel {
   final String id;
-  final NguoiDung userId;
+  final String userId;
   // final String orderId;
   final diaChiList diaChi;
   final int TrangThai;
   final bool thanhToan;
-  final double TongTien;
+  final int TongTien;
   final String khuyenmaiId;
-  final String transactionId;
+  final int transactionId;
   final List<ChiTietHoaDon>? chiTietHoaDon;
   final String GhiChu;
   final String YeuCauNhanHang;
+  final String payment_url;
+  final String redirect_url;
+  final int order_id;
+  final DateTime expiresAt;
   final DateTime NgayTao;
 
   OrderModel({
@@ -28,38 +32,77 @@ class OrderModel {
     required this.TongTien,
     required this.khuyenmaiId,
     required this.transactionId,
-    this.chiTietHoaDon,
+    required this.chiTietHoaDon,
     required this.GhiChu,
     required this.YeuCauNhanHang,
     required this.NgayTao,
+    required this.payment_url,
+    required this.redirect_url,
+    required this.order_id,
+    required this.expiresAt,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Safely handle chiTietHoaDon list
     var chiTietHoaDonFromJson = json['chiTietHoaDon'] as List<dynamic>? ?? [];
 
     List<ChiTietHoaDon> listCart = chiTietHoaDonFromJson
         .map((item) => ChiTietHoaDon.fromJson(item as Map<String, dynamic>))
         .toList();
 
+    // Ensure proper parsing of nested structures
     return OrderModel(
       id: json['_id'] ?? '',
-      userId: NguoiDung.fromJson(json['userId'] as Map<String, dynamic>),
+      userId: json['userId'] is String
+          ? json['userId']
+          : (json['userId'] != null
+              ? json['userId']['id']
+              : ''), // If nested, access id
       diaChi: diaChiList.fromJson(json['diaChi'] as Map<String, dynamic>),
       TongTien: json['TongTien'] ?? 0,
       TrangThai: json['TrangThai'] ?? 4,
       thanhToan: json['ThanhToan'] ?? false,
       chiTietHoaDon: listCart,
       GhiChu: json['GhiChu'] ?? '',
-      transactionId: json['transactionId'] ?? '',
+      transactionId: json['transactionId'],
       khuyenmaiId: json['khuyenmaiId'],
-      YeuCauNhanHang: json['YeuCauNhanHang'],
-      NgayTao: DateTime.tryParse(json['NgayTao'] ?? DateTime.now().toString()) ?? DateTime.now(),
+      YeuCauNhanHang: json['YeuCauNhanHang'] ?? '', // Default empty string
+      NgayTao:
+          DateTime.tryParse(json['NgayTao'] ?? DateTime.now().toString()) ??
+              DateTime.now(),
+      payment_url: json['payment_url'] ?? '',
+      redirect_url: json['redirect_url'] ?? '',
+      order_id: json['order_id'],
+      expiresAt:
+          DateTime.tryParse(json['expiresAt'] ?? DateTime.now().toString()) ??
+              DateTime.now(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'userId': userId,
+      'diaChi': diaChi.toJson(),
+      'TrangThai': TrangThai,
+      'ThanhToan': thanhToan,
+      'TongTien': TongTien,
+      'khuyenmaiId': khuyenmaiId,
+      'transactionId': transactionId,
+      'chiTietHoaDon': chiTietHoaDon?.map((item) => item.toJson()).toList(),
+      'GhiChu': GhiChu,
+      'YeuCauNhanHang': YeuCauNhanHang,
+      'NgayTao': NgayTao.toIso8601String(),
+      'payment_url': payment_url,
+      'redirect_url': redirect_url,
+      'order_id': order_id,
+      'expiresAt': expiresAt.toIso8601String(),
+    };
   }
 }
 
 class ChiTietHoaDon {
-  final BienTheModel bienThe;
+  final String bienThe;
   final int soLuong;
   final int donGia;
 
@@ -71,13 +114,20 @@ class ChiTietHoaDon {
 
   factory ChiTietHoaDon.fromJson(Map<String, dynamic> json) {
     return ChiTietHoaDon(
-      bienThe: BienTheModel.fromJSON(json['BienThe'] as Map<String, dynamic>),
-      soLuong: json['soLuong'] ?? 0,
-      donGia: json['donGia'] ?? 0,
+      bienThe: json['idBienThe'] as String? ?? '',
+      soLuong: json['soLuong'] as int? ?? 0,
+      donGia: json['donGia'] as int? ?? 0,
     );
   }
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'idBienThe': bienThe,
+      'soLuong': soLuong,
+      'donGia': donGia,
+    };
+  }
+}
 
 class BienTheModel {
   final String idSanPham;
@@ -95,7 +145,8 @@ class BienTheModel {
   });
 
   factory BienTheModel.fromJSON(Map<String, dynamic> json) {
-    var ketHopThuocTinhFromJson = json['KetHopThuocTinh'] as List<dynamic>? ?? [];
+    var ketHopThuocTinhFromJson =
+        json['KetHopThuocTinh'] as List<dynamic>? ?? [];
 
     List<KetHopThuocTinh2> listKetHopThuocTinh = ketHopThuocTinhFromJson
         .map((item) => KetHopThuocTinh2.fromJson(item as Map<String, dynamic>))
@@ -122,7 +173,8 @@ class KetHopThuocTinh2 {
 
   factory KetHopThuocTinh2.fromJson(Map<String, dynamic> json) {
     return KetHopThuocTinh2(
-      giaTriThuocTinh: GiaTriThuocTinh.fromJson(json['GiaTriThuocTinh'] as Map<String, dynamic>),
+      giaTriThuocTinh: GiaTriThuocTinh.fromJson(
+          json['GiaTriThuocTinh'] as Map<String, dynamic>),
       id: json['_id'] ?? '',
     );
   }

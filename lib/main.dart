@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
       //   Tablet: SettingScreen(), 
       //   Desktop: RegisterScreen()
       // ),
-      home: BottomnavigationMenu(),
+      home: LoginScreen(),
       routes: {
         '/registerscreen': (context) => RegisterScreen(),
         '/loginscreen': (context) => LoginScreen(),

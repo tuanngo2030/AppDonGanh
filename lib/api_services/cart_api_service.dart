@@ -52,18 +52,33 @@ class CartApiService {
       ]
     };
 
-    final response = await http.post(
-      Uri.parse(addToCartURL),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(data),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(addToCartURL),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(data),
+      );
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> cartData = json.decode(response.body);
-      return CartModel.fromJSON(cartData);
-    } else {
-      print('Response body: ${response.body}');
-      throw Exception('Failed to add to cart');
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        try {
+          Map<String, dynamic> cartData = json.decode(response.body);
+          print('Decoded Cart Data: $cartData');
+          return CartModel.fromJSON(cartData);
+        } catch (e) {
+          print('Error decoding JSON: $e');
+          throw Exception('Failed to decode JSON');
+        }
+      } else {
+        print('Error Response: ${response.body}');
+        throw Exception('Failed to add to cart');
+      }
+    } catch (e, stackTrace) {
+      print('HTTP Request Error: $e');
+      print('StackTrace: $stackTrace');
+      throw Exception('Failed to add to cart: $e');
     }
   }
 
