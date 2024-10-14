@@ -43,8 +43,8 @@ class ChiTietGioHang {
     return ChiTietGioHang(
       id: data['_id'],
       variantModel: VariantModel.fromJSON(data['idBienThe']),
-      soLuong: data['soLuong'],
-      donGia: data['donGia'],
+      soLuong: data['soLuong'] ?? 0,
+      donGia: data['donGia'] ?? 0,
     );
   }
 

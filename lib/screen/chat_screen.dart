@@ -1,74 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
-  final String title; // Accept the title as a parameter
+  final String title; // Tiêu đề nhận từ tham số
 
-  const ChatScreen({Key? key, required this.title}) : super(key: key);
+  const ChatScreen({super.key, required this.title});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final List<Map<String, dynamic>> messages = [
-    {
-      'sender': 'Customer Support',
-      'message': 'Đơn hàng của quý khách "SẦU RIÊNG" đang bắt đầu giao, dự kiến giao tới quý khách trong vòng 1 giờ.',
-      'time': '14:26',
-      'isUserMessage': false,
-    },
-    {
-      'sender': 'User',
-      'message': 'Khi nào tới nhớ nhấn chuông. Người nhà ra lấy, mình đang họp không tiện về lấy.',
-      'time': '14:50',
-      'isUserMessage': true,
-    },
-    {
-      'sender': 'Customer Support',
-      'message': 'Vâng thưa chị',
-      'time': '14:51',
-      'isUserMessage': false,
-    },
-  ];
-
+  final List<Map<String, dynamic>> messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late IO.Socket socket;
 
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
-      setState(() {
-        messages.add({
-          'sender': 'User',
-          'message': _controller.text,
-          'time': TimeOfDay.now().format(context), // Current time
-          'isUserMessage': true,
-        });
-        _controller.clear(); // Clear the input field after sending the message
-      });
+  String? storedUserId;
+  String? token;
+  String? receiverId;
 
-      // Scroll to the last message
-      _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    connect();
+    // _initializeChat();
   }
+
+   void connect(){
+      socket = IO.io(
+        "https://upward-urchin-pleasant.ngrok-free.app",
+        <String, dynamic>{
+          "transports" : ["websocket"],
+          "autoConnect" : false,
+        }
+      );
+      socket.connect();
+      socket.emit("/test", "hello world");
+
+      socket.onConnect((data) => print("CONNECT"));
+      print("Socket connected: ${socket.connected}");
+    }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title), // Use the title passed to the ChatScreen
+        title: Text(widget.title), // Sử dụng tiêu đề truyền vào
         backgroundColor: Colors.green[700],
       ),
       body: Column(
         children: <Widget>[
-          // Message list
+          // Danh sách tin nhắn
           Expanded(
             child: ListView.builder(
-              controller: _scrollController, // Add scroll controller
-              reverse: true, // Show the latest messages at the bottom
+              controller: _scrollController, // Thêm scroll controller
+              reverse: true, // Hiển thị tin nhắn mới nhất ở dưới cùng
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[messages.length - 1 - index];
@@ -81,18 +71,18 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          // Input field and send button
+          // Trường nhập liệu và nút gửi
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: <Widget>[
-                // Text field
+                // Trường nhập liệu
                 Expanded(
                   child: TextFormField(
                     keyboardType: TextInputType.multiline,
                     maxLines: 5,
                     minLines: 1,
-                    controller: _controller, // Link the controller
+                    controller: _controller, // Liên kết controller
                     decoration: InputDecoration(
                       hintText: 'Nhắn tin...',
                       border: OutlineInputBorder(
@@ -102,23 +92,22 @@ class _ChatScreenState extends State<ChatScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: (){},
-                            icon: Icon(Icons.attach_file),
+                            onPressed: () {},
+                            icon: const Icon(Icons.attach_file),
                           ),
-
                           IconButton(
-                            onPressed: (){},
-                            icon: Icon(Icons.camera_alt_outlined),
+                            onPressed: () {},
+                            icon: const Icon(Icons.camera_alt_outlined),
                           ),
                         ],
-                      )
+                      ),
                     ),
                   ),
                 ),
-                // Send button
+                // Nút gửi
                 IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: _sendMessage, // Call send message function
+                  icon: const Icon(Icons.send),
+                  onPressed: (){}
                 ),
               ],
             ),
@@ -135,7 +124,7 @@ class ChatBubble extends StatelessWidget {
   final String time;
   final bool isUserMessage;
 
-  const ChatBubble({
+  const ChatBubble({super.key, 
     required this.sender,
     required this.message,
     required this.time,
@@ -149,7 +138,8 @@ class ChatBubble extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
         child: Column(
-          crossAxisAlignment: isUserMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isUserMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(10.0),
@@ -157,10 +147,10 @@ class ChatBubble extends StatelessWidget {
                 color: isUserMessage ? Colors.green[200] : Colors.grey[300],
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(message, style: TextStyle(fontSize: 16)),
+              child: Text(message, style: const TextStyle(fontSize: 16)),
             ),
-            SizedBox(height: 2),
-            Text(time, style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 2),
+            Text(time, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
       ),

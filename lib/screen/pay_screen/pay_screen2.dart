@@ -1,19 +1,55 @@
 import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
+import 'package:don_ganh_app/api_services/order_api_service.dart';
+import 'package:don_ganh_app/models/cart_model.dart';
+import 'package:don_ganh_app/models/order_model.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PayScreen2 extends StatefulWidget {
   final VoidCallback nextStep;
   const PayScreen2({super.key, required this.nextStep});
-
+   
   @override
   State<PayScreen2> createState() => _PayScreen2State();
 }
  
 class _PayScreen2State extends State<PayScreen2> {
   String? selectedPaymentMethod;
+    final OrderApiService _orderApiService = OrderApiService();
+    bool _isProcessing = false;
+
+   Future<void> _updateTransaction(String _hoadonId, String _transactionId) async {
+    setState(() {
+      _isProcessing = true;
+    });
+
+    try {
+      OrderModel updatedOrder = await _orderApiService.updateTransactionHoaDon(
+        hoadonId: _hoadonId,
+        transactionId: _transactionId,
+      );
+
+      print("Updated Order ID: ${updatedOrder.id}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
+      );
+    } catch (e) {
+      print('Error updating transaction: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi cập nhật giao dịch.')),
+      );
+    } finally {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+     final paymentInfo = Provider.of<PaymentInfo>(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -60,7 +96,7 @@ class _PayScreen2State extends State<PayScreen2> {
                         ),
                       ),
                       TextSpan(
-                        text: 'Anh An Nguyen, 0707449425',
+                        text: '${paymentInfo.hoTen},${paymentInfo.soDienThoai}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.black,
@@ -86,7 +122,7 @@ class _PayScreen2State extends State<PayScreen2> {
                       ),
                       TextSpan(
                         text:
-                            '18/27 Phạm Thế Hiển, P. Tân An, TP. Buôn Mê Thuột, Tỉnh Đắk Lắk',
+                            '${paymentInfo.duongThonXom}, ${paymentInfo.phuongXa}, ${paymentInfo.quanHuyen}, ${paymentInfo.tinhThanhPho}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.black,
@@ -150,37 +186,14 @@ class _PayScreen2State extends State<PayScreen2> {
       shrinkWrap: true,
       children: [
         buildPaymentMethod(
-          assetPath: 'lib/assets/ic_vietqr.png',
-          title: 'Quét mã chuyển khoản VietQR',
-          subtitle:
-              'Ghi nhận giao dịch tức thì. QR được chấp nhận bởi 40+ Ngân hàng và ví điện tử',
-          value: 'VietQR',
-        ),
-        buildPaymentMethod(
-          assetPath: 'lib/assets/ic_bankcard.png',
-          title: 'Thẻ ATM',
-          value: 'ATM',
-        ),
-        buildPaymentMethod(
-          assetPath: 'lib/assets/ic_bankcard.png',
-          title: 'Thẻ Visa, MasterCard, JCB',
-          value: 'CreditCard',
-        ),
-        buildPaymentMethod(
           assetPath: 'lib/assets/ic_money.png',
           title: 'Giao hàng thu tiền (COD)',
           value: 'COD',
         ),
         buildPaymentMethod(
-          assetPath: 'lib/assets/ic_bank.png',
-          title: 'Tài khoản ngân hàng',
-          subtitle: 'Chấp nhận MB Bank, PVcom Bank',
-          value: 'BankAccount',
-        ),
-        buildPaymentMethod(
-          assetPath: 'lib/assets/ic_vnpay.png',
-          title: 'VNPAY QR',
-          value: 'VNPAYQR',
+          assetPath: 'lib/assets/Baokim-logo.png',
+          title: 'Bảo Kim',
+          value: 'Qr',
         ),
       ],
     );
@@ -192,23 +205,31 @@ class _PayScreen2State extends State<PayScreen2> {
   required String title,
   String? subtitle,
   required String value,
-}) {
+}) 
+
+{
   return GestureDetector(
-    onTap: () {
-      if (value == 'BankAccount') {
+    onTap: () async {
+      if (value == 'Qr') {
         // Điều hướng sang PaymentMethodsScreen khi chọn "Tài khoản ngân hàng"
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PaymentMethodsScreen(),
-          ),
-        ).then((selectedId) {
-          if (selectedId != null) {
-            setState(() {
-              this.selectedPaymentMethod = selectedId.toString(); // Lưu ID đã chọn
-            });
-          }
-        });
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => PaymentMethodsScreen(),
+        //   ),
+        // ).then((selectedId) {
+        //   if (selectedId != null) {
+        //     setState(() {
+        //       this.selectedPaymentMethod = selectedId.toString(); // Lưu ID đã chọn
+        //     });
+        //   }
+        // });
+        final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+        String hoadonId = paymentInfo.order_id;
+        String transactionId = '151';
+
+        await _updateTransaction(hoadonId, transactionId);
+        
       } else {
         setState(() {
           selectedPaymentMethod = value;
@@ -237,33 +258,13 @@ class _PayScreen2State extends State<PayScreen2> {
     String assetPath = '';
 
     switch (selectedPaymentMethod) {
-      case 'VietQR':
-        paymentDetails = 'Quét mã chuyển khoản VietQR';
-        paymentSubtitle =
-            'Ghi nhận giao dịch tức thì. QR được chấp nhận bởi 40+ Ngân hàng và ví điện tử';
-        assetPath = 'lib/assets/ic_vietqr.png';
-        break;
-      case 'ATM':
-        paymentDetails = 'Thẻ ATM';
-        assetPath = 'lib/assets/ic_bankcard.png';
-        break;
-      case 'CreditCard':
-        paymentDetails = 'Thẻ Visa, MasterCard, JCB';
-        assetPath = 'lib/assets/ic_bankcard.png';
-        break;
       case 'COD':
         paymentDetails = 'Giao hàng thu tiền (COD)';
         assetPath = 'lib/assets/ic_money.png';
         break;
-      case 'BankAccount':
-        paymentDetails = 'Tài khoản ngân hàng';
-        paymentSubtitle = 'Chấp nhận MB Bank, PVcom Bank';
-        assetPath = 'lib/assets/ic_bank.png';
-        
-        break;
-      case 'VNPAYQR':
-        paymentDetails = 'VNPAY QR';
-        assetPath = 'lib/assets/ic_vnpay.png';
+      case 'Qr':
+        paymentDetails = 'Bảo Kim';
+        assetPath = 'lib/assets/Baokim-logo.png';
         break;
     }
 

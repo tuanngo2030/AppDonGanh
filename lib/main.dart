@@ -6,6 +6,7 @@ import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:don_ganh_app/reponsive.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
@@ -33,9 +34,15 @@ import 'package:don_ganh_app/screen/new_password.dart';
 import 'package:don_ganh_app/screen/otp_screen.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
 import 'package:don_ganh_app/screen/trang_xin_chao.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => PaymentInfo(),
+      child: const MyApp()
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {

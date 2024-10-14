@@ -60,11 +60,11 @@ class OrderModel {
               : ''), // If nested, access id
       diaChi: diaChiList.fromJson(json['diaChi'] as Map<String, dynamic>),
       TongTien: json['TongTien'] ?? 0,
-      TrangThai: json['TrangThai'] ?? 4,
+      TrangThai: json['TrangThai'] ?? 0,
       thanhToan: json['ThanhToan'] ?? false,
       chiTietHoaDon: listCart,
       GhiChu: json['GhiChu'] ?? '',
-      transactionId: json['transactionId'],
+      transactionId: json['transactionId'] ?? 0,
       khuyenmaiId: json['khuyenmaiId'],
       YeuCauNhanHang: json['YeuCauNhanHang'] ?? '', // Default empty string
       NgayTao:
@@ -72,7 +72,7 @@ class OrderModel {
               DateTime.now(),
       payment_url: json['payment_url'] ?? '',
       redirect_url: json['redirect_url'] ?? '',
-      order_id: json['order_id'],
+      order_id: json['order_id'] ?? 0,
       expiresAt:
           DateTime.tryParse(json['expiresAt'] ?? DateTime.now().toString()) ??
               DateTime.now(),

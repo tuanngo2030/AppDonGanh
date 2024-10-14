@@ -1,4 +1,6 @@
 class ProductModel {
+   static const String defaultImageUrl = 'https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg'; // Thay bằng URL hình mặc định của bạn
+
   final String id;
   final String idProduct;
   final String nameProduct;
@@ -37,6 +39,18 @@ class ProductModel {
       required this.IDDanhMucCon,
       required this.ImgBoSung});
 
+       // Hàm kiểm tra URL hợp lệ
+  static bool isValidUrl(String url) {
+    try {
+      Uri uri = Uri.parse(url);
+      return uri.hasScheme && uri.hasAuthority;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  
+
   factory ProductModel.fromJSON(Map<String, dynamic> data) {
     var danhsachThuocTinhFromJson = data['DanhSachThuocTinh'] as List<dynamic>;
     List<danhSachThuocTinh> listThuocTinh = danhsachThuocTinhFromJson
@@ -46,6 +60,11 @@ class ProductModel {
     var ImgBoSungFromJson = data['HinhBoSung'] as List<dynamic>;
     List<hinhBoSung> ImgBoSung =
         ImgBoSungFromJson.map((item) => hinhBoSung.fromJSON(item)).toList();
+
+         String imageProductUrl = data['HinhSanPham'] ?? '';
+    if (!isValidUrl(imageProductUrl)) {
+      imageProductUrl = defaultImageUrl;
+    }
 
     return ProductModel(
       id: data['_id'],

@@ -6,9 +6,13 @@ import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
+import 'package:don_ganh_app/models/order_model.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:don_ganh_app/models/product_model.dart';
+import 'package:don_ganh_app/screen/pay_screen/pay_screen2.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PayScreen1 extends StatefulWidget {
@@ -49,6 +53,8 @@ class _PayScreen1State extends State<PayScreen1> {
 
   // To ensure products are fetched only once
   bool _productsFetched = false;
+
+  final OrderApiService _orderApiService = OrderApiService();
 
   @override
   void initState() {
@@ -313,127 +319,152 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Method to create an order
-Future<void> _createOrder() async {
-  setState(() {
-    _isOrderProcessing = true; // Bắt đầu quá trình xử lý đơn hàng
-  });
-
-  // Thu thập thông tin từ form
-  String hoTen = hoTenController.text.trim();
-  String soDienThoai = soDienThoaiController.text.trim();
-  String email = emailController.text.trim();
-  String yeuCauNhanHang = groupValueRequest; // Lấy yêu cầu nhận hàng
-  String? tinhThanhPho = selectedTinhThanhPho;
-  String? quanHuyen = selectedQuanHuyen;
-  String? phuongXa = selectedPhuongXa;
-  String duongThonXom = duongThonController.text.trim();
-  String ghiChu = ghiChuController.text.trim();
-
-  // Kiểm tra dữ liệu nhập vào
-  if (_validateInput(hoTen, soDienThoai, email, tinhThanhPho, quanHuyen, phuongXa, duongThonXom)) {
+  Future<void> _createOrder() async {
     setState(() {
-      _isOrderProcessing = false;
+      _isOrderProcessing = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
-    );
-    return;
-  }
 
-  // Tính tổng tiền
-  double totalPrice = selectedItems.fold(0, (sum, item) => sum + (item.soLuong * item.donGia));
-  print('Total Price: $totalPrice');
+    // Thu thập thông tin từ form
+    String hoTen = hoTenController.text.trim();
+    String soDienThoai = soDienThoaiController.text.trim();
+    String email = emailController.text.trim();
+    String yeuCauNhanHang = groupValueRequest;
+    String? tinhThanhPho = selectedTinhThanhPho;
+    String? quanHuyen = selectedQuanHuyen;
+    String? phuongXa = selectedPhuongXa;
+    String duongThonXom = duongThonController.text.trim();
+    String ghiChu = ghiChuController.text.trim();
 
-  try {
-    // Lấy userId từ SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('userId');
-
-    if (userId == null) {
+    // Kiểm tra dữ liệu nhập vào
+    if (_validateInput(hoTen, soDienThoai, email, tinhThanhPho, quanHuyen,
+        phuongXa, duongThonXom)) {
       setState(() {
         _isOrderProcessing = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
+        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
       );
       return;
     }
 
-    // Tạo đối tượng địa chỉ mới
-    diaChiList newAddress = diaChiList(
-      tinhThanhPho: tinhThanhPho,
-      quanHuyen: quanHuyen,
-      phuongXa: phuongXa,
-      duongThon: duongThonXom,
-      name: hoTen,
-      soDienThoai: soDienThoai,
-    );
+    double totalPrice = selectedItems.fold(
+        0, (sum, item) => sum + (item.soLuong * item.donGia));
+    print('Total Price: $totalPrice');
 
-    // Chuyển đổi chi tiết giỏ hàng thành danh sách maps cho API
-    List<ChiTietGioHang> chiTietGioHang = selectedItems.map((item) => ChiTietGioHang(
-      id: item.id,
-      variantModel: item.variantModel,
-      soLuong: item.soLuong,
-      donGia: item.donGia,
-    )).toList();
-    print('Cart Details: ${chiTietGioHang.map((item) => item.toJson()).toList()}');
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('userId');
 
-    // ID giao dịch mẫu, thay thế bằng logic thực tế
-    int transactionId = 151;
+      if (userId == null) {
+        setState(() {
+          _isOrderProcessing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
+        );
+        return;
+      }
 
-    // Gọi API để tạo đơn hàng
-    var response = await OrderApiService().createUserDiaChivaThongTinGiaoHang(
-      userId: userId,
-      diaChiMoi: newAddress,
-      ghiChu: ghiChu,
-      khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
-      TongTien: totalPrice,
-      selectedItems: chiTietGioHang,
-      transactionId: transactionId,
-      giohangId: "670492efb57221ab50c0baef",
-      YeuCauNhanHang: yeuCauNhanHang,
-    );
-
-    // print('Order Response: $response');
-
-    // Kiểm tra phản hồi và xử lý
-    if (response != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đặt hàng thành công!')),
+      diaChiList newAddress = diaChiList(
+        tinhThanhPho: tinhThanhPho!,
+        quanHuyen: quanHuyen!,
+        phuongXa: phuongXa!,
+        duongThon: duongThonXom,
+        name: hoTen,
+        soDienThoai: soDienThoai,
       );
-      widget.nextStep(); // Chuyển sang bước tiếp theo
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đặt hàng thất bại: ${response}')),
+
+      // Chuyển đổi chi tiết giỏ hàng thành danh sách đối tượng
+      List<ChiTietGioHang> chiTietGioHang = selectedItems
+          .map((item) => ChiTietGioHang(
+                id: item.id,
+                variantModel: item.variantModel,
+                soLuong: item.soLuong,
+                donGia: item.donGia,
+              ))
+          .toList();
+int transactionId = 0;
+
+      // Gọi API để tạo đơn hàng
+      OrderModel? response =
+          await _orderApiService.createUserDiaChivaThongTinGiaoHang(
+        userId: userId,
+        diaChiMoi: newAddress,
+        ghiChu: ghiChu,
+        khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
+        TongTien: totalPrice,
+        selectedItems: chiTietGioHang,
+        // YeuCauNhanHang: yeuCauNhanHang,
+        // transactionId: transactionId,
+        // giohangId: "670492efb57221ab50c0baef", // ID giỏ hàng
       );
+
+      print('Order Response: $response');
+
+      // Kiểm tra phản hồi và xử lý
+      if (response != null && response.id != null) {
+        PaymentInfo paymentInfo =
+            Provider.of<PaymentInfo>(context, listen: false);
+        paymentInfo.updateInfo(
+          order_id: response.id,
+          hoTen: hoTen,
+          soDienThoai: soDienThoai,
+          email: email,
+          yeuCauNhanHang: yeuCauNhanHang,
+          tinhThanhPho: tinhThanhPho,
+          quanHuyen: quanHuyen,
+          phuongXa: phuongXa,
+          duongThonXom: duongThonXom,
+          ghiChu: ghiChu,
+          selectedItems: selectedItems,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Dữ liệu đã được cập nhật!')),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đặt hàng thành công!')),
+        );
+        widget.nextStep();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đặt hàng thất bại: Lỗi không xác định.')),
+        );
+      }
+
+    } catch (e) {
+      print('Lỗi khi tạo hóa đơn flutter: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
+      );
+    } finally {
+      setState(() {
+        _isOrderProcessing = false; // Kết thúc quá trình xử lý
+      });
     }
-  } catch (e) {
-    print('Lỗi khi tạo hóa đơn flutter: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
-    );
-  } finally {
-    setState(() {
-      _isOrderProcessing = false; // Kết thúc quá trình xử lý
-    });
   }
-}
-
 
 // Phương thức kiểm tra dữ liệu đầu vào
-bool _validateInput(String hoTen, String soDienThoai, String email, String? tinhThanhPho, String? quanHuyen, String? phuongXa, String duongThonXom) {
-  return hoTen.isEmpty ||
-      soDienThoai.isEmpty ||
-      email.isEmpty ||
-      tinhThanhPho == null ||
-      tinhThanhPho.isEmpty ||
-      quanHuyen == null ||
-      quanHuyen.isEmpty ||
-      phuongXa == null ||
-      phuongXa.isEmpty ||
-      duongThonXom.isEmpty;
-}
+  bool _validateInput(
+      String hoTen,
+      String soDienThoai,
+      String email,
+      String? tinhThanhPho,
+      String? quanHuyen,
+      String? phuongXa,
+      String duongThonXom) {
+    return hoTen.isEmpty ||
+        soDienThoai.isEmpty ||
+        email.isEmpty ||
+        tinhThanhPho == null ||
+        tinhThanhPho.isEmpty ||
+        quanHuyen == null ||
+        quanHuyen.isEmpty ||
+        phuongXa == null ||
+        phuongXa.isEmpty ||
+        duongThonXom.isEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {

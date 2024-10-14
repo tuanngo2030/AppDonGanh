@@ -1,3 +1,4 @@
+import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen1.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen2.dart';
@@ -42,6 +43,8 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
 
   @override
 Widget build(BuildContext context) {
+   final List<ChiTietGioHang> selectedItems = ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
+
   return SafeArea(
     child: Scaffold(
       appBar: AppBar(
@@ -135,36 +138,13 @@ Widget build(BuildContext context) {
                 physics: NeverScrollableScrollPhysics(),
                 children: [
                   PayScreen1(nextStep: _nextStep),
-                  PayScreen2(nextStep: _nextStep),
+                  PayScreen2(
+                    nextStep: _nextStep,
+                    ),
                   PayScreen3(nextStep: _nextStep),
                 ],
               ),
             ),
-            // Nút Tiếp tục
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-            //   child: SizedBox(
-            //     width: double.infinity,
-            //     height: 50,
-            //     child: ElevatedButton(
-            //       onPressed: _nextStep,
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: Color.fromRGBO(59, 99, 53, 1),
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(8),
-            //         ),
-            //       ),
-            //       child: Text(
-            //         'Tiếp tục',
-            //         style: TextStyle(
-            //           color: Colors.white,
-            //           fontSize: 18,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
