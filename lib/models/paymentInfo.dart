@@ -14,6 +14,11 @@ class PaymentInfo with ChangeNotifier {
   String ghiChu = '';
   int transitionID = 0;
   List<ChiTietGioHang> selectedItems = [];
+  double totalPrice = 0;
+  String assetPath = '';
+  String title = '';
+  String? subtitle;
+  String payment_url = '';
 
   void updateInfo({
     required String order_id,
@@ -27,6 +32,7 @@ class PaymentInfo with ChangeNotifier {
     required String duongThonXom,
     required String ghiChu,
     required List<ChiTietGioHang> selectedItems,
+    required double totalPrice,
   }) {
     this.order_id = order_id;
     this.hoTen = hoTen;
@@ -39,6 +45,20 @@ class PaymentInfo with ChangeNotifier {
     this.duongThonXom = duongThonXom;
     this.ghiChu = ghiChu;
     this.selectedItems = selectedItems;
+    this.totalPrice = totalPrice;
     notifyListeners(); // Thông báo cho các widget lắng nghe về sự thay đổi
+  }
+
+  void paymentMehtod({
+    required String assetPath,
+    required String title,
+    required String? subtitle,
+    required String payment_url,
+  }) {
+    this.assetPath = assetPath;
+    this.title = title;
+    this.subtitle = subtitle;
+    this.payment_url = payment_url;
+    notifyListeners();
   }
 }

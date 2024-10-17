@@ -1,4 +1,7 @@
+import 'package:don_ganh_app/api_services/order_api_service.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class PayScreen3 extends StatefulWidget {
@@ -12,6 +15,7 @@ class PayScreen3 extends StatefulWidget {
 class _PayScreen3State extends State<PayScreen3> {
   String paymentSubtitle = "";
   bool isPaymentSuccessful = false;
+    bool isOrderExpired = false;
 
   late final WebViewController _webViewController;
 
@@ -19,6 +23,7 @@ class _PayScreen3State extends State<PayScreen3> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
        ..setNavigationDelegate(
@@ -30,14 +35,40 @@ class _PayScreen3State extends State<PayScreen3> {
             print('Error loading page: ${error.errorCode}');
           },
         ),
-      )
-      ..loadRequest(Uri.parse('https://baokim.vn/?id=181016&mrc_order_id=tuanngo-20241008155248&stat=d&checksum=c2343556762779cf21840ef525d276b07852d1e967b17a557ed332f8795121d3')); // Thay thế bằng URL bạn muốn hiển thị
+      );
+      // ..loadRequest(Uri.parse('https://baokim.vn/?id=181016&mrc_order_id=tuanngo-20241008155248&stat=d&checksum=c2343556762779cf21840ef525d276b07852d1e967b17a557ed332f8795121d3')); // Thay thế bằng URL bạn muốn hiển thị
+      _checkOrderStatus();
+  }
+
+   Future<void> _checkOrderStatus() async {
+   final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    try {
+      final data = await OrderApiService().checkDonHangBaoKim(orderId: paymentInfo.order_id);
+      setState(() {
+        isOrderExpired = data['isExpired'] ?? false;
+      });
+
+      if (!isOrderExpired) {
+        _webViewController.loadRequest(Uri.parse(
+          paymentInfo.payment_url,
+        ));
+      }
+    } catch (e) {
+      print('Lỗi khi kiểm tra đơn hàng: $e');
+      setState(() {
+        isOrderExpired = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isPaymentSuccessful ? _buildSuccessScreen() : _buildPaymentScreen(),
+      body: isOrderExpired
+          ? _buildExpiredMessage()
+          : isPaymentSuccessful
+              ? _buildSuccessScreen()
+              : _buildPaymentScreen(),
     );
   }
 
@@ -46,8 +77,8 @@ class _PayScreen3State extends State<PayScreen3> {
       child: Column(
         children: [
           Image.asset('lib/assets/img_success.png'),
-          SizedBox(height: 20),
-          Text(
+          const SizedBox(height: 20),
+          const Text(
             'Thanh toán thành công!',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
@@ -57,11 +88,11 @@ class _PayScreen3State extends State<PayScreen3> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.fromBorderSide(
+                border: const Border.fromBorderSide(
                     BorderSide(color: Color.fromARGB(255, 174, 172, 172))),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
+              child: const Padding(
+                padding: EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -129,10 +160,10 @@ class _PayScreen3State extends State<PayScreen3> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Quý khách có thể tra cứu trạng thái đơn hàng'),
+              const Text('Quý khách có thể tra cứu trạng thái đơn hàng'),
               TextButton(
                   onPressed: () {},
-                  child: Text('Tại đây',
+                  child: const Text('Tại đây',
                       style: TextStyle(
                           color: Color.fromRGBO(248, 158, 25, 1),
                           decoration: TextDecoration.underline)))
@@ -140,31 +171,53 @@ class _PayScreen3State extends State<PayScreen3> {
           ),
           ElevatedButton(
               onPressed: () {},
-              child: Text('Trở về'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                 foregroundColor: Colors.white
                
-              )
+              ),
+              child: const Text('Trở về')
             )
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildExpiredMessage() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error, size: 80, color: Colors.red),
+          const SizedBox(height: 20),
+          const Text(
+            'Đơn hàng đã hết hạn!',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Trở về'),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildPaymentScreen() {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Card(
             child: ListTile(
-              leading: Image.asset('lib/assets/ic_money.png',
+              leading: Image.asset(paymentInfo.assetPath,
                   width: 40, height: 40),
-              title: Text('Giao hàng thu tiền (COD)'),
-              subtitle: paymentSubtitle.isNotEmpty
-                  ? Text(paymentSubtitle, style: TextStyle(fontSize: 12))
-                  : null,
+              title:  Text(paymentInfo.title),
+              subtitle: paymentInfo.subtitle == ''
+                  ? const Text('')
+                  : Text('${paymentInfo.subtitle}', style: const TextStyle(fontSize: 12)),
             ),
           ),
           Padding(
@@ -173,10 +226,10 @@ class _PayScreen3State extends State<PayScreen3> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.fromBorderSide(
+                border: const Border.fromBorderSide(
                     BorderSide(color: Color.fromARGB(255, 174, 172, 172))),
               ),
-              child: Padding(
+              child:  Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,32 +237,32 @@ class _PayScreen3State extends State<PayScreen3> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Tổng giá trị thanh toán:',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '40.000 đ',
-                          style: TextStyle(fontSize: 14),
+                          '${paymentInfo.totalPrice} đ',
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ],
                     ),
-                    Row(
+                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Giá trị đơn hàng:',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '40.000 đ',
-                          style: TextStyle(fontSize: 14),
+                          '${paymentInfo.totalPrice} đ',
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -223,7 +276,7 @@ class _PayScreen3State extends State<PayScreen3> {
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -246,7 +299,7 @@ class _PayScreen3State extends State<PayScreen3> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.fromBorderSide(
+                border: const Border.fromBorderSide(
                     BorderSide(color: Color.fromARGB(255, 174, 172, 172))),
               ),
               child: WebViewWidget(controller: _webViewController),
@@ -261,12 +314,12 @@ class _PayScreen3State extends State<PayScreen3> {
                 child: ElevatedButton(
                   onPressed: widget.nextStep,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                    backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Thanh toán',
                     style: TextStyle(
                       color: Colors.white,

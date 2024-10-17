@@ -5,24 +5,18 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class OrderApiService {
-  final String baseUrl =
-      "https://imp-model-widely.ngrok-free.app/api/hoadon/getHoaDonByUserId/66e29eef4957e0380722e081";
-
-  Future<List<OrderModel>> fetchOrder() async {
+  Future<List<OrderModel>> fetchOrder(String userId) async {
+    final String baseUrl =
+        "https://imp-model-widely.ngrok-free.app/api/hoadon/getHoaDonByUserId/$userId";
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
       try {
         // In ra toàn bộ phản hồi để kiểm tra
-        print('Response body: ${response.body}');
+        print('Response body order: ${response.body}');
 
         // Giải mã JSON nhận được
         List<dynamic> orderDataList = json.decode(response.body);
-
-        // Kiểm tra nếu dữ liệu không phải là một mảng
-        if (orderDataList is! List) {
-          throw Exception('Invalid data format: Expected a list');
-        }
 
         // Chuyển đổi mảng JSON thành danh sách OrderModel
         return orderDataList.map((data) => OrderModel.fromJson(data)).toList();
@@ -45,7 +39,7 @@ class OrderApiService {
     required List<ChiTietGioHang> selectedItems,
     // required String YeuCauNhanHang,
   }) async {
-    final String url =
+    const String url =
         "https://imp-model-widely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
 
     final Map<String, dynamic> body = {
@@ -87,12 +81,12 @@ class OrderApiService {
     }
   }
 
-
-   Future<OrderModel> updateTransactionHoaDon({
+  Future<OrderModel> updateTransactionHoaDon({
     required String hoadonId,
     required String transactionId,
   }) async {
-    final String url = "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+    final String url =
+        "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final Map<String, dynamic> body = {
       'transactionId': transactionId,
@@ -111,8 +105,12 @@ class OrderApiService {
 
     if (response.statusCode == 200) {
       try {
-        final data = json.decode(response.body);
-        return OrderModel.fromJson(data);
+        final decodedResponse = json.decode(response.body);
+        if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
+          return OrderModel.fromJson(decodedResponse['data']);
+        } else {
+          throw Exception('API returned error: ${decodedResponse['message']}');
+        }
       } catch (e) {
         print('Error decoding JSON: $e');
         throw Exception('Failed to decode JSON');
@@ -122,4 +120,66 @@ class OrderApiService {
       throw Exception('Failed to update HoaDon');
     }
   }
+
+  Future<dynamic> checkDonHangBaoKim({
+    required String orderId,
+  }) async {
+    final String url =
+        'https://imp-model-widely.ngrok-free.app/api/hoadon/Checkdonhangbaokim/$orderId';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('Check Order Response Status: ${response.statusCode}');
+    print('Check Order Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      try {
+        final data = json.decode(response.body);
+        return data;
+      } catch (e) {
+        print('Error decoding JSON: $e');
+        throw Exception('Failed to decode JSON');
+      }
+    } else {
+      print('Failed to check order: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to check order');
+    }
+  }
+
+    Future<OrderModel> updateTrangThaiHoaDon({
+    required String hoadonId,
+  }) async {
+    final String url =
+        "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+
+    final response = await http.post(
+      Uri.parse(url),);
+
+
+    print('Response Status: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      try {
+        final decodedResponse = json.decode(response.body);
+        if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
+          return OrderModel.fromJson(decodedResponse['data']);
+        } else {
+          throw Exception('API returned error: ${decodedResponse['message']}');
+        }
+      } catch (e) {
+        print('Error decoding JSON: $e');
+        throw Exception('Failed to decode JSON');
+      }
+    } else {
+      print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to update HoaDon');
+    }
+  }
+
 }

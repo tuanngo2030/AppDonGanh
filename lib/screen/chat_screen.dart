@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -42,7 +43,49 @@ class _ChatScreenState extends State<ChatScreen> {
 
       socket.onConnect((data) => print("CONNECT"));
       print("Socket connected: ${socket.connected}");
+
+      
     }
+
+
+     void sendMessage(String text) {
+    if (text.isEmpty) return;
+
+    final message = {
+      'message': text,
+      'time': DateFormat('HH:mm').format(DateTime.now()),
+      'isUserMessage': true,
+    };
+    // addMessage(message, isUserMessage: true);
+
+    socket.emit('sendMessage', {
+      // 'conversationId': widget.conversationId,
+      'message': text,
+    });
+
+    _controller.clear();
+    _scrollToBottom();
+  }
+
+  void addMessage(String text, {required bool isUserMessage}) {
+    final message = {
+      'message': text,
+      'time': DateFormat('HH:mm').format(DateTime.now()),
+      'isUserMessage': isUserMessage,
+    };
+
+    setState(() {
+      messages.insert(0, message);
+    });
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
 
 
   @override

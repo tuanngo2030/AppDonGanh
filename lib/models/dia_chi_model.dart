@@ -22,13 +22,13 @@ class diaChiList {
   // Convert JSON to DiaChi
   factory diaChiList.fromJson(Map<String, dynamic> json) {
     return diaChiList(
-      id: json['_id'] as String?,
-      name: json['Name'] as String?, // Chỉnh sửa tên trường
-      soDienThoai: json['SoDienThoai'] as String?, // Chỉnh sửa tên trường
-      tinhThanhPho: json['tinhThanhPho'] as String?,
-      quanHuyen: json['quanHuyen'] as String?,
-      phuongXa: json['phuongXa'] as String?,
-      duongThon: json['duongThon'] as String?,
+      id: json['_id'] as String? ?? '',
+      name: json['Name'] as String? ?? '', // Chỉnh sửa tên trường
+      soDienThoai: json['SoDienThoai'] as String? ?? '', // Chỉnh sửa tên trường
+      tinhThanhPho: json['tinhThanhPho'] as String? ?? '',
+      quanHuyen: json['quanHuyen'] as String? ?? '',
+      phuongXa: json['phuongXa'] as String? ?? '',
+      duongThon: json['duongThon'] as String? ?? '',
       isDeleted: json['isDeleted'] as bool? ?? false,
     );
   }

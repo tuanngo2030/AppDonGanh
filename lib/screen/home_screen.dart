@@ -92,9 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                         child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/search_screen');
-                        },
+                      onTap: () {
+                        Navigator.pushNamed(context, '/search_screen');
+                      },
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
@@ -123,21 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                    )
-                        // TextField(
-                        //   decoration: InputDecoration(
-                        //     prefixIcon: Padding(
-                        //       padding: const EdgeInsets.all(5),
-                        //       child: Image.asset("lib/assets/ic_search.png"),
-                        //     ),
-                        //     hintText: "Tìm kiếm sản phẩm",
-                        //     border: OutlineInputBorder(
-                        //       borderRadius: BorderRadius.circular(25),
-                        //     ),
-                        //     contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        //   ),
-                        // ),
-                        ),
+                    )),
                     SizedBox(width: 8),
                     BadgeWidget(),
                   ],
@@ -241,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Category
-                Container(height: 120, child: CategoryWidget()),
+                SizedBox(height: 120, child: CategoryWidget()),
 
                 Row(
                   children: [
@@ -286,6 +272,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
 
                       List<ProductModel> products = snapshot.data!;
+                      List<ProductModel> activeProducts = products
+                          .where((product) => product.tinhTrang != 'Đã xóa')
+                          .toList();
+
+                      if (activeProducts.isEmpty) {
+                        return Center(
+                            child: Text('Không có sản phẩm nào để hiển thị'));
+                      }
                       return GridView.builder(
                         shrinkWrap: true,
                         physics:
@@ -295,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisSpacing: 20,
                             mainAxisSpacing: 10,
                             childAspectRatio: 0.7),
-                        itemCount: products.length,
+                        itemCount: activeProducts.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () {
@@ -304,20 +298,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => DetailProductScreen(
-                                          product: products[index])));
+                                          product: activeProducts[index])));
                             },
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Flexible(
                                   child: Stack(children: [
-                                    Container(
+                                    SizedBox(
                                       height: 150,
                                       width: 200,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
                                         child: Image.network(
-                                          products[index].imageProduct,
+                                          activeProducts[index].imageProduct,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -339,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              "- ${products[index].phanTramGiamGia}%",
+                                              "- ${activeProducts[index].phanTramGiamGia}%",
                                               style: TextStyle(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w500),
@@ -380,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          products[index].nameProduct,
+                                          activeProducts[index].nameProduct,
                                           style: TextStyle(
                                             fontSize: 17,
                                             overflow: TextOverflow.ellipsis,
@@ -413,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Row(
                                     children: [
                                       Text(
-                                        '${products[index].donGiaBan} đ/kg',
+                                        '${activeProducts[index].donGiaBan} đ/kg',
                                         style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w400),
@@ -433,7 +427,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 35,
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 1.5)),
+                                          border: Border.fromBorderSide(
+                                              BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.5)),
                                           color: Color.fromRGBO(41, 87, 35, 1),
                                           borderRadius:
                                               BorderRadius.circular(20)),
@@ -441,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Expanded(
                                             flex: 2,
-                                            child: Container(
+                                            child: SizedBox(
                                                 width: 60,
                                                 child: Icon(
                                                   Icons.shopping_cart_outlined,
@@ -458,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           Expanded(
                                             flex: 3,
                                             child: Center(
-                                              child: Container(
+                                              child: SizedBox(
                                                 width: 100,
                                                 child: Text(
                                                   'Mua Ngay',

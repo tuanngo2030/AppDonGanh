@@ -6,7 +6,6 @@ import 'package:don_ganh_app/models/variant_model.dart';
 class OrderModel {
   final String id;
   final String userId;
-  // final String orderId;
   final diaChiList diaChi;
   final int TrangThai;
   final bool thanhToan;
@@ -15,12 +14,13 @@ class OrderModel {
   final int transactionId;
   final List<ChiTietHoaDon>? chiTietHoaDon;
   final String GhiChu;
-  final String YeuCauNhanHang;
+  // final String YeuCauNhanHang;
   final String payment_url;
   final String redirect_url;
   final int order_id;
   final DateTime expiresAt;
   final DateTime NgayTao;
+  final String mrc_order_id;
 
   OrderModel({
     required this.id,
@@ -34,12 +34,13 @@ class OrderModel {
     required this.transactionId,
     required this.chiTietHoaDon,
     required this.GhiChu,
-    required this.YeuCauNhanHang,
+    // required this.YeuCauNhanHang,
     required this.NgayTao,
     required this.payment_url,
     required this.redirect_url,
     required this.order_id,
     required this.expiresAt,
+    required this.mrc_order_id,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -47,8 +48,19 @@ class OrderModel {
     var chiTietHoaDonFromJson = json['chiTietHoaDon'] as List<dynamic>? ?? [];
 
     List<ChiTietHoaDon> listCart = chiTietHoaDonFromJson
-        .map((item) => ChiTietHoaDon.fromJson(item as Map<String, dynamic>))
+        .map((item) => item is Map<String, dynamic>
+            ? ChiTietHoaDon.fromJson(item)
+            : ChiTietHoaDon.fromJson({}))
         .toList();
+
+    // Safely handle diaChi
+    diaChiList diaChi;
+    if (json['diaChi'] is Map<String, dynamic>) {
+      diaChi = diaChiList.fromJson(json['diaChi']);
+    } else {
+      diaChi =
+          diaChiList(); // Provide a default constructor or handle accordingly
+    }
 
     // Ensure proper parsing of nested structures
     return OrderModel(
@@ -56,26 +68,23 @@ class OrderModel {
       userId: json['userId'] is String
           ? json['userId']
           : (json['userId'] != null
-              ? json['userId']['id']
+              ? json['userId']['_id']
               : ''), // If nested, access id
-      diaChi: diaChiList.fromJson(json['diaChi'] as Map<String, dynamic>),
+      diaChi: diaChi,
       TongTien: json['TongTien'] ?? 0,
       TrangThai: json['TrangThai'] ?? 0,
       thanhToan: json['ThanhToan'] ?? false,
       chiTietHoaDon: listCart,
       GhiChu: json['GhiChu'] ?? '',
       transactionId: json['transactionId'] ?? 0,
-      khuyenmaiId: json['khuyenmaiId'],
-      YeuCauNhanHang: json['YeuCauNhanHang'] ?? '', // Default empty string
-      NgayTao:
-          DateTime.tryParse(json['NgayTao'] ?? DateTime.now().toString()) ??
-              DateTime.now(),
+      khuyenmaiId: json['khuyenmaiId'] ?? '',
+      // YeuCauNhanHang: json['YeuCauNhanHang'] ?? '',
+      NgayTao: DateTime.tryParse(json['NgayTao'] ?? '') ?? DateTime.now(),
       payment_url: json['payment_url'] ?? '',
       redirect_url: json['redirect_url'] ?? '',
       order_id: json['order_id'] ?? 0,
-      expiresAt:
-          DateTime.tryParse(json['expiresAt'] ?? DateTime.now().toString()) ??
-              DateTime.now(),
+      expiresAt: DateTime.tryParse(json['expiresAt'] ?? '') ?? DateTime.now(),
+      mrc_order_id: json['mrc_order_id'] ?? '',
     );
   }
 
@@ -91,7 +100,7 @@ class OrderModel {
       'transactionId': transactionId,
       'chiTietHoaDon': chiTietHoaDon?.map((item) => item.toJson()).toList(),
       'GhiChu': GhiChu,
-      'YeuCauNhanHang': YeuCauNhanHang,
+      // 'YeuCauNhanHang': YeuCauNhanHang,
       'NgayTao': NgayTao.toIso8601String(),
       'payment_url': payment_url,
       'redirect_url': redirect_url,
@@ -102,11 +111,13 @@ class OrderModel {
 }
 
 class ChiTietHoaDon {
+  final String id;
   final String bienThe;
   final int soLuong;
   final int donGia;
 
   ChiTietHoaDon({
+    required this.id,
     required this.bienThe,
     required this.soLuong,
     required this.donGia,
@@ -114,7 +125,8 @@ class ChiTietHoaDon {
 
   factory ChiTietHoaDon.fromJson(Map<String, dynamic> json) {
     return ChiTietHoaDon(
-      bienThe: json['idBienThe'] as String? ?? '',
+      id : json['_id'] ?? '',
+      bienThe: json['idBienThe'] is String ? json['idBienThe'] : '',
       soLuong: json['soLuong'] as int? ?? 0,
       donGia: json['donGia'] as int? ?? 0,
     );

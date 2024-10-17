@@ -3,6 +3,7 @@ import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/screen/oder_status_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OderScreen extends StatefulWidget {
   const OderScreen({super.key});
@@ -12,38 +13,52 @@ class OderScreen extends StatefulWidget {
 }
 
 class _OderScreenState extends State<OderScreen> {
-  late Future<List<OrderModel>> orderModel;
+  late Future<List<OrderModel>> orderModel = Future.value([]); // Initialize with an empty Future
+  String? userId;
 
   @override
   void initState() {
     super.initState();
-    orderModel = OrderApiService().fetchOrder();
+    _loadUserId(); // Load userId
+  }
+
+   Future<void> _loadUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    if (userId != null) {
+      setState(() {
+        orderModel = OrderApiService().fetchOrder(userId!); // Fetch orders when userId is available
+      });
+    } else {
+      // Handle the case where userId is null
+      // For example, navigate to a login screen or show an error message
+      setState(() {
+        orderModel = Future.value([]); // Initialize with an empty list if no userId
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Scaffold(
-      appBar: AppBar(
-        title: Text('Đơn hàng'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-            child: Column(
-          children: [
-            FutureBuilder<List<OrderModel>>(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Đơn hàng'),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              FutureBuilder<List<OrderModel>>(
                 future: orderModel,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Lỗi: ${snapshot.error}'));
-                  } else if (!snapshot.hasData ||
-                      snapshot.data == null ||
-                      snapshot.data!.isEmpty) {
-                    return Center(child: Text('Không tìm thấy hình ảnh'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Không tìm thấy đơn hàng'));
                   }
 
                   List<OrderModel> order = snapshot.data!;
@@ -53,7 +68,7 @@ class _OderScreenState extends State<OderScreen> {
                       itemBuilder: (context, index) {
                         DateTime orderDate = order[index].NgayTao;
 
-                        // Định dạng ngày
+                        // Format date
                         String formattedDate =
                             DateFormat('dd/MM/yyyy').format(orderDate);
                         return GestureDetector(
@@ -76,24 +91,22 @@ class _OderScreenState extends State<OderScreen> {
                                       children: [
                                         Expanded(
                                             child: Text(
-                                          '${order[index].id}',
+                                          order[index].id,
                                           overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(fontSize: 15),
+                                          style: const TextStyle(fontSize: 15),
                                         )),
-                                        SizedBox(width: 8),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          '$formattedDate',
-                                          style: TextStyle(
+                                          formattedDate,
+                                          style: const TextStyle(
                                               fontWeight: FontWeight.w600,
-                                              color: const Color.fromARGB(
+                                              color: Color.fromARGB(
                                                   255, 155, 154, 154)),
                                         )
                                       ],
                                     ),
                                   ),
-                                  Divider(
-                                    thickness: 1,
-                                  ),
+                                  const Divider(thickness: 1),
                                   Padding(
                                     padding: const EdgeInsets.all(20),
                                     child: Row(
@@ -101,39 +114,39 @@ class _OderScreenState extends State<OderScreen> {
                                         Expanded(
                                             child: Row(
                                           children: [
-                                            Text(
+                                            const Text(
                                               'Số lượng: ',
                                               style: TextStyle(
                                                   fontWeight: FontWeight.w500,
-                                                  color: const Color.fromARGB(
+                                                  color: Color.fromARGB(
                                                       255, 155, 154, 154)),
                                             ),
                                             Text(
                                               '${order[index].TongTien}',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.black),
                                             )
                                           ],
                                         )),
-                                        SizedBox(width: 8),
-                                        Text(
+                                        const SizedBox(width: 8),
+                                        const Text(
                                           'Tổng tiền: ',
                                           style: TextStyle(
                                               fontWeight: FontWeight.w500,
-                                              color: const Color.fromARGB(
+                                              color: Color.fromARGB(
                                                   255, 155, 154, 154)),
                                         ),
                                         Text(
                                           '${order[index].TongTien}',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontWeight: FontWeight.w600,
                                               color: Colors.black),
                                         )
                                       ],
                                     ),
                                   ),
-                                  Container(
+                                  SizedBox(
                                     height: 100,
                                     child: Row(
                                       children: [
@@ -141,17 +154,12 @@ class _OderScreenState extends State<OderScreen> {
                                           padding:
                                               const EdgeInsets.only(left: 20),
                                           child: ElevatedButton(
-                                            onPressed: () {},
-                                            child: Text(
-                                              'Detail',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w600),
-                                            ),
+                                            onPressed: () {}, // Handle detail action here
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
-                                                  Color.fromRGBO(41, 87, 35, 1),
+                                                  const Color.fromRGBO(41, 87, 35, 1),
                                               foregroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(
+                                              shape: const RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.only(
                                                   bottomLeft:
                                                       Radius.circular(10),
@@ -162,15 +170,20 @@ class _OderScreenState extends State<OderScreen> {
                                                 ),
                                               ),
                                             ),
+                                            child: const Text(
+                                              'Detail',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600),
+                                            ),
                                           ),
                                         ),
-                                        SizedBox(width: 10),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                             child: Padding(
                                           padding:
                                               const EdgeInsets.only(right: 20),
                                           child: Text(
-                                            '${TrangThai(order[index].TrangThai)}',
+                                            TrangThai(order[index].TrangThai),
                                             textAlign: TextAlign.right,
                                           ),
                                         )),
@@ -183,11 +196,13 @@ class _OderScreenState extends State<OderScreen> {
                       },
                     ),
                   );
-                }),
-          ],
-        )),
+                },
+              ),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   String TrangThai(int trangThai) {

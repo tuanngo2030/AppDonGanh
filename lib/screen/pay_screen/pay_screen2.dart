@@ -15,30 +15,41 @@ class PayScreen2 extends StatefulWidget {
 }
  
 class _PayScreen2State extends State<PayScreen2> {
-  String? selectedPaymentMethod;
+    String? selectedPaymentMethod;
+    String payment_url = '';
     final OrderApiService _orderApiService = OrderApiService();
     bool _isProcessing = false;
 
-   Future<void> _updateTransaction(String _hoadonId, String _transactionId) async {
+   Future<void> _updateTransaction(String hoadonId, String transactionId, String assetPath, String title, String? subtitle) async {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
     setState(() {
       _isProcessing = true;
     });
 
     try {
-      OrderModel updatedOrder = await _orderApiService.updateTransactionHoaDon(
-        hoadonId: _hoadonId,
-        transactionId: _transactionId,
+      OrderModel? updatedOrder = await _orderApiService.updateTransactionHoaDon(
+        hoadonId: hoadonId,
+        transactionId: transactionId,
       );
 
-      print("Updated Order ID: ${updatedOrder.id}");
+      print("Updated Order ID: ${updatedOrder.payment_url}");
+       paymentInfo.paymentMehtod(
+          assetPath: assetPath, 
+          title: title, 
+          subtitle: subtitle,
+          payment_url: updatedOrder.payment_url
+        );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
       );
+
+      widget.nextStep();
+
     } catch (e) {
       print('Error updating transaction: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi cập nhật giao dịch.')),
+        const SnackBar(content: Text('Lỗi khi cập nhật giao dịch.')),
       );
     } finally {
       setState(() {
@@ -53,14 +64,14 @@ class _PayScreen2State extends State<PayScreen2> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
-                  text: TextSpan(
+                  text: const TextSpan(
                     children: [
                       TextSpan(
                         text: 'Mã đơn hàng: ',
@@ -87,7 +98,7 @@ class _PayScreen2State extends State<PayScreen2> {
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Người nhận hàng: ',
                         style: TextStyle(
                           fontSize: 14,
@@ -97,7 +108,7 @@ class _PayScreen2State extends State<PayScreen2> {
                       ),
                       TextSpan(
                         text: '${paymentInfo.hoTen},${paymentInfo.soDienThoai}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -112,7 +123,7 @@ class _PayScreen2State extends State<PayScreen2> {
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Địa chỉ nhận: ',
                         style: TextStyle(
                           fontSize: 14,
@@ -123,7 +134,7 @@ class _PayScreen2State extends State<PayScreen2> {
                       TextSpan(
                         text:
                             '${paymentInfo.duongThonXom}, ${paymentInfo.phuongXa}, ${paymentInfo.quanHuyen}, ${paymentInfo.tinhThanhPho}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -133,8 +144,8 @@ class _PayScreen2State extends State<PayScreen2> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 25, bottom: 20),
+              const Padding(
+                padding: EdgeInsets.only(top: 25, bottom: 20),
                 child: Text(
                   'Phương thức thanh toán',
                   style: TextStyle(
@@ -156,12 +167,12 @@ class _PayScreen2State extends State<PayScreen2> {
                 child: ElevatedButton(
                   onPressed: widget.nextStep,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                    backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Tiếp tục',
                     style: TextStyle(
                       color: Colors.white,
@@ -182,7 +193,7 @@ class _PayScreen2State extends State<PayScreen2> {
   // Widget function to build Payment Methods List
   Widget buildPaymentMethodsList() {
     return ListView(
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       children: [
         buildPaymentMethod(
@@ -193,6 +204,7 @@ class _PayScreen2State extends State<PayScreen2> {
         buildPaymentMethod(
           assetPath: 'lib/assets/Baokim-logo.png',
           title: 'Bảo Kim',
+          subtitle: 'Chuyển tiền nhanh chóng',
           value: 'Qr',
         ),
       ],
@@ -228,7 +240,8 @@ class _PayScreen2State extends State<PayScreen2> {
         String hoadonId = paymentInfo.order_id;
         String transactionId = '151';
 
-        await _updateTransaction(hoadonId, transactionId);
+        await _updateTransaction(hoadonId, transactionId, assetPath, title, subtitle);
+       
         
       } else {
         setState(() {
@@ -237,12 +250,12 @@ class _PayScreen2State extends State<PayScreen2> {
       }
     },
     child: Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         leading: Image.asset(assetPath, width: 40, height: 40),
         title: Text(title),
         subtitle: subtitle != null
-            ? Text(subtitle, style: TextStyle(fontSize: 12))
+            ? Text(subtitle, style: const TextStyle(fontSize: 12))
             : null,
       ),
     ),
@@ -276,7 +289,7 @@ class _PayScreen2State extends State<PayScreen2> {
             leading: Image.asset(assetPath, width: 40, height: 40),
             title: Text(paymentDetails),
             subtitle: paymentSubtitle.isNotEmpty
-                ? Text(paymentSubtitle, style: TextStyle(fontSize: 12))
+                ? Text(paymentSubtitle, style: const TextStyle(fontSize: 12))
                 : null,
           ),
         ),
@@ -286,14 +299,14 @@ class _PayScreen2State extends State<PayScreen2> {
               width: double.infinity,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.fromBorderSide(
+                  border: const Border.fromBorderSide(
                       BorderSide(color: Color.fromARGB(179, 177, 174, 174)))),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     flex: 7, 
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(8.0),
                       child: Text('Mã'),
                     )
                   ),
@@ -303,23 +316,23 @@ class _PayScreen2State extends State<PayScreen2> {
                       flex: 3,
                       child: ElevatedButton(
                           onPressed: () {},
-                          child: Text('Chọn mã'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+                            backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                             foregroundColor: Colors.white,
-                          )),
+                          ),
+                          child: const Text('Chọn mã')),
                     ),
                   ),
                 ],
               )),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
+        const Padding(
+          padding: EdgeInsets.only(top: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'Tổng giá trị thanh toán',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),

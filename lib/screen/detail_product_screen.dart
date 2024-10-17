@@ -22,6 +22,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   int donGia = 0;
   String selectedVariantId = '';
   int quantity = 1;
+  int soluong = 0;
   late Future<List<VariantModel>> variantModel;
 
   String mainImageUrl = '';
@@ -30,6 +31,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   @override
   void initState() {
     super.initState();
+    donGia = widget.product.donGiaBan;
+    soluong = widget.product.soLuongHienTai;
     mainImageUrl = widget.product.imageProduct;
     supplementaryImages = widget.product.ImgBoSung.map((img) => img.url).toList();
     variantModel = VariantApiService().getVariant(widget.product.id);
@@ -117,7 +120,7 @@ void _swapImage(int index) {
         child: SafeArea(
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 height: 250,
                 width: double.infinity,
                 child: Stack(
@@ -190,7 +193,7 @@ void _swapImage(int index) {
                               Color.fromRGBO(217, 217, 217, 1).withOpacity(0.3),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: Container(
+                        child: SizedBox(
                           height: 50,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
@@ -274,7 +277,7 @@ void _swapImage(int index) {
                             return StatefulBuilder(builder:
                                 (BuildContext context,
                                     StateSetter setModalState) {
-                              return Container(
+                              return SizedBox(
                                 height: 500,
                                 child: Column(
                                   children: [
@@ -311,11 +314,11 @@ void _swapImage(int index) {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                '${widget.product.donGiaBan} đ/kg',
+                                                '$donGia đ/kg',
                                                 style: TextStyle(fontSize: 16),
                                               ),
                                               Text(
-                                                'Kho: ${widget.product.soLuongHienTai} sản phẩm',
+                                                'Kho: $soluong sản phẩm',
                                                 style: TextStyle(fontSize: 16),
                                               ),
                                             ],
@@ -362,8 +365,8 @@ void _swapImage(int index) {
                                                     selectedVariantId =
                                                         variant[index].id;
                                                     donGia = variant[index].gia;
-                                                    print(selectedVariantId +
-                                                        ' $donGia');
+                                                    soluong = variant[index].soLuong;
+                                                    print('$selectedVariantId $donGia');
                                                   });
                                                 },
                                                 child: Container(
@@ -391,7 +394,7 @@ void _swapImage(int index) {
                                                             const EdgeInsets
                                                                 .all(4.0),
                                                         child: Text(
-                                                            '${item.giaTriThuocTinh.GiaTri}'),
+                                                            item.giaTriThuocTinh.GiaTri),
                                                       );
                                                     }).toList(),
                                                   ),
@@ -405,7 +408,7 @@ void _swapImage(int index) {
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           left: 20, right: 20),
-                                      child: Container(
+                                      child: SizedBox(
                                         height: 50,
                                         width: double.infinity,
                                         child: Row(
@@ -414,7 +417,7 @@ void _swapImage(int index) {
                                           children: [
                                             Expanded(child: Text("Số lượng")),
                                             SizedBox(width: 8),
-                                            Container(
+                                            SizedBox(
                                               width: 150,
                                               height: 30,
                                               child: Row(
@@ -478,7 +481,6 @@ void _swapImage(int index) {
                                                   addToCart(selectedVariantId,
                                                       donGia);
                                                 },
-                                          child: Text('Thêm Vào Giỏ Hàng'),
                                           style: ElevatedButton.styleFrom(
                                             minimumSize: Size.fromHeight(60),
                                             backgroundColor:
@@ -491,6 +493,7 @@ void _swapImage(int index) {
                                                   BorderRadius.circular(0),
                                             ),
                                           ),
+                                          child: Text('Thêm Vào Giỏ Hàng'),
                                         ),
                                       ),
                                     )
@@ -510,7 +513,7 @@ void _swapImage(int index) {
                             borderRadius: BorderRadius.circular(20)),
                         child: Row(
                           children: [
-                            Container(
+                            SizedBox(
                                 width: 60,
                                 child: Icon(
                                   Icons.shopping_cart_outlined,
@@ -524,7 +527,7 @@ void _swapImage(int index) {
                               ),
                             ),
                             Center(
-                              child: Container(
+                              child: SizedBox(
                                 width: 100,
                                 child: Text(
                                   'Mua Ngay',
