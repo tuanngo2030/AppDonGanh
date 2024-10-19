@@ -1,9 +1,12 @@
+import 'package:don_ganh_app/api_services/login_with_api_google.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/user_model.dart';
+import 'package:don_ganh_app/screen/ban_la.dart';
 import 'package:don_ganh_app/screen/manageraccount_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final UserApiService _apiService = UserApiService(); // Khởi tạo dịch vụ API
-
+  final LoginWithApiGoogle _apiGoogle = LoginWithApiGoogle();
   // Biến trạng thái lỗi
   String? _emailError;
   String? _passwordError;
@@ -254,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      print("Login with google");
+                      signIn();
                     },
                     child: Container(
                       child: Image.asset('lib/assets/gg_icon.png'),
@@ -310,4 +313,34 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+Future<void> signIn() async {
+  final user = await LoginWithApiGoogle.login();
+  
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đăng nhập thất bại')));
+    return;
+  } 
+
+  try {
+    // Gọi API để đăng ký người dùng Google
+    await _apiGoogle.registerUserGoogle(user.displayName ?? '', user.email, user.id);
+
+    // Lưu thông tin người dùng vào SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userDisplayName', user.displayName ?? '');
+    await prefs.setString('userEmail', user.email);
+    await prefs.setString('googleId', user.id);
+
+    // Điều hướng đến màn hình BanLa
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => BanLa(),
+    ));
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $error')));
+  }
 }
+
+
+}
+
+
