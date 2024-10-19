@@ -280,7 +280,7 @@ Navigator.pushNamed(
                       )),
                   InkWell(
                       onTap: () async {
-                        LoginWithApiGoogle.launchURL(LoginWithApiGoogle.getGoogleAuthUrl());
+                      
                       },
                       child: Container(
                         child: Image.asset('lib/assets/gg_icon.png'),

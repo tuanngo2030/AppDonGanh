@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/user_model.dart';
+import 'package:don_ganh_app/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -158,9 +159,22 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
               title: Text('Đăng xuất'),
-              onTap: () {
-                
-              },
+           // Trong phần onTap của danh sách đăng xuất
+onTap: () async {
+  // Xóa thông tin người dùng từ SharedPreferences
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('userDisplayName');
+  await prefs.remove('userEmail');
+  await prefs.remove('userId');
+
+  // Điều hướng về màn hình đăng nhập
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => LoginScreen()),
+    (Route<dynamic> route) => false, // Xóa tất cả các route trước đó
+  );
+},
+
             ),
           ],
         ),
