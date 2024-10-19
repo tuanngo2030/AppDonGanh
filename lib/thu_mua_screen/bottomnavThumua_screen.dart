@@ -20,9 +20,9 @@ class _BottomnavthumuaScreenState extends State<BottomnavthumuaScreen> {
   }
 
   final List screens = [
-    ChatScreen(title: 'Chat',),
-    HomeThumua(),
-    ProfileThumua(),
+    // ChatScreen(title: 'Chat',),
+    const HomeThumua(),
+    const ProfileThumua(),
   ];
 
   @override

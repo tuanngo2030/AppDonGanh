@@ -53,8 +53,49 @@ class _PayScreen1State extends State<PayScreen1> {
   @override
   void initState() {
     super.initState();
-    // _initializeDropdowns();
-    // _loadSavedAddress(); // Load saved address from SharedPreferences if available
+    _fetchDefaultAddress();
+  }
+
+    Future<void> _fetchDefaultAddress() async {
+    try {
+      // Giả sử có một service để lấy danh sách địa chỉ từ API
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? storedUserId = prefs.getString('userId');
+      
+      if (storedUserId != null) {
+        List<diaChiList> addresses =
+            await DiaChiApiService().getDiaChiByUserId(storedUserId);
+
+        // Nếu có địa chỉ trong danh sách, chọn địa chỉ đầu tiên làm mặc định
+        if (addresses.isNotEmpty) {
+          setState(() {
+            final firstAddress = addresses[0];
+            selectedTinhThanhPho = firstAddress.tinhThanhPho ?? '';
+            selectedQuanHuyen = firstAddress.quanHuyen ?? '';
+            selectedPhuongXa = firstAddress.phuongXa ?? '';
+
+            hoTenController = firstAddress.name ?? '';
+            soDienThoaiController = firstAddress.soDienThoai ?? '';
+            duongThonController = firstAddress.duongThon ?? '';
+            _isLoading = false;  // Dừng hiển thị loading khi đã có dữ liệu
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
+      );
+    }
   }
 
   @override
@@ -81,30 +122,6 @@ class _PayScreen1State extends State<PayScreen1> {
       _productsFetched = true;
     }
   }
-
-  // Future<void> _initializeDropdowns() async {
-  //   try {
-  //     _tinhThanhPhoList = await dcApiService().getProvinces();
-  //     print('Fetched Provinces: $_tinhThanhPhoList');
-
-  //     if (!mounted) return;
-
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching provinces: $e');
-
-  //     if (!mounted) return;
-
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Lỗi khi tải danh sách Tỉnh/Thành Phố.')),
-  //     );
-  //   }
-  // }
 
   // Fetch all products based on selectedItems
   Future<void> _fetchAllProducts() async {
@@ -143,39 +160,7 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Fetch districts based on selected province/city
-  // Future<void> _fetchQuanHuyen(String tinhThanhPho) async {
-  //   try {
-  //     _quanHuyenList = await dcApiService().getDistricts(tinhThanhPho);
-  //     print('Fetched Districts for $tinhThanhPho: $_quanHuyenList');
-  //     setState(() {
-  //       selectedQuanHuyen = null; // Reset when province/city changes
-  //       selectedPhuongXa = null; // Reset when district changes
-  //       _phuongXaList = [];
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching districts: $e');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Lỗi khi tải danh sách Quận/Huyện.')),
-  //     );
-  //   }
-  // }
 
-  // // Fetch wards based on selected district
-  // Future<void> _fetchPhuongXa(String quanHuyen) async {
-  //   try {
-  //     _phuongXaList = await dcApiService().getWards(quanHuyen);
-  //     print('Fetched Wards for $quanHuyen: $_phuongXaList');
-  //     setState(() {
-  //       selectedPhuongXa = null; // Reset when district changes
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching wards: $e');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Lỗi khi tải danh sách Phường/Xã.')),
-  //     );
-  //   }
-  // }
 
   // Show address selection dialog
   Future<void> _showDiaChiDialog() async {
@@ -229,19 +214,6 @@ class _PayScreen1State extends State<PayScreen1> {
                         duongThonController = address.duongThon ?? '';
                       });
 
-                      // Update district and ward lists based on selected address
-                      // if (selectedTinhThanhPho != null &&
-                      //     selectedTinhThanhPho!.isNotEmpty) {
-                      //   await _fetchQuanHuyen(selectedTinhThanhPho!);
-                      // }
-                      // if (selectedQuanHuyen != null &&
-                      //     selectedQuanHuyen!.isNotEmpty) {
-                      //   await _fetchPhuongXa(selectedQuanHuyen!);
-                      // }
-
-                      // // Save selected address to SharedPreferences
-                      // await _saveAddressToPreferences();
-
                       Navigator.of(context).pop();
                     },
                   );
@@ -258,42 +230,6 @@ class _PayScreen1State extends State<PayScreen1> {
       );
     }
   }
-
-  // Save address to SharedPreferences
-  // Future<void> _saveAddressToPreferences() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   await prefs.setString('selectedTinhThanhPho', selectedTinhThanhPho ?? '');
-  //   await prefs.setString('selectedQuanHuyen', selectedQuanHuyen ?? '');
-  //   await prefs.setString('selectedPhuongXa', selectedPhuongXa ?? '');
-  //   await prefs.setString('hoTen', hoTenController.text);
-  //   await prefs.setString('soDienThoai', soDienThoaiController.text);
-  //   await prefs.setString('email', emailController.text);
-  //   await prefs.setString('duongThon', duongThonController.text);
-  //   await prefs.setString('ghiChu', ghiChuController.text);
-  // }
-
-  // Load saved address from SharedPreferences
-  // Future<void> _loadSavedAddress() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     selectedTinhThanhPho = prefs.getString('selectedTinhThanhPho') ?? '';
-  //     selectedQuanHuyen = prefs.getString('selectedQuanHuyen') ?? '';
-  //     selectedPhuongXa = prefs.getString('selectedPhuongXa') ?? '';
-  //     hoTenController.text = prefs.getString('hoTen') ?? '';
-  //     soDienThoaiController.text = prefs.getString('soDienThoai') ?? '';
-  //     emailController.text = prefs.getString('email') ?? '';
-  //     duongThonController.text = prefs.getString('duongThon') ?? '';
-  //     ghiChuController.text = prefs.getString('ghiChu') ?? '';
-  //   });
-
-  //   if (selectedTinhThanhPho != null && selectedTinhThanhPho!.isNotEmpty) {
-  //     await _fetchQuanHuyen(selectedTinhThanhPho!);
-  //   }
-
-  //   if (selectedQuanHuyen != null && selectedQuanHuyen!.isNotEmpty) {
-  //     await _fetchPhuongXa(selectedQuanHuyen!);
-  //   }
-  // }
 
   // Fetch product data
   Future<ProductModel> fetchProduct(String productID) async {
@@ -447,9 +383,6 @@ class _PayScreen1State extends State<PayScreen1> {
 
   @override
   Widget build(BuildContext context) {
-    // Remove the local declaration of selectedItems in build
-    // final List<ChiTietGioHang> selectedItems =
-    //     ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
 
     print('Building PayScreen1');
     print('Selected Items Count: ${selectedItems.length}');

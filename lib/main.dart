@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
         // '/oder_status_screen': (context) => OderStatusScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
         '/bottomThumuan': (context) => const BottomnavthumuaScreen(),
-        '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
+        // '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
         '/oder_review_screen': (context) => const OrderReviewScreen(),
         '/setting_screen': (context) => const SettingScreen(),
         '/search_screen' :(context) => const SearchScreen(),

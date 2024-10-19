@@ -94,17 +94,17 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Giỏ hàng'),
+        title: const Text('Giỏ hàng'),
       ),
       body: FutureBuilder<CartModel>(
         future: cartModelFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Hiển thị loading khi đang tải dữ liệu
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             // Hiển thị thông báo lỗi nếu có lỗi xảy ra
-            return Center(
+            return const Center(
               child: Text(
                 'Đã xảy ra lỗi khi tải giỏ hàng.',
                 style: TextStyle(fontSize: 18, color: Colors.red),
@@ -118,20 +118,20 @@ class _CartScreenState extends State<CartScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Giỏ hàng trống',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/bottomnavigation'); // Điều hướng đến trang mua sắm
                       },
-                      child: Text('Tiếp tục mua sắm'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                        backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                         foregroundColor: Colors.white,
                       ),
+                      child: const Text('Tiếp tục mua sắm'),
                     ),
                   ],
                 ),
@@ -150,7 +150,7 @@ class _CartScreenState extends State<CartScreen> {
                           future: fetchProduct(item.variantModel.idProduct),
                           builder: (context, productSnapshot) {
                             if (!productSnapshot.hasData) {
-                              return SizedBox.shrink();
+                              return const SizedBox.shrink();
                             }
 
                             ProductModel product = productSnapshot.data!;
@@ -203,15 +203,15 @@ class _CartScreenState extends State<CartScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '${product.nameProduct}',
-                                              style: TextStyle(
+                                              product.nameProduct,
+                                              style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            SizedBox(height: 4),
+                                            const SizedBox(height: 4),
                                             Row(
                                               children: item
                                                   .variantModel
@@ -222,18 +222,18 @@ class _CartScreenState extends State<CartScreen> {
                                                       const EdgeInsets.only(
                                                           right: 8.0),
                                                   child: Text(
-                                                    '${thuocTinh.giaTriThuocTinh.GiaTri}',
-                                                    style: TextStyle(
+                                                    thuocTinh.giaTriThuocTinh.GiaTri,
+                                                    style: const TextStyle(
                                                       fontSize: 14,
                                                     ),
                                                   ),
                                                 );
                                               }).toList(),
                                             ),
-                                            SizedBox(height: 4),
+                                            const SizedBox(height: 4),
                                             Text('Đơn giá: ${item.donGia} đ/kg'),
-                                            SizedBox(height: 4),
-                                            Container(
+                                            const SizedBox(height: 4),
+                                            SizedBox(
                                               width: double.infinity,
                                               height: 50,
                                               child: Row(
@@ -255,12 +255,12 @@ class _CartScreenState extends State<CartScreen> {
                                                             item.donGia);
                                                       }
                                                     },
-                                                    icon: Icon(Icons.remove),
+                                                    icon: const Icon(Icons.remove),
                                                   ),
                                                   Text(
                                                     "${item.soLuong}",
                                                     textAlign: TextAlign.center,
-                                                    style: TextStyle(
+                                                    style: const TextStyle(
                                                         fontSize: 14),
                                                   ),
                                                   IconButton(
@@ -275,7 +275,7 @@ class _CartScreenState extends State<CartScreen> {
                                                           item.soLuong,
                                                           item.donGia);
                                                     },
-                                                    icon: Icon(Icons.add),
+                                                    icon: const Icon(Icons.add),
                                                   ),
                                                 ],
                                               ),
@@ -286,7 +286,7 @@ class _CartScreenState extends State<CartScreen> {
                                       Align(
                                         alignment: Alignment.topRight,
                                         child: IconButton(
-                                          icon: Icon(Icons.delete),
+                                          icon: const Icon(Icons.delete),
                                           onPressed: () {
                                             removeItem(
                                                 cart.id, item.variantModel.id);
@@ -309,7 +309,7 @@ class _CartScreenState extends State<CartScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
@@ -325,17 +325,17 @@ class _CartScreenState extends State<CartScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   "Tổng tiền hàng:",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   '${calculateTotalPrice()} đ',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 20,
                                       color: Colors.amber),
@@ -361,7 +361,7 @@ class _CartScreenState extends State<CartScreen> {
                                 if (selectedItems.isEmpty) {
                                   // Hiển thị thông báo nếu không có sản phẩm nào được chọn
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text(
                                             'Vui lòng chọn ít nhất một sản phẩm để mua.')),
                                   );
@@ -375,12 +375,12 @@ class _CartScreenState extends State<CartScreen> {
                                   arguments: selectedItems,
                                 );
                               },
-                              child: Text("Mua ngay"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromRGBO(41, 87, 35, 1),
+                                    const Color.fromRGBO(41, 87, 35, 1),
                                 foregroundColor: Colors.white,
                               ),
+                              child: const Text("Mua ngay"),
                             ),
                           )
                         ],
@@ -392,7 +392,7 @@ class _CartScreenState extends State<CartScreen> {
             }
           } else {
             // Nếu không có dữ liệu, hiển thị thông báo giỏ hàng trống
-            return Center(
+            return const Center(
               child: Text(
                 'Giỏ hàng trống',
                 style: TextStyle(fontSize: 18, color: Colors.grey),
