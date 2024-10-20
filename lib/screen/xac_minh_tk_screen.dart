@@ -2,6 +2,8 @@ import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:flutter/material.dart';
 
 class XacMinhTkScreen extends StatefulWidget {
+    final String email;
+      XacMinhTkScreen({required this.email});
   @override
   _XacMinhTkScreen createState() => _XacMinhTkScreen();
 }
@@ -86,7 +88,7 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
                 ),
                 child: Text(
                   'Tiếp theo',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 18,color: Color.fromRGBO(255, 255, 255, 1)),
                 ),
               ),
               SizedBox(height: 20),

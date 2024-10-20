@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
         '/gmail': (context) => const Gmailscreen(),
         '/diachiScreen': (context) => const AddressScreen(),
         '/gioitinh': (context) => const GioitinhScreen(),
-        '/xacminhtk': (context) => XacMinhTkScreen(),
+        // '/xacminhtk': (context) => XacMinhTkScreen(email: ,),
         '/oder_screen': (context) => const OderScreen(),
         // '/oder_status_screen': (context) => OderStatusScreen(),
         '/pay_screen': (context) => PayProcessScreen(),
@@ -98,6 +98,14 @@ class MyApp extends StatelessWidget {
           if (email != null) {
             return MaterialPageRoute(
               builder: (context) => OtpXacMinhTkscreen(email: email),
+            );
+          }
+        }
+             if (settings.name == '/xacminhtk') {
+          final email = settings.arguments as String?;
+          if (email != null) {
+            return MaterialPageRoute(
+              builder: (context) => XacMinhTkScreen(email: email),
             );
           }
         }
