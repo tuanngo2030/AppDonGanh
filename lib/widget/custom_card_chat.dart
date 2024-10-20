@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CustomCardChat extends StatelessWidget {
   const CustomCardChat({super.key, required this.chatModel});
-  final ChatModel chatModel;
+  final Message chatModel;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class CustomCardChat extends StatelessWidget {
               child: Icon(Icons.percent),
             ),
             title: Text(
-              chatModel.name,
+              chatModel.msgByUserId,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold
@@ -31,7 +31,7 @@ class CustomCardChat extends StatelessWidget {
                 Icon(Icons.done_all),
                 SizedBox(width: 3,),
                 Text(
-                  chatModel.currentMessage,
+                  chatModel.text,
                   style: TextStyle(
                     fontSize: 13
                   ),
@@ -39,7 +39,7 @@ class CustomCardChat extends StatelessWidget {
               ],
             ),
 
-            trailing: Text(chatModel.time),
+            trailing: Text('${chatModel.createdAt}'),
           ),
         ],
       ),
