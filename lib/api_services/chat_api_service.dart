@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -52,4 +54,48 @@ class ChatApiService{
       print('Error: $error');
     }
   }
+
+ Future<String?> uploadFile(File file, String type) async {
+  try {
+    String endpoint = 'https://imp-model-widely.ngrok-free.app/api/user/upload_ImageOrVideo';
+    var request = http.MultipartRequest('POST', Uri.parse(endpoint));
+
+    // Thêm file vào request
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        type == 'image' ? 'image' : 'video', // Tên field tương ứng với loại file
+        file.path, // Đường dẫn tới file cần upload
+      ),
+    );
+
+    request.fields['type'] = type;
+
+    // Gửi yêu cầu và nhận phản hồi
+    final response = await request.send();
+    
+    if (response.statusCode == 200) {
+      final responseData = await http.Response.fromStream(response);
+      print('Response data: ${responseData.body}');
+
+      final jsonResponse = jsonDecode(responseData.body);
+      print('JSON Response: $jsonResponse');
+
+      String? url = type == 'image' ? jsonResponse['imageUrl'] : jsonResponse['videoUrl'];
+
+      if (url != null && !url.startsWith('http')) {
+        print('Invalid URL received: $url');
+        return null;
+      }
+
+      return url; // Trả về URL hợp lệ
+    } else {
+      print('Upload failed with status code: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    print('Error uploading file: $e');
+    return null;
+  }
+}
+
 }
