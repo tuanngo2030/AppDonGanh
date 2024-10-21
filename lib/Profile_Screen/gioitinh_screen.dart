@@ -83,7 +83,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
         ),
         title: const Text(
           'Hồ sơ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                 style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,

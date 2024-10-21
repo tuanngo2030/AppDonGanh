@@ -39,9 +39,28 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-            Text(widget.address == null ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ'),
+            appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+            onTap: () {
+               Navigator.pop(context);
+            },
+            child: Image.asset(
+              'lib/assets/arrow_back.png',
+              width: 30,
+              height: 30,
+              color: Color.fromRGBO(41, 87, 35, 1),
+            ),
+          ),
+        ),
+        title: Text(
+          widget.address == null ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ',
+          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -49,7 +68,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
           children: [
             TextField(
               controller: _tenController,
-              decoration: const InputDecoration(labelText: 'Tên'),
+              decoration: const InputDecoration(labelText: 'Họ và tên'),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -108,6 +127,20 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   return;
                 }
 
+                // Kiểm tra xem số điện thoại có đúng 10 chữ số hay không
+                if (_soDienThoaiController.text.length != 10 ||
+                    !_soDienThoaiController.text
+                        .startsWith('0') || // Kiểm tra bắt đầu bằng số 0
+                    !_soDienThoaiController.text
+                        .contains(RegExp(r'^[0-9]+$'))) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0')),
+                  );
+                  return;
+                }
+
                 diaChiList newAddress = diaChiList(
                   tinhThanhPho: _tinhThanhPhoController.text,
                   quanHuyen: _quanHuyenController.text,
@@ -122,10 +155,17 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                     // Tạo địa chỉ mới
                     await DiaChiApiService()
                         .createDiaChi(widget.userId, newAddress);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Thêm địa chỉ thành công')),
+                    );
                   } else {
                     // Cập nhật địa chỉ
                     await DiaChiApiService().updateDiaChi(
                         widget.userId, widget.address!.id!, newAddress);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Cập nhật địa chỉ thành công')),
+                    );
                   }
 
                   // Trả về true để thông báo load lại danh sách

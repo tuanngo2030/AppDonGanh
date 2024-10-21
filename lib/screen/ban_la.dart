@@ -15,6 +15,7 @@ class BanLa extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 // logo
+                SizedBox(height: 100),
                 Image.asset("lib/assets/logo_xinchao.png"),
                 const Text(
                   'Đòn gánh xin chào!',
@@ -27,7 +28,7 @@ class BanLa extends StatelessWidget {
                 ),
                 const SizedBox(height: 10), // Add space between the two texts
                 const Text(
-                  'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
+                  'Ứng dụng giúp cuộc sống dễ dàng hơn, với những nông sản tươi ngon, Đòn gánh sẵn sàng phục vụ bạn mọi nơi.',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white,

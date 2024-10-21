@@ -1,5 +1,6 @@
-import 'package:don_ganh_app/api_services/otp_api_service.dart';
+import 'package:don_ganh_app/api_services/forgotpassword_api.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpScreen extends StatelessWidget {
   final String email;
@@ -14,19 +15,32 @@ class OtpScreen extends StatelessWidget {
   final FocusNode _focusNode3 = FocusNode();
   final FocusNode _focusNode4 = FocusNode();
 
-  final OtpApiService _otpApiService = OtpApiService();
+  final ForgotpasswordApi _ForgotpasswordApi = ForgotpasswordApi();
 
   OtpScreen({required this.email});
+  Future<void> saveResetToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('resetToken', token);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Code xác minh',
@@ -99,18 +113,17 @@ class OtpScreen extends StatelessWidget {
                         _controller4.text;
 
                     try {
+                      // Gọi API để kiểm tra OTP
                       bool isVerified =
-                          await _otpApiService.verifyOtp(otp, email);
-                      print('OTP entered: $otp');
-                      print('API verification result: $isVerified');
+                          await _ForgotpasswordApi.CheckOtpForgotPassword(
+                              otp, email);
 
                       if (isVerified) {
-                        Navigator.pushNamed(
-                          context,
-                          '/loginscreen',
-                          arguments: isVerified,
-                        );
+                        // OTP được kiểm tra thành công
+                        Navigator.pushNamed(context, '/new_password',
+                            arguments: isVerified);
                       } else {
+                        // Thông báo lỗi nếu OTP không hợp lệ
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -119,6 +132,7 @@ class OtpScreen extends StatelessWidget {
                         );
                       }
                     } catch (e) {
+                      // Xử lý lỗi trong quá trình kiểm tra OTP
                       print('Error during OTP verification: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

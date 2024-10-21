@@ -3,7 +3,6 @@ import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:don_ganh_app/api_services/diachi_api.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
-
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +17,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   File? _image;
   final UserImageUploadService _uploadService = UserImageUploadService();
   final UserApiService _apiService = UserApiService();
-  final DiaChiApiService _diaChiApiService = DiaChiApiService(); // Khởi tạo dịch vụ API
+  final DiaChiApiService _diaChiApiService = DiaChiApiService(); 
   String _tenNguoiDung = 'Người dùng';
   String _userId = '';
   String? _profileImageUrl;
@@ -26,7 +25,6 @@ class _ProfileScreen extends State<ProfileScreen> {
   String _ngaySinh = 'Chưa cập nhật';
   String _soDienThoai = 'Chưa cập nhật';
   String _gmail = 'Chưa cập nhật';
-  List<diaChiList> _diaChiList = []; // Danh sách địa chỉ
 
   @override
   void initState() {
@@ -39,35 +37,29 @@ class _ProfileScreen extends State<ProfileScreen> {
     String? storedUserId = prefs.getString('userId');
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
-      // Lấy thông tin người dùng từ UserApiService
       NguoiDung? user = await _apiService.fetchUserDetails(storedUserId);
       if (user != null) {
-        setState(() {
-          _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
-          _userId = storedUserId;
-          _gioiTinh = user.GioiTinh ?? 'Chưa xác định';
-          _ngaySinh = user.ngaySinh ?? 'Chưa cập nhật';
-          _soDienThoai = user.soDienThoai ?? 'Chưa cập nhật';
-          _gmail = user.gmail ?? 'Chưa cập nhật';
-          _profileImageUrl = user.anhDaiDien;
-        });
+        if (mounted) {  // Kiểm tra mounted trước khi gọi setState
+          setState(() {
+            _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
+            _userId = storedUserId;
+            _gioiTinh = user.GioiTinh ?? 'Chưa xác định';
+            _ngaySinh = user.ngaySinh ?? 'Chưa cập nhật';
+            _soDienThoai = user.soDienThoai ?? 'Chưa cập nhật';
+            _gmail = user.gmail ?? 'Chưa cập nhật';
+            _profileImageUrl = user.anhDaiDien;
+          });
+        }
       } else {
         print('User details not found.');
       }
-
-      // Lấy danh sách địa chỉ từ DiaChiApiService
-      List<diaChiList> diaChiLists = await _diaChiApiService.getDiaChiByUserId(storedUserId);
-      setState(() {
-        _diaChiList = diaChiLists;
-      });
     } else {
       print('User ID is not available.');
     }
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
@@ -113,7 +105,7 @@ class _ProfileScreen extends State<ProfileScreen> {
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/bottom');
+              Navigator.pop(context);
             },
             child: Image.asset(
               'lib/assets/arrow_back.png',
@@ -125,7 +117,7 @@ class _ProfileScreen extends State<ProfileScreen> {
         ),
         title: Text(
           'Hồ sơ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -177,9 +169,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   }
 
   Widget _buildDiaChiItems() {
-
-      return _buildProfileItem('Địa chỉ', 'Danh sách địa chỉ');
-    
+    return _buildProfileItem('Địa chỉ', 'Danh sách địa chỉ');
   }
 
   Widget _buildProfileItem(String title, String value) {
@@ -211,9 +201,16 @@ class _ProfileScreen extends State<ProfileScreen> {
         if (title == 'Địa chỉ') {
           await Navigator.pushNamed(context, '/diachiScreen');
         }
-        _loadUserDetails();
+        if (mounted) { // Kiểm tra mounted trước khi gọi _loadUserDetails()
+          _loadUserDetails();
+        }
       },
     );
   }
+  
+  @override
+  void dispose() {
+    // Hủy bỏ tất cả các tác vụ cần thiết ở đây nếu có
+    super.dispose();
+  }
 }
-

@@ -1,11 +1,15 @@
+import 'package:don_ganh_app/Profile_Screen/bao_mat.dart';
 import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/gioitinh_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/gmailScreen.dart';
 import 'package:don_ganh_app/Profile_Screen/ngay_sinh_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/profile_screen.dart';
+import 'package:don_ganh_app/Profile_Screen/resetpassword.dart';
 import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
+import 'package:don_ganh_app/Profile_Screen/them_the_ngan_hang.dart';
+import 'package:don_ganh_app/forgotpassword_screen/sendotpgmail.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:don_ganh_app/reponsive.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
@@ -30,19 +34,15 @@ import 'package:don_ganh_app/screen/detail_product_screen.dart';
 import 'package:don_ganh_app/screen/gioithieu.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
 import 'package:don_ganh_app/screen/manageraccount_screen.dart';
-import 'package:don_ganh_app/screen/new_password.dart';
-import 'package:don_ganh_app/screen/otp_screen.dart';
+import 'package:don_ganh_app/forgotpassword_screen/new_password.dart';
+import 'package:don_ganh_app/forgotpassword_screen/otp_screen.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
 import 'package:don_ganh_app/screen/trang_xin_chao.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => PaymentInfo(),
-      child: const MyApp()
-    )
-  );
+  runApp(ChangeNotifierProvider(
+      create: (context) => PaymentInfo(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -53,11 +53,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // home: ReponsiveScreen(
-      //   Mobile: CreatBlogScreen(), 
-      //   Tablet: SettingScreen(), 
+      //   Mobile: CreatBlogScreen(),
+      //   Tablet: SettingScreen(),
       //   Desktop: RegisterScreen()
       // ),
-      home: const gioithieu(),
+      home: gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -87,10 +87,14 @@ class MyApp extends StatelessWidget {
         // '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
         '/oder_review_screen': (context) => const OrderReviewScreen(),
         '/setting_screen': (context) => const SettingScreen(),
-        '/search_screen' :(context) => const SearchScreen(),
-        '/creat_blog_screen' :(context) => const CreatBlogScreen(),
-        '/webview' :(context) => const WebViewPage(),
-        '/payment_screen' :(context) => PaymentMethodsScreen(),
+        '/search_screen': (context) => const SearchScreen(),
+        '/creat_blog_screen': (context) => const CreatBlogScreen(),
+        '/webview': (context) => const WebViewPage(),
+        '/payment_screen': (context) => PaymentMethodsScreen(),
+        '/CardLinkScreen': (context) => CardLinkScreen(),
+        '/SecurityScreen': (context) => SecurityScreen(),
+        '/Sendotpgmail': (context) => Sendotpgmail(),
+        '/Resetpassword':(context)=>Resetpassword(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
@@ -101,7 +105,7 @@ class MyApp extends StatelessWidget {
             );
           }
         }
-             if (settings.name == '/xacminhtk') {
+        if (settings.name == '/xacminhtk') {
           final email = settings.arguments as String?;
           if (email != null) {
             return MaterialPageRoute(

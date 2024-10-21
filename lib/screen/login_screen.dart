@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(5.0),
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.pushNamed(context, '/forgot_password');
+                            Navigator.pushNamed(context, '/Sendotpgmail');
                             // TODO: Implement password reset logic here
                           },
                           child: Text(
@@ -330,11 +330,13 @@ Future<void> signIn() async {
     await prefs.setString('userDisplayName', user.displayName ?? '');
     await prefs.setString('userEmail', user.email);
     await prefs.setString('googleId', user.id);
-
+ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Đăng nhập thành công')),
+    );
     // Điều hướng đến màn hình BanLa
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => BanLa(),
-    ));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => BanLa()),
+    );
   } catch (error) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $error')));
   }

@@ -107,7 +107,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         ),
         title: const Text(
           'Payment Methods',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                  style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,

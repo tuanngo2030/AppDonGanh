@@ -4,6 +4,7 @@ import 'package:don_ganh_app/models/user_model.dart';
 import 'package:don_ganh_app/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +20,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
   final UserApiService _apiService = UserApiService();
   String _tenNguoiDung = 'Người dùng';
   String _userId = '';
-  String? _profileImageUrl; 
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -36,8 +37,8 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
       if (user != null) {
         setState(() {
           _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
-          _userId = storedUserId; 
-          _profileImageUrl = user.anhDaiDien; 
+          _userId = storedUserId;
+          _profileImageUrl = user.anhDaiDien;
         });
       } else {
         print('User details not found.');
@@ -126,25 +127,29 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
               leading: Image.asset("lib/assets/hoso_icon.png"),
               title: Text('Hồ sơ'),
               onTap: () {
-                Navigator.pushNamed(context,'/ProfileScreen');
+                Navigator.pushNamed(context, '/ProfileScreen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/lienketthu_icon.png"),
               title: Text('Liên kết thẻ'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, '/CardLinkScreen');
+              },
             ),
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),
               title: Text('Đơn hàng'),
               onTap: () {
-                Navigator.pushNamed(context,'/oder_screen');
+                Navigator.pushNamed(context, '/oder_screen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/caidat_icon.png"),
               title: Text('Cài đặt'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, '/setting_screen');
+              },
             ),
             ListTile(
               leading: Image.asset("lib/assets/trungtamhotro_icon.png"),
@@ -154,27 +159,29 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             ListTile(
               leading: Image.asset("lib/assets/baomat_icon.png"),
               title: Text('Bảo mật'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, '/SecurityScreen');
+              },
             ),
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
               title: Text('Đăng xuất'),
-           // Trong phần onTap của danh sách đăng xuất
-onTap: () async {
-  // Xóa thông tin người dùng từ SharedPreferences
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('userDisplayName');
-  await prefs.remove('userEmail');
-  await prefs.remove('userId');
-
-  // Điều hướng về màn hình đăng nhập
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => LoginScreen()),
-    (Route<dynamic> route) => false, // Xóa tất cả các route trước đó
-  );
-},
-
+              // Trong phần onTap của danh sách đăng xuất
+              onTap: () async {
+                // Xóa thông tin người dùng từ SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.remove('userDisplayName');
+                await prefs.remove('userEmail');
+                await prefs.remove('userId');
+                await GoogleSignIn().signOut();
+                // Điều hướng về màn hình đăng nhập
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (Route<dynamic> route) =>
+                      false, // Xóa tất cả các route trước đó
+                );
+              },
             ),
           ],
         ),
