@@ -186,9 +186,9 @@ class _ChatScreenState extends State<ChatScreen> {
           imageUrl: data['message']['imageUrl'], // Thêm imageUrl nếu có
           videoUrl: data['message']['videoUrl'], // Thêm videoUrl nếu có
         );
-
-        // Thêm tin nhắn vào danh sách
-        addMessage(message);
+        if (!messages.any((msg) => msg.id == message.id)) {
+          addMessage(message);
+        }
       } else {
         print('Received null data: $data');
       }
@@ -227,7 +227,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // Nếu có hình ảnh, chuyển đổi thành base64
       if (_image != null) {
         imageUrl = await _fileToBase64(_image!);
-          // imageUrl = await ChatApiService().uploadFile(_image!, 'image');
+        // imageUrl = await ChatApiService().uploadFile(_image!, 'image');
       }
 
       // Nếu có video, chuyển đổi thành base64
@@ -248,10 +248,9 @@ class _ChatScreenState extends State<ChatScreen> {
         imageUrl: imageUrl,
         videoUrl: videoUrl,
       );
-
-      // Thêm tin nhắn vào danh sách ngay lập tức
-      // addMessage(message);
-
+  // if (!messages.any((msg) => msg.id == message.id)) {
+  //         addMessage(message);
+  //       }
       // Gửi tin nhắn
       socket!.emit('sendMessage', {
         'conversationId': widget.conversationId,
@@ -331,7 +330,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   width: 200,
                   child: AspectRatio(
                     aspectRatio: _videoController!.value.aspectRatio,
-                    child: VideoPlayer(_videoController!), // Display video player
+                    child:
+                        VideoPlayer(_videoController!), // Display video player
                   ),
                 ),
               ),
