@@ -151,15 +151,15 @@ class OrderApiService {
     }
   }
 
-    Future<OrderModel> updateTrangThaiHoaDon({
+  Future<OrderModel> updateTrangThaiHoaDon({
     required String hoadonId,
   }) async {
     final String url =
         "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final response = await http.post(
-      Uri.parse(url),);
-
+      Uri.parse(url),
+    );
 
     print('Response Status: ${response.statusCode}');
     print('Response Body: ${response.body}');
@@ -182,4 +182,45 @@ class OrderApiService {
     }
   }
 
+ Future<OrderModel> updateTransactionHoaDonCOD({
+  required String hoadonId,
+  required String transactionId,
+}) async {
+  final String url =
+      "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId";
+
+  final Map<String, dynamic> body = {
+    'transactionId': transactionId,
+  };
+
+  final response = await http.put(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: json.encode(body),
+  );
+
+  print('Response Status: ${response.statusCode}');
+  print('Response Body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    try {
+      final decodedResponse = json.decode(response.body);
+      print('Decoded Response: $decodedResponse'); // Log the response
+
+      if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
+        return OrderModel.fromJson(decodedResponse['data']);
+      } else {
+        throw Exception('API returned error: ${decodedResponse['message']}');
+      }
+    } catch (e) {
+      print('Error decoding JSON: $e');
+      throw Exception('Failed to decode JSON');
+    }
+  } else {
+    print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
+    throw Exception('Failed to update HoaDon');
+  }
+}
 }

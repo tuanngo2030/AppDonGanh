@@ -58,6 +58,46 @@ class _PayScreen2State extends State<PayScreen2> {
     }
   }
 
+
+Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String assetPath, String title, String? subtitle) async {
+  final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+  setState(() {
+    _isProcessing = true;
+  });
+
+  try {
+    OrderModel? updatedOrder = await _orderApiService.updateTransactionHoaDonCOD(
+      hoadonId: hoadonId,
+      transactionId: transactionId,
+    );
+
+    print("Updated Order ID: ${updatedOrder.payment_url}");
+    paymentInfo.paymentMehtod(
+      assetPath: assetPath, 
+      title: title, 
+      subtitle: subtitle,
+      payment_url: updatedOrder.payment_url
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
+    );
+
+    widget.nextStep();
+
+  } catch (e) {
+    print('Error updating COD transaction: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Lỗi khi cập nhật giao dịch COD.')),
+    );
+  } finally {
+    setState(() {
+      _isProcessing = false;
+    });
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
      final paymentInfo = Provider.of<PaymentInfo>(context);
@@ -221,7 +261,12 @@ class _PayScreen2State extends State<PayScreen2> {
 
 {
   return GestureDetector(
+    
     onTap: () async {
+       final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+        String hoadonId = paymentInfo.order_id;
+        String transactionId = '151';
+        String transactionIdCod = '111';
       if (value == 'Qr') {
         // Điều hướng sang PaymentMethodsScreen khi chọn "Tài khoản ngân hàng"
         // Navigator.push(
@@ -236,13 +281,16 @@ class _PayScreen2State extends State<PayScreen2> {
         //     });
         //   }
         // });
-        final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-        String hoadonId = paymentInfo.order_id;
-        String transactionId = '151';
+        // final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+        // String hoadonId = paymentInfo.order_id;
+        // String transactionId = '151';
 
         await _updateTransaction(hoadonId, transactionId, assetPath, title, subtitle);
        
         
+      }else if (value == 'COD') {
+        // Nếu chọn COD, gọi API riêng
+        await _updateTransactionCOD(hoadonId, transactionIdCod, assetPath, title, subtitle);
       } else {
         setState(() {
           selectedPaymentMethod = value;

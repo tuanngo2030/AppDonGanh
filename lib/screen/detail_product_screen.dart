@@ -1,10 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:don_ganh_app/api_services/cart_api_service.dart';
+import 'package:don_ganh_app/api_services/review_api_service.dart';
 import 'package:don_ganh_app/api_services/variant_api_service.dart';
 import 'package:don_ganh_app/models/product_model.dart';
+import 'package:don_ganh_app/models/review_model.dart';
 import 'package:don_ganh_app/models/variant_model.dart';
+import 'package:don_ganh_app/screen/all_review.dart';
+import 'package:don_ganh_app/screen/order_review_screen.dart';
 import 'package:don_ganh_app/widget/badge_widget.dart';
+import 'package:don_ganh_app/widget/review_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:badges/badges.dart' as badges;
@@ -24,19 +29,47 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   int quantity = 1;
   int soluong = 0;
   late Future<List<VariantModel>> variantModel;
+  final bool _showResponses = false;
+  int _totalReviews = 0;
 
   String mainImageUrl = '';
   List<String> supplementaryImages = [];
+  late Future<List<DanhGia>> _reviewsFuture;
+  List<DanhGia> _reviews = [];
 
   @override
   void initState() {
     super.initState();
+    _initializeProductData();
+    // donGia = widget.product.donGiaBan;
+    // soluong = widget.product.soLuongHienTai;
+    // mainImageUrl = widget.product.imageProduct;
+    // supplementaryImages =
+    //     widget.product.ImgBoSung.map((img) => img.url).toList();
+    // variantModel = VariantApiService().getVariant(widget.product.id);
+  }
+
+ void _initializeProductData() {
     donGia = widget.product.donGiaBan;
     soluong = widget.product.soLuongHienTai;
     mainImageUrl = widget.product.imageProduct;
-    supplementaryImages = widget.product.ImgBoSung.map((img) => img.url).toList();
+    supplementaryImages =
+        widget.product.ImgBoSung.map((img) => img.url).toList();
     variantModel = VariantApiService().getVariant(widget.product.id);
+    _fetchReviews(); // Fetch reviews once here
   }
+
+  Future<void> _fetchReviews() async {
+  // Fetch reviews once and don't call setState in every render cycle
+  _reviewsFuture = ReviewApiService().getReviewsByProductId(widget.product.id);
+  final reviews = await _reviewsFuture;
+  if (mounted) { // Ensure widget is still mounted before calling setState
+    setState(() {
+      _reviews = reviews;
+      _totalReviews = reviews.length; // Update the total reviews count
+    });
+  }
+}
 
   void plusQuantity() {
     setState(() {
@@ -52,16 +85,10 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
 
 void _swapImage(int index) {
   setState(() {
-    // Lấy URL của hình ảnh được chọn
+    // Swap images without triggering any re-fetch of data
     String selectedImage = supplementaryImages[index];
-    
-    // Lấy URL của hình ảnh chính hiện tại
     String oldMainImage = mainImageUrl;
-    
-    // Thay đổi hình ảnh chính thành hình ảnh được chọn
     mainImageUrl = selectedImage;
-    
-    // Thay thế hình ảnh được chọn bằng hình ảnh cũ của hình ảnh chính
     supplementaryImages[index] = oldMainImage;
   });
 }
@@ -84,7 +111,7 @@ void _swapImage(int index) {
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
 
-        Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 
@@ -200,7 +227,7 @@ void _swapImage(int index) {
                             itemCount: supplementaryImages.length,
                             itemBuilder: (context, index) {
                               return GestureDetector(
-                                onTap: (){
+                                onTap: () {
                                   _swapImage(index);
                                 },
                                 child: Container(
@@ -310,8 +337,10 @@ void _swapImage(int index) {
                                             ),
                                           ),
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 '$donGia đ/kg',
@@ -365,8 +394,10 @@ void _swapImage(int index) {
                                                     selectedVariantId =
                                                         variant[index].id;
                                                     donGia = variant[index].gia;
-                                                    soluong = variant[index].soLuong;
-                                                    print('$selectedVariantId $donGia');
+                                                    soluong =
+                                                        variant[index].soLuong;
+                                                    print(
+                                                        '$selectedVariantId $donGia');
                                                   });
                                                 },
                                                 child: Container(
@@ -393,8 +424,9 @@ void _swapImage(int index) {
                                                         padding:
                                                             const EdgeInsets
                                                                 .all(4.0),
-                                                        child: Text(
-                                                            item.giaTriThuocTinh.GiaTri),
+                                                        child: Text(item
+                                                            .giaTriThuocTinh
+                                                            .GiaTri),
                                                       );
                                                     }).toList(),
                                                   ),
@@ -483,10 +515,10 @@ void _swapImage(int index) {
                                                 },
                                           style: ElevatedButton.styleFrom(
                                             minimumSize: Size.fromHeight(60),
-                                            backgroundColor:
-                                               selectedVariantId.isEmpty
-                                                          ? Colors.grey
-                                                          : Color.fromRGBO(41, 87, 35, 1),
+                                            backgroundColor: selectedVariantId
+                                                    .isEmpty
+                                                ? Colors.grey
+                                                : Color.fromRGBO(41, 87, 35, 1),
                                             foregroundColor: Colors.white,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -508,7 +540,8 @@ void _swapImage(int index) {
                         height: 40,
                         width: 180,
                         decoration: BoxDecoration(
-                            border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 1.5)),
+                            border: Border.fromBorderSide(
+                                BorderSide(color: Colors.black, width: 1.5)),
                             color: Color.fromRGBO(41, 87, 35, 1),
                             borderRadius: BorderRadius.circular(20)),
                         child: Row(
@@ -587,6 +620,134 @@ void _swapImage(int index) {
                         fontWeight: FontWeight.w400,
                         color: Color.fromRGBO(248, 158, 25, 1)),
                     style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 27),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 27),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Đánh giá sản phẩm',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color.fromRGBO(41, 87, 35, 1),
+                                  ),
+                                ),
+                                Text(
+                                    'Đánh giá: 4.5 ($_totalReviews lượt đánh giá)'),
+                                SizedBox(height: 10),
+                              ],
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              OrderReviewScreen(
+                                                title: 'sản phẩm',
+                                                id: widget.product.id,
+                                              ))).then((_) {
+                                    _fetchReviews();
+                                  });
+                                },
+                                child: Text(
+                                  'Đánh giá',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color.fromRGBO(41, 87, 35, 1),
+                                      decoration: TextDecoration.underline),
+                                )),
+                          ],
+                        ),
+                      ),
+                      Divider(thickness: 1, color: Colors.grey),
+                      FutureBuilder<List<DanhGia>>(
+                        future: ReviewApiService()
+                            .getReviewsByProductId(widget.product.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return Center(
+                                child: Text('Chưa có lượt đánh giá nào'));
+                          }
+
+                          // Get the most recent two reviews
+                          final reviews = snapshot.data!;
+                          final recentReviews = reviews.reversed
+                              .take(2)
+                              .toList(); // Take the first 2 reviews
+                          _totalReviews = reviews.length;
+
+                          // Display the list of recent reviews
+                          return SizedBox(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: recentReviews.length,
+                              itemBuilder: (context, index) {
+                                final review = recentReviews[index];
+                                return ReviewItem(
+                                  review: review,
+                                  onDelete: _fetchReviews,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AllReviewsPage(productId: widget.product.id),
+                            ),
+                          ).then((_) {
+                            _fetchReviews();
+                          });
+                        },
+                        child: SizedBox(
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _totalReviews <= 2
+                                    ? 'Xem tất cả ($_totalReviews) >'
+                                    : 'Xem tất cả (${_totalReviews - 2}) >',
+                                style: TextStyle(
+                                    color: Color.fromRGBO(41, 87, 35, 1),
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
