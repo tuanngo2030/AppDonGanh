@@ -257,7 +257,8 @@ class _PayScreen1State extends State<PayScreen1> {
     String? quanHuyen = selectedQuanHuyen;
     String? phuongXa = selectedPhuongXa;
     String duongThonXom = duongThonController;
-    String ghiChu = ghiChuController.text.trim();
+     String ghiChu = ghiChuController.text.trim().isEmpty ? 'Không có ghi chú' : ghiChuController.text.trim(); // Kiểm tra và gán giá trị chuỗi rỗng nếu trống
+
 
     // Kiểm tra dữ liệu nhập vào
     if (_validateInput(

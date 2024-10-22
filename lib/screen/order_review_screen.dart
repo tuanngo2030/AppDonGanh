@@ -1,7 +1,13 @@
+import 'dart:io';
+
+import 'package:don_ganh_app/api_services/review_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderReviewScreen extends StatefulWidget {
-  const OrderReviewScreen({super.key});
+  final String title;
+  final String id;
+  const OrderReviewScreen({super.key, required this.title, required this.id});
 
   @override
   State<OrderReviewScreen> createState() => _OrderReviewScreenState();
@@ -9,6 +15,34 @@ class OrderReviewScreen extends StatefulWidget {
 
 class _OrderReviewScreenState extends State<OrderReviewScreen> {
   int _selectedStars = 0;
+  final TextEditingController _reviewController = TextEditingController();
+  File? _imageFile;
+  String? userId;
+
+  Future<void> _submitReview() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+
+    try {
+      // Call API to create review
+      await ReviewApiService().createReview(
+        userId: userId!,
+        sanphamId: widget.id,
+        xepHang: _selectedStars,
+        binhLuan: _reviewController.text,
+        imageFile: _imageFile, // Optional image file
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đánh giá của bạn đã được gửi!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error submitting review: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lỗi khi gửi đánh giá')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,133 +58,136 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                 Navigator.pop(context);
               },
               child: Container(
-                child: ImageIcon(
+                child: const ImageIcon(
                   AssetImage('lib/assets/arrow_back.png'), // Hình ảnh logo
                   size: 49, // Kích thước hình ảnh
                 ),
               ),
             ),
           ),
-          title: Text('Đánh giá đơn hàng'),
+          title: Text('Đánh giá ${widget.title}'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 50),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Bạn cảm thấy đơn hàng thế nào?',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 8),
-                Divider(thickness: 1),
-                SizedBox(height: 8),
-                Text(
-                  'Đánh giá tổng thể',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                // Hiển thị các sao có thể chọn
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        Icons.star,
-                        color: _selectedStars > index
-                            ? Colors.amber
-                            : Color.fromARGB(255, 221, 220, 220),
-                        size: 35,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _selectedStars = index + 1;
-                        });
-                      },
-                    );
-                  }),
-                ),
-                SizedBox(height: 8),
-                Divider(thickness: 1),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Đánh giá chi tiết cảm nhận của bạn',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Bạn cảm thấy ${widget.title} thế nào?',
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  const Divider(thickness: 1),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Đánh giá tổng thể',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  // Hiển thị các sao có thể chọn
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          Icons.star,
+                          color: _selectedStars > index
+                              ? Colors.amber
+                              : const Color.fromARGB(255, 221, 220, 220),
+                          size: 35,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _selectedStars = index + 1;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  const Divider(thickness: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Đánh giá chi tiết cảm nhận của bạn',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
-                      ),
-                      TextField(
-                        maxLines: 6,
-                        minLines: 5,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          hintText: 'Gõ vào đây',
-                          contentPadding: EdgeInsets.all(16),
+                        TextField(
+                          maxLines: 6,
+                          minLines: 5,
+                          controller: _reviewController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            hintText: 'Gõ vào đây',
+                            contentPadding: const EdgeInsets.all(16),
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Row(
-                          children: [
-                            Icon(Icons.camera_alt_outlined),
-                            Text('Thêm hình ảnh')
-                          ],
+                        const Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Row(
+                            children: [
+                              Icon(Icons.camera_alt_outlined),
+                              Text('Thêm hình ảnh')
+                            ],
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: Padding(
-                                padding: const EdgeInsets.all(13),
-                                child: Text(
-                                  'Bỏ qua',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromRGBO(59, 99, 53, 1),
+                                    foregroundColor: Colors.white),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(13),
+                                  child: Text(
+                                    'Bỏ qua',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700),
+                                  ),
                                 ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromRGBO(59, 99, 53, 1),
-                                  foregroundColor: Colors.white),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                print('$_selectedStars');
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(13),
-                                child: Text(
-                                  'Xác nhận',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await _submitReview();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromRGBO(59, 99, 53, 1),
+                                    foregroundColor: Colors.white),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(13),
+                                  child: Text(
+                                    'Xác nhận',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700),
+                                  ),
                                 ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromRGBO(59, 99, 53, 1),
-                                  foregroundColor: Colors.white),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

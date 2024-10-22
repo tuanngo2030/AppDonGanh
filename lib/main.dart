@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
       //   Tablet: SettingScreen(),
       //   Desktop: RegisterScreen()
       // ),
-      home: gioithieu(),
+      home: const gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -82,10 +82,10 @@ class MyApp extends StatelessWidget {
         // '/xacminhtk': (context) => XacMinhTkScreen(email: ,),
         '/oder_screen': (context) => const OderScreen(),
         // '/oder_status_screen': (context) => OderStatusScreen(),
-        '/pay_screen': (context) => PayProcessScreen(),
+        '/pay_screen': (context) => const PayProcessScreen(),
         '/bottomThumuan': (context) => const BottomnavthumuaScreen(),
         // '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
-        '/oder_review_screen': (context) => const OrderReviewScreen(),
+        // '/oder_review_screen': (context) => const OrderReviewScreen(),
         '/setting_screen': (context) => const SettingScreen(),
         '/search_screen': (context) => const SearchScreen(),
         '/creat_blog_screen': (context) => const CreatBlogScreen(),
@@ -94,8 +94,7 @@ class MyApp extends StatelessWidget {
         '/CardLinkScreen': (context) => CardLinkScreen(),
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
-        '/Resetpassword':(context)=>Resetpassword(),
-        
+        '/Resetpassword':(context)=>const Resetpassword(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
