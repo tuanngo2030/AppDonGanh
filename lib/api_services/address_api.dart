@@ -1,63 +1,58 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class dcApiService {
-  final String baseUrl = 'https://open.oapi.vn/location';
+class DcApiService {
+  static const String baseUrl = 'https://provinces.open-api.vn/api';
 
-  // Lấy danh sách tỉnh/thành phố
-  Future<List<String>> getProvinces() async {
-    final response = await http.get(Uri.parse('$baseUrl/provinces'));
+  // Lấy danh sách Tỉnh/Thành phố
+  Future<List<String>> getTinhThanhPho() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/p/'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
 
     if (response.statusCode == 200) {
-      print('Provinces response: ${utf8.decode(response.bodyBytes)}');
-      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['data']; // Lấy 'data' từ JSON
-      
-      // Kiểm tra nếu data trả về không phải là List
-      if (data is List) {
-        return data.map((item) => item['name'] as String).toList();
-      } else {
-        throw Exception('Unexpected response format');
-      }
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      return data.map((item) => item['name'] as String).toList();
     } else {
       throw Exception('Failed to load provinces');
     }
   }
 
-  // Lấy danh sách quận/huyện dựa trên mã tỉnh/thành phố
-  Future<List<String>> getDistricts(String provinceCode) async {
-    final String url = '$baseUrl/districts?province=$provinceCode';
-    print('Fetching districts from: $url');
-    final response = await http.get(Uri.parse(url));
+// Chỉ lấy danh sách Quận/Huyện
+Future<List<String>> getQuanHuyen() async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/d/'), // Đảm bảo rằng API trả về tất cả quận/huyện
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['data'];
-      
-      if (data is List) {
-        return data.map((item) => item['name'] as String).toList();
-      } else {
-        throw Exception('Unexpected response format');
-      }
-    } else {
-      throw Exception('Failed to load districts');
-    }
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+    return data.map((item) => item['name'] as String).toList();
+  } else {
+    throw Exception('Failed to load districts');
   }
+}
 
-  // Lấy danh sách phường/xã dựa trên mã quận/huyện
-  Future<List<String>> getWards(String districtCode) async {
-    final String url = '$baseUrl/wards?district=$districtCode';
-    print('Fetching wards from: $url');
-    final response = await http.get(Uri.parse(url));
+// Chỉ lấy danh sách Phường/Xã
+Future<List<String>> getPhuongXa() async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/w/'), // Đảm bảo rằng API trả về tất cả phường/xã
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['data'];
-      
-      if (data is List) {
-        return data.map((item) => item['name'] as String).toList();
-      } else {
-        throw Exception('Unexpected response format');
-      }
-    } else {
-      throw Exception('Failed to load wards');
-    }
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+    return data.map((item) => item['name'] as String).toList();
+  } else {
+    throw Exception('Failed to load wards');
   }
+}
+
 }

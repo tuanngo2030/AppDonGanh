@@ -95,6 +95,7 @@ class MyApp extends StatelessWidget {
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
         '/Resetpassword':(context)=>Resetpassword(),
+        
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
