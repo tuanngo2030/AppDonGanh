@@ -1,7 +1,8 @@
-import 'package:don_ganh_app/api_services/diachi_api.dart';
 import 'package:flutter/material.dart';
+import 'package:don_ganh_app/api_services/diachi_api.dart';
+import 'package:don_ganh_app/api_services/address_api.dart'; // Import service API
 import 'package:don_ganh_app/models/dia_chi_model.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class AddressFormScreen extends StatefulWidget {
   final diaChiList? address;
@@ -18,10 +19,17 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   TextEditingController _duongThonController = TextEditingController();
   TextEditingController _tenController = TextEditingController();
   TextEditingController _soDienThoaiController = TextEditingController();
-  TextEditingController _tinhThanhPhoController = TextEditingController();
-  TextEditingController _quanHuyenController = TextEditingController();
-  TextEditingController _phuongXaController = TextEditingController();
-  LatLng? _selectedLocation;
+
+  String? _selectedTinhThanhPho; // Tỉnh/Thành phố
+  String? _selectedQuanHuyen; // Quận/Huyện
+  String? _selectedPhuongXa; // Phường/Xã
+
+  List<String> _tinhThanhPhoList = [];
+  List<String> _quanHuyenList = [];
+  List<String> _phuongXaList = [];
+
+  DcApiService _dcApiService = DcApiService();
+
   @override
   void initState() {
     super.initState();
@@ -30,21 +38,58 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       _duongThonController.text = widget.address!.duongThon!;
       _tenController.text = widget.address!.name!;
       _soDienThoaiController.text = widget.address!.soDienThoai!;
-      _tinhThanhPhoController.text = widget.address!.tinhThanhPho!;
-      _quanHuyenController.text = widget.address!.quanHuyen!;
-      _phuongXaController.text = widget.address!.phuongXa!;
+      _selectedTinhThanhPho = widget.address!.tinhThanhPho;
+      _selectedQuanHuyen = widget.address!.quanHuyen;
+      _selectedPhuongXa = widget.address!.phuongXa;
+    }
+
+    _loadTinhThanhPho();
+    _loadQuanHuyen();
+    _loadPhuongXa();
+  }
+
+  Future<void> _loadTinhThanhPho() async {
+    try {
+      final provinces = await _dcApiService.getTinhThanhPho();
+      setState(() {
+        _tinhThanhPhoList = provinces;
+      });
+    } catch (e) {
+      print('Error loading provinces: $e');
+    }
+  }
+
+  Future<void> _loadQuanHuyen() async {
+    try {
+      final districts = await _dcApiService.getQuanHuyen();
+      setState(() {
+        _quanHuyenList = districts;
+      });
+    } catch (e) {
+      print('Error loading districts: $e');
+    }
+  }
+
+  Future<void> _loadPhuongXa() async {
+    try {
+      final wards = await _dcApiService.getPhuongXa();
+      setState(() {
+        _phuongXaList = wards;
+      });
+    } catch (e) {
+      print('Error loading wards: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
             onTap: () {
-               Navigator.pop(context);
+              Navigator.pop(context);
             },
             child: Image.asset(
               'lib/assets/arrow_back.png',
@@ -56,7 +101,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
         ),
         title: Text(
           widget.address == null ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold ),
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -78,25 +125,73 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
             ),
             const SizedBox(height: 10),
 
-            // TextField cho Tỉnh/Thành Phố
-            TextField(
-              controller: _tinhThanhPhoController,
-              decoration: const InputDecoration(labelText: 'Tỉnh/Thành phố'),
+            // Dropdown cho Tỉnh/Thành phố
+            DropdownSearch<String>(
+              popupProps: const PopupProps.menu(
+                showSearchBox: true,
+              ),
+              items: _tinhThanhPhoList,
+              filterFn: (item, filter) =>
+                  item.toLowerCase().contains(filter.toLowerCase()),
+              onChanged: (newValue) {
+                setState(() {
+                  _selectedTinhThanhPho = newValue;
+                });
+              },
+              selectedItem: _selectedTinhThanhPho,
+              dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: 'Tỉnh/Thành phố',
+                  border: OutlineInputBorder(),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
 
-            // TextField cho Quận/Huyện
-            TextField(
-              controller: _quanHuyenController,
-              decoration: const InputDecoration(labelText: 'Quận/Huyện'),
-            ),
+            // Dropdown cho Quận/Huyện
+           DropdownSearch<String>(
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                items: _quanHuyenList,
+                filterFn: (item, filter) =>
+                    item.toLowerCase().contains(filter.toLowerCase()),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedQuanHuyen = newValue;
+                  });
+                },
+                selectedItem: _selectedQuanHuyen,
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Quận/Huyện',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
             const SizedBox(height: 10),
 
-            // TextField cho Phường/Xã
-            TextField(
-              controller: _phuongXaController,
-              decoration: const InputDecoration(labelText: 'Phường/Xã'),
-            ),
+            // Dropdown cho Phường/Xã
+            DropdownSearch<String>(
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                items: _phuongXaList,
+                filterFn: (item, filter) =>
+                    item.toLowerCase().contains(filter.toLowerCase()),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedPhuongXa = newValue;
+                  });
+                },
+                selectedItem: _selectedPhuongXa,
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Phường/Xã',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
             const SizedBox(height: 10),
 
             // TextField cho Đường/Thôn
@@ -108,7 +203,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(41, 87, 35, 1), // Màu nền
+                backgroundColor: Color.fromRGBO(41, 87, 35, 1),
                 minimumSize: Size(double.infinity, 50),
                 foregroundColor: Color.fromRGBO(255, 255, 255, 1),
               ),
@@ -117,9 +212,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                 if (_tenController.text.isEmpty ||
                     _soDienThoaiController.text.isEmpty ||
                     _duongThonController.text.isEmpty ||
-                    _tinhThanhPhoController.text.isEmpty ||
-                    _quanHuyenController.text.isEmpty ||
-                    _phuongXaController.text.isEmpty) {
+                    _selectedTinhThanhPho == null ||
+                    _selectedQuanHuyen == null ||
+                    _selectedPhuongXa == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Vui lòng điền đầy đủ thông tin')),
@@ -127,10 +222,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   return;
                 }
 
-                // Kiểm tra xem số điện thoại có đúng 10 chữ số hay không
+                // Kiểm tra số điện thoại
                 if (_soDienThoaiController.text.length != 10 ||
-                    !_soDienThoaiController.text
-                        .startsWith('0') || // Kiểm tra bắt đầu bằng số 0
+                    !_soDienThoaiController.text.startsWith('0') ||
                     !_soDienThoaiController.text
                         .contains(RegExp(r'^[0-9]+$'))) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -142,9 +236,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                 }
 
                 diaChiList newAddress = diaChiList(
-                  tinhThanhPho: _tinhThanhPhoController.text,
-                  quanHuyen: _quanHuyenController.text,
-                  phuongXa: _phuongXaController.text,
+                  tinhThanhPho: _selectedTinhThanhPho,
+                  quanHuyen: _selectedQuanHuyen,
+                  phuongXa: _selectedPhuongXa,
                   duongThon: _duongThonController.text,
                   name: _tenController.text,
                   soDienThoai: _soDienThoaiController.text,
@@ -152,14 +246,12 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
 
                 try {
                   if (widget.address == null) {
-                    // Tạo địa chỉ mới
                     await DiaChiApiService()
                         .createDiaChi(widget.userId, newAddress);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Thêm địa chỉ thành công')),
                     );
                   } else {
-                    // Cập nhật địa chỉ
                     await DiaChiApiService().updateDiaChi(
                         widget.userId, widget.address!.id!, newAddress);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -168,7 +260,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                     );
                   }
 
-                  // Trả về true để thông báo load lại danh sách
                   Navigator.pop(context, true);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(

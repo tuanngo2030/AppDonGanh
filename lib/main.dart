@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
         // '/xacminhtk': (context) => XacMinhTkScreen(email: ,),
         '/oder_screen': (context) => const OderScreen(),
         // '/oder_status_screen': (context) => OderStatusScreen(),
-        '/pay_screen': (context) => PayProcessScreen(),
+        '/pay_screen': (context) => const PayProcessScreen(),
         '/bottomThumuan': (context) => const BottomnavthumuaScreen(),
         // '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
         // '/oder_review_screen': (context) => const OrderReviewScreen(),

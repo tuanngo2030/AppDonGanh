@@ -55,7 +55,7 @@ class ChatApiService{
     }
   }
 
- Future<String?> uploadFile(File file, String type) async {
+Future<String?> uploadFile(File file, String type) async {
   try {
     String endpoint = 'https://imp-model-widely.ngrok-free.app/api/user/upload_ImageOrVideo';
     var request = http.MultipartRequest('POST', Uri.parse(endpoint));
@@ -74,20 +74,24 @@ class ChatApiService{
     final response = await request.send();
     
     if (response.statusCode == 200) {
+      // Xử lý phản hồi từ server
       final responseData = await http.Response.fromStream(response);
       print('Response data: ${responseData.body}');
 
+      // Parse JSON từ phản hồi
       final jsonResponse = jsonDecode(responseData.body);
       print('JSON Response: $jsonResponse');
 
+      // Truy xuất URL ảnh hoặc video từ phản hồi
       String? url = type == 'image' ? jsonResponse['imageUrl'] : jsonResponse['videoUrl'];
 
-      if (url != null && !url.startsWith('http')) {
+      // Kiểm tra nếu URL hợp lệ (URL phải bắt đầu bằng http hoặc https)
+      if (url != null && url.startsWith('http')) {
+        return url; // Trả về URL hợp lệ
+      } else {
         print('Invalid URL received: $url');
         return null;
       }
-
-      return url; // Trả về URL hợp lệ
     } else {
       print('Upload failed with status code: ${response.statusCode}');
       return null;
