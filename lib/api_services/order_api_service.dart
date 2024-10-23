@@ -193,34 +193,40 @@ class OrderApiService {
     'transactionId': transactionId,
   };
 
-  final response = await http.put(
-    Uri.parse(url),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: json.encode(body),
-  );
+  try {
+    // Making the HTTP PUT request to update the invoice
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(body),
+    );
 
-  print('Response Status: ${response.statusCode}');
-  print('Response Body: ${response.body}');
+    // Logging the response status and body for debugging
+    print('Response Status: ${response.statusCode}');
+    print('Response Body: ${response.body}');
 
-  if (response.statusCode == 200) {
-    try {
+    // Handling the response based on the HTTP status code
+    if (response.statusCode == 200) {
       final decodedResponse = json.decode(response.body);
-      print('Decoded Response: $decodedResponse'); // Log the response
+      print('Decoded Response: $decodedResponse');
 
-      if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
+      // Checking if the API call was successful
+      if (decodedResponse['message'] == 'Cập nhật hóa đơn thành công' && decodedResponse['data'] != null) {
         return OrderModel.fromJson(decodedResponse['data']);
       } else {
         throw Exception('API returned error: ${decodedResponse['message']}');
       }
-    } catch (e) {
-      print('Error decoding JSON: $e');
-      throw Exception('Failed to decode JSON');
+    } else {
+      // Handling non-200 responses
+      print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to update HoaDon');
     }
-  } else {
-    print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
-    throw Exception('Failed to update HoaDon');
+  } catch (e) {
+    // Catching and handling any potential errors
+    print('Error: $e');
+    throw Exception('Error occurred during the API call');
   }
 }
 }
