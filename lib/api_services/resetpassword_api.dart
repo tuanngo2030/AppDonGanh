@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class ResetPasswordApi {
   final String _resetPasswordUrl =
-      'https://imp-model-widely.ngrok-free.app/api/user/ResetPassword';
+      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/ResetPassword';
 
   Future<bool> resetPassword(String email, String newPassword) async {
     try {

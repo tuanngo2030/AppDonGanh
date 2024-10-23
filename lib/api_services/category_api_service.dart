@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CategoryApiService {
-  final String apiUrl = "https://imp-model-widely.ngrok-free.app/api/danhmuc/getlistDanhMuc";
+  final String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/danhmuc/getlistDanhMuc";
      
   Future<List<CategoryModel>> fetchCategories() async {
     final response = await http.get(Uri.parse(apiUrl));

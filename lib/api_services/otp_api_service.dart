@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OtpApiService {
-  static const String baseUrl = 'https://imp-model-widely.ngrok-free.app/api/user/verifyOtp';
-   static const String resendUrl= 'https://imp-model-widely.ngrok-free.app/api/user/resendOTP';
+  static const String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/verifyOtp';
+   static const String resendUrl= 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/resendOTP';
 
   // Phương thức xác minh OTP
   Future<bool> verifyOtp(String otp, String gmail) async {

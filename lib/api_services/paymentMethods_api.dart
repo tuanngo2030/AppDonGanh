@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<void> getPaymentMethods() async {
-  final url = Uri.parse('https://imp-model-widely.ngrok-free.app/apiBaokim/getPaymentMethods');
+  final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/apiBaokim/getPaymentMethods');
 
   try {
     final response = await http.get(url);

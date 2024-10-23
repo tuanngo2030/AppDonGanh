@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class BannerApiService {
-  final String apiUrl = "https://imp-model-widely.ngrok-free.app/api/banner/banners?";
+  final String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/banner/banners?";
 
   Future<List<BannerModel>> fetchBanner() async {
     final response = await http.get(Uri.parse(apiUrl));

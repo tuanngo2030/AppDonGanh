@@ -7,7 +7,7 @@ import 'dart:convert';
 class OrderApiService {
   Future<List<OrderModel>> fetchOrder(String userId) async {
     final String baseUrl =
-        "https://imp-model-widely.ngrok-free.app/api/hoadon/getHoaDonByUserId/$userId";
+        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/getHoaDonByUserId/$userId";
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
@@ -40,7 +40,7 @@ class OrderApiService {
     // required String YeuCauNhanHang,
   }) async {
     const String url =
-        "https://imp-model-widely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
+        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
 
     final Map<String, dynamic> body = {
       'userId': userId,
@@ -86,7 +86,7 @@ class OrderApiService {
     required String transactionId,
   }) async {
     final String url =
-        "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final Map<String, dynamic> body = {
       'transactionId': transactionId,
@@ -125,7 +125,7 @@ class OrderApiService {
     required String orderId,
   }) async {
     final String url =
-        'https://imp-model-widely.ngrok-free.app/api/hoadon/Checkdonhangbaokim/$orderId';
+        'https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/Checkdonhangbaokim/$orderId';
 
     final response = await http.get(
       Uri.parse(url),
@@ -155,7 +155,7 @@ class OrderApiService {
     required String hoadonId,
   }) async {
     final String url =
-        "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final response = await http.post(
       Uri.parse(url),
@@ -187,7 +187,7 @@ class OrderApiService {
   required String transactionId,
 }) async {
   final String url =
-      "https://imp-model-widely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId";
+      "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId";
 
   final Map<String, dynamic> body = {
     'transactionId': transactionId,

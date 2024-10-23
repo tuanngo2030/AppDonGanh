@@ -3,7 +3,7 @@ import 'package:don_ganh_app/models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = 'https://imp-model-widely.ngrok-free.app/api/user/Register';
+  static const String _baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/Register';
 
   // Đăng ký người dùng mới
   Future<bool> registerUser(NguoiDung user) async {
