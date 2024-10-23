@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:don_ganh_app/models/dia_chi_model.dart';
  
 class DiaChiApiService {
-  final String baseUrl = 'https://imp-model-widely.ngrok-free.app/api/diachi';
+  final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/diachi';
 
 // Lấy danh sách địa chỉ theo userId
 Future<List<diaChiList>> getDiaChiByUserId(String userId) async {

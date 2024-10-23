@@ -24,7 +24,7 @@ class _NewPasswordState extends State<NewPassword> {
         resetToken != null &&
         gmail != null) {
       final url = Uri.parse(
-          'https://imp-model-widely.ngrok-free.app/api/user/SendPassword');
+          'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendPassword');
 
       try {
         final response = await http.post(

@@ -6,7 +6,7 @@ import 'dart:convert';
 
 class ChatApiService{
    Future<bool> createConversation(String senderId, String receiverId) async {
-    const String apiUrl = "https://imp-model-widely.ngrok-free.app/api/chatsocket/Createconversation";
+    const String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/Createconversation";
     try {
       Map<String, String> body = {
         'sender_id': senderId,
@@ -35,7 +35,7 @@ class ChatApiService{
 
   // Phương thức lấy danh sách cuộc trò chuyện theo ID
   Future<void> getListConversation(String conversationId) async {
-    const String apiUrl = "https://imp-model-widely.ngrok-free.app/api/chatsocket/getlistconversation/";
+    const String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/getlistconversation/";
 
     try {
       final response = await http.get(
@@ -57,7 +57,7 @@ class ChatApiService{
 
 Future<String?> uploadFile(File file, String type) async {
   try {
-    String endpoint = 'https://imp-model-widely.ngrok-free.app/api/user/upload_ImageOrVideo';
+    String endpoint = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/upload_ImageOrVideo';
     var request = http.MultipartRequest('POST', Uri.parse(endpoint));
 
     // Thêm file vào request
@@ -83,7 +83,12 @@ Future<String?> uploadFile(File file, String type) async {
       print('JSON Response: $jsonResponse');
 
       // Truy xuất URL ảnh hoặc video từ phản hồi
-      String? url = type == 'image' ? jsonResponse['imageUrl'] : jsonResponse['videoUrl'];
+      String? url;
+      if (type == 'image') {
+        url = jsonResponse['imageUrl']; // Kiểm tra trường này
+      } else {
+        url = jsonResponse['videoUrl']; // Kiểm tra trường này
+      }
 
       // Kiểm tra nếu URL hợp lệ (URL phải bắt đầu bằng http hoặc https)
       if (url != null && url.startsWith('http')) {
@@ -94,6 +99,7 @@ Future<String?> uploadFile(File file, String type) async {
       }
     } else {
       print('Upload failed with status code: ${response.statusCode}');
+      // print('Response body: ${response.body}');
       return null;
     }
   } catch (e) {
@@ -101,5 +107,6 @@ Future<String?> uploadFile(File file, String type) async {
     return null;
   }
 }
+
 
 }

@@ -39,7 +39,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   Future<void> fetchPaymentMethods() async {
     final url = Uri.parse(
-        'https://imp-model-widely.ngrok-free.app/apiBaokim/getPaymentMethods');
+        'https://peacock-wealthy-vaguely.ngrok-free.app/apiBaokim/getPaymentMethods');
 
     try {
       final response = await http.get(url);

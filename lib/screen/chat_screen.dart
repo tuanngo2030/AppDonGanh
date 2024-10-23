@@ -68,8 +68,8 @@ class _ChatScreenState extends State<ChatScreen> {
               boundaryMargin: const EdgeInsets.all(10),
               minScale: 0.5,
               maxScale: 5.0,
-              child: Image.memory(
-                base64Decode(imageUrl),
+              child: Image.network(
+                imageUrl,
                 fit: BoxFit
                     .cover, // Đặt BoxFit.cover để hình ảnh chiếm toàn bộ dialog
               ),
@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Tạo socket mới
     socket = IO.io(
-      "https://imp-model-widely.ngrok-free.app",
+      "https://peacock-wealthy-vaguely.ngrok-free.app",
       <String, dynamic>{
         "transports": ["websocket"],
         "autoConnect": true,
@@ -188,7 +188,9 @@ class _ChatScreenState extends State<ChatScreen> {
         );
 
         // Thêm tin nhắn vào danh sách
-        addMessage(message);
+        if (!messages.any((msg) => msg.id == message.id)) {
+          addMessage(message);
+        }
       } else {
         print('Received null data: $data');
       }
@@ -224,35 +226,25 @@ class _ChatScreenState extends State<ChatScreen> {
       String? imageUrl;
       String? videoUrl;
 
-      // Nếu có hình ảnh, chuyển đổi thành base64
+      // Nếu có hình ảnh, tải lên và lấy URL
       if (_image != null) {
-        imageUrl = await _fileToBase64(_image!);
-          // imageUrl = await ChatApiService().uploadFile(_image!, 'image');
+        imageUrl = await ChatApiService().uploadFile(_image!, 'image');
+        if (imageUrl == null) {
+          print("Failed to upload image");
+          return;
+        }
       }
 
-      // Nếu có video, chuyển đổi thành base64
+      // Nếu có video, tải lên và lấy URL
       if (_video != null) {
-        videoUrl = await _fileToBase64(_video!);
-        // videoUrl = await ChatApiService().uploadFile(_video!, 'video');
-        print('videoUrl: $videoUrl');
+        videoUrl = await ChatApiService().uploadFile(_video!, 'video');
+        if (videoUrl == null) {
+          print("Failed to upload video");
+          return;
+        }
       }
 
-      // Tạo một message mới
-      final message = Message(
-        id: '', // ID sẽ được tạo bởi server
-        text: text,
-        seen: false,
-        msgByUserId: widget.userId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        imageUrl: imageUrl,
-        videoUrl: videoUrl,
-      );
-
-      // Thêm tin nhắn vào danh sách ngay lập tức
-      // addMessage(message);
-
-      // Gửi tin nhắn
+      // Tạo tin nhắn mới và gửi tới server
       socket!.emit('sendMessage', {
         'conversationId': widget.conversationId,
         'text': text,
@@ -260,12 +252,12 @@ class _ChatScreenState extends State<ChatScreen> {
         'videoUrl': videoUrl,
       });
 
-      // Xóa trường nhập và các biến sau khi gửi
+      // Xóa dữ liệu sau khi gửi tin nhắn
       _controller.clear();
       setState(() {
-        _image = null; // Reset image after sending
-        _video = null; // Reset video after sending
-        _videoController?.dispose(); // Dispose video controller after sending
+        _image = null;
+        _video = null;
+        _videoController?.dispose();
         _videoController = null;
       });
     } else {
@@ -331,7 +323,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   width: 200,
                   child: AspectRatio(
                     aspectRatio: _videoController!.value.aspectRatio,
-                    child: VideoPlayer(_videoController!), // Display video player
+                    child:
+                        VideoPlayer(_videoController!), // Display video player
                   ),
                 ),
               ),
@@ -415,29 +408,152 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Container(
-                  width: 100,
-                  height: 150,
+                  width: 150,
+                  height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Image.memory(
-                    base64Decode(message.imageUrl!),
+                  child: Image.network(
+                    (message.imageUrl!),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
           if (message.videoUrl != null)
-            GestureDetector(
-              onTap: () {
-                _playReceivedVideo(message.videoUrl!);
-              },
-              child: const Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text('Received video'),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                height: 250,
+                width: 150,
+                child: VideoPlayerWidget(videoUrl: message.videoUrl!),
               ),
             ),
         ],
+      ),
+    );
+  }
+  
+}
+class VideoPlayerWidget extends StatefulWidget {
+  final String videoUrl;
+
+  const VideoPlayerWidget({super.key, required this.videoUrl});
+
+  @override
+  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.videoUrl)
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FullScreenVideoPlayer(videoUrl: widget.videoUrl),
+          ),
+        );
+      },
+      child: _controller.value.isInitialized
+          ? AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            )
+          : const Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
+
+class FullScreenVideoPlayer extends StatefulWidget {
+  final String videoUrl;
+
+  const FullScreenVideoPlayer({super.key, required this.videoUrl});
+
+  @override
+  _FullScreenVideoPlayerState createState() => _FullScreenVideoPlayerState();
+}
+
+class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+  late VideoPlayerController _controller;
+  bool _isPlaying = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.videoUrl)
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _togglePlayPause() {
+    setState(() {
+      if (_controller.value.isPlaying) {
+        _controller.pause();
+      } else {
+        _controller.play();
+      }
+      _isPlaying = !_controller.value.isPlaying;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: _controller.value.isInitialized
+            ? GestureDetector(
+                onTap: _togglePlayPause,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
+                    ),
+                    if (!_isPlaying)
+                      const Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                        size: 80.0,
+                      ),
+                  ],
+                ),
+              )
+            : const Center(child: CircularProgressIndicator()),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class UserImageUploadService {
-  final String baseUrl = 'https://imp-model-widely.ngrok-free.app/api/user/createAnhDaiDien';
+  final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/createAnhDaiDien';
 
   Future<bool> uploadImage(File imageFile, String userId) async {
     try {

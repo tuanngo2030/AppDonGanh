@@ -7,12 +7,12 @@ import 'package:jwt_decode/jwt_decode.dart'; // For decoding JWT tokens
 
 class UserApiService {
   final String baseUrl =
-      'https://imp-model-widely.ngrok-free.app/api/user/login';
+      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/login';
   final String baseUrlid =
-      'https://imp-model-widely.ngrok-free.app/api/user/showUserID';
+      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/showUserID';
 
   final String updateUserUrl =
-      'https://imp-model-widely.ngrok-free.app/api/user/updateUser';
+      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/updateUser';
 
   Future<NguoiDung?> login(String gmail, String matKhau) async {
     final uri = Uri.parse(baseUrl);

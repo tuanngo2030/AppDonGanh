@@ -10,7 +10,7 @@ class LoginWithApiGoogle {
   Future<void> registerUserGoogle(
     String displayName, String email, String googleId) async {
   final url =
-      'https://imp-model-widely.ngrok-free.app/api/user/RegisterUserGG';
+      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/RegisterUserGG';
 
   try {
     final response = await http.post(
@@ -65,7 +65,7 @@ class LoginWithApiGoogle {
 
   // Thêm hàm này để lấy thông tin người dùng sau khi đăng nhập Google
   Future<NguoiDung?> fetchUserDetails(String userId) async {
-    final uri = Uri.parse('https://imp-model-widely.ngrok-free.app/api/user/showUserID');
+    final uri = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/showUserID');
 
     try {
       final response = await http.get(uri);

@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewApiService {
-   final String baseUrl = 'https://imp-model-widely.ngrok-free.app/api';
+   final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api';
    String? userId;
     
   // Method to fetch reviews for a specific product

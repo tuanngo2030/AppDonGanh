@@ -6,7 +6,7 @@ class ForgotpasswordApi {
   
   // Gửi OTP
   static Future<void> sendOtpForgotPassword(String gmail) async {
-    final url = Uri.parse('https://imp-model-widely.ngrok-free.app/api/user/SendOtpForgotPassword');
+    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendOtpForgotPassword');
 
     try {
       final response = await http.post(
@@ -29,7 +29,7 @@ class ForgotpasswordApi {
   }
 
 Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
-  final url = Uri.parse('https://imp-model-widely.ngrok-free.app/api/user/CheckOtpForgotPassword');
+  final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/CheckOtpForgotPassword');
   
   try {
     final response = await http.post(
@@ -69,7 +69,7 @@ Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
 }
 
  static Future<void> sendNewPassword(String gmail, String matKhauMoi, String resetToken) async {
-    final url = Uri.parse('https://imp-model-widely.ngrok-free.app/api/user/SendPassword');
+    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendPassword');
 
     try {
       final response = await http.post(

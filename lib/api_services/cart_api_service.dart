@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartApiService {
-  final String baseUrl = 'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/user/';
+  final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/user/';
 
   Future<CartModel> getCart() async {
     // Retrieve userId from SharedPreferences
@@ -39,7 +39,7 @@ class CartApiService {
   Future<CartModel> addToCart(
       String userId, String idBienThe, int quantity, int donGia) async {
     final addToCartURL =
-        'https://imp-model-widely.ngrok-free.app/api/cart/gioHang?';
+        'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang?';
 
     Map<String, dynamic> data = {
       'userId': userId,
@@ -84,7 +84,7 @@ class CartApiService {
 
   Future<void> deleteFromCart(String idGioHang, String idBienThe) async {
     final deleteFromCartURL =
-        'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/$idGioHang';
+        'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {
       'idBienThe': idBienThe,
@@ -105,7 +105,7 @@ class CartApiService {
   }
 
   Future<void> updateCart(String idGioHang, String idBienThe, int soLuong, int donGia) async {
-    final updateCartURL = 'https://imp-model-widely.ngrok-free.app/api/cart/gioHang/$idGioHang';
+    final updateCartURL = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {
       'chiTietGioHang': [

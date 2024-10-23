@@ -3,7 +3,7 @@ import 'package:don_ganh_app/models/product_model.dart';
 import 'package:http/http.dart' as http;
 
 class ProductApiService{
-  final String apiUrl = "https://imp-model-widely.ngrok-free.app/api/sanpham";
+  final String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/sanpham";
 
   Future<List<ProductModel>> getListProduct() async {
     final response = await http.get(Uri.parse('$apiUrl/getlistSanPham'));

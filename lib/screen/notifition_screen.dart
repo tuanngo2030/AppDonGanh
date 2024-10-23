@@ -38,7 +38,7 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
   // Fetch conversations and filter by userId
   Future<void> getListConversationsByUserId(String userId) async {
     const String apiUrl =
-        "https://imp-model-widely.ngrok-free.app/api/chatsocket/getlistconversation/";
+        "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/getlistconversation/";
 
     try {
       final response = await http.get(
