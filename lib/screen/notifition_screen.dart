@@ -68,11 +68,20 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Thông báo'),
-      //   backgroundColor: Colors.white,
-      //   centerTitle: true,
-      // ),
+ appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+          ),
+        ),
+        title: Text(
+          'Thông báo',
+         style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: ListView.builder(
         itemCount: conversations.length,
         itemBuilder: (context, index) {

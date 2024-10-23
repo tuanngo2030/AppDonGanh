@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/models/chat_model.dart';
 import 'package:flutter/material.dart';
@@ -29,12 +28,14 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
   IO.Socket? socket;
   String? token;
   List<Message> messages = [];
   File? _image;
   File? _video;
   VideoPlayerController? _videoController;
+  bool _isLoading = false; // Biến để theo dõi trạng thái tải
 
   @override
   void initState() {
@@ -42,6 +43,15 @@ class _ChatScreenState extends State<ChatScreen> {
     _loadTokenAndConnect();
   }
 
+  // @override
+  // void dispose() {
+  //   _scrollController.dispose();
+  //   _controller.dispose();
+  //   socket?.disconnect();
+  //   socket?.dispose();
+  //   _videoController?.dispose();
+  //   super.dispose();
+  // }
   @override
   void dispose() {
     _scrollController.dispose();
@@ -110,13 +120,21 @@ class _ChatScreenState extends State<ChatScreen> {
     if (pickedFile != null) {
       setState(() {
         _video = File(pickedFile.path);
-        _videoController = VideoPlayerController.file(_video!)
-          ..initialize().then((_) {
-            setState(
-                () {}); // Rebuild the widget when the video is ready to play
-            _videoController!.play(); // Auto-play the video
-          });
       });
+
+      // Nén video trước khi sử dụng
+      final compressedVideo = await (_video!);
+      if (compressedVideo != null) {
+        setState(() {
+          _video = compressedVideo; // Cập nhật video đã được nén
+          _videoController = VideoPlayerController.file(_video!)
+            ..initialize().then((_) {
+              setState(
+                  () {}); // Rebuild the widget when the video is ready to play
+              _videoController!.play(); // Auto-play the video
+            });
+        });
+      }
     }
   }
 
@@ -220,7 +238,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) async {
-    if (text.isEmpty && _image == null && _video == null) return;
+    if (!mounted || text.isEmpty && _image == null && _video == null) return;
 
     if (socket != null && socket!.connected) {
       String? imageUrl;
@@ -259,6 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _video = null;
         _videoController?.dispose();
         _videoController = null;
+        _isLoading = false;
       });
     } else {
       print("Socket is not connected.");
@@ -306,6 +325,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
+            if (_isLoading) // Hiển thị chỉ báo tải
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
             if (_image != null) // Hiển thị hình ảnh nếu có
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -433,8 +459,8 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
 }
+
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
@@ -450,6 +476,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
+    // ignore: deprecated_member_use
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
@@ -470,7 +497,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FullScreenVideoPlayer(videoUrl: widget.videoUrl),
+            builder: (context) =>
+                FullScreenVideoPlayer(videoUrl: widget.videoUrl),
           ),
         );
       },
@@ -484,7 +512,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 }
 
-
 class FullScreenVideoPlayer extends StatefulWidget {
   final String videoUrl;
 
@@ -497,13 +524,17 @@ class FullScreenVideoPlayer extends StatefulWidget {
 class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   late VideoPlayerController _controller;
   bool _isPlaying = true;
-
+  double _volume = 1.0; 
+  bool _isLoading = true; 
   @override
   void initState() {
     super.initState();
+    // ignore: deprecated_member_use
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
-        setState(() {});
+        setState(() {
+          _isLoading = false;
+        });
         _controller.play();
       });
   }
@@ -525,6 +556,17 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     });
   }
 
+  Future<void> _saveVideo() async {
+    
+  }
+
+  void _setVolume(double value) {
+    setState(() {
+      _volume = value;
+      _controller.setVolume(_volume);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -532,28 +574,72 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text("Video"),
       ),
       body: Center(
-        child: _controller.value.isInitialized
-            ? GestureDetector(
-                onTap: _togglePlayPause,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    ),
-                    if (!_isPlaying)
-                      const Icon(
-                        Icons.play_arrow,
-                        color: Colors.white,
-                        size: 80.0,
+        child: _isLoading // Kiểm tra nếu đang tải
+            ? const Center(child: CircularProgressIndicator())
+            : _controller.value.isInitialized
+                ? Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
+                        child: VideoPlayer(_controller),
                       ),
-                  ],
-                ),
-              )
-            : const Center(child: CircularProgressIndicator()),
+                      // Nút dừng và tiếp tục
+                      Positioned(
+                        bottom: 10,
+                        left: 20,
+                        right: 20,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                _isPlaying ? Icons.pause : Icons.play_arrow,
+                                color: Colors.white,
+                              ),
+                              onPressed: _togglePlayPause,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Nút tải video ở góc trên bên phải
+                      // Positioned(
+                      //   top: 20,
+                      //   right: 20,
+                      //   child: IconButton(
+                      //     icon: const Icon(
+                      //       Icons.download,
+                      //       color: Colors.white,
+                      //     ),
+                      //     onPressed: _saveVideo, // Lưu video
+                      //   ),
+                      // ),
+                      // Slider điều chỉnh âm thanh ở góc dưới bên phải
+                      Positioned(
+                        bottom: 10,
+                        right: 20,
+                        child: RotatedBox(
+                          quarterTurns: 3,
+                          child: Container(
+                            height:
+                                40, 
+                            child: Slider(
+                              value: _volume,
+                              onChanged: _setVolume,
+                              min: 0,
+                              max: 1,
+                              activeColor: Colors.white,
+                              inactiveColor: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : const Center(child: Text("Video không thể phát!")),
       ),
     );
   }
