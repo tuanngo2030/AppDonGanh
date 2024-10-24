@@ -26,7 +26,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         elevation: 0,
       ),
       body: Center(
-        child: Text("Favorite Screen") ,
+        child: Text("Đang trong quá trình phát triển sẽ sớm thôi <('.')>") ,
         ),
     );
   }
