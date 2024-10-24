@@ -153,7 +153,7 @@ class OrderApiService {
   }
 
   Future<void> cancelOrder(String hoadonId) async {
-    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/HuyDonHang/$hoadonId');
+    final url = Uri.parse('${dotenv.env['API_URL']}/hoadon/HuyDonHang/$hoadonId');
 
     try {
       final response = await http.post(url);
