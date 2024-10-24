@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class UserImageUploadService {
-  final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/createAnhDaiDien';
+  final String baseUrl = '${dotenv.env['API_URL']}/user/createAnhDaiDien';
 
   Future<bool> uploadImage(File imageFile, String userId) async {
     try {

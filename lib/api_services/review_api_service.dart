@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:don_ganh_app/models/review_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewApiService {
-   final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api';
+   final String baseUrl = '${dotenv.env['API_URL']}';
    String? userId;
     
   // Method to fetch reviews for a specific product

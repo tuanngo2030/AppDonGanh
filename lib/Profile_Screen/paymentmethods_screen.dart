@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/paymenthod_model.dart'; // Nhớ kiểm tra tên mô hình của bạn
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart'; // Thêm thư viện
 
@@ -39,7 +40,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   Future<void> fetchPaymentMethods() async {
     final url = Uri.parse(
-        'https://peacock-wealthy-vaguely.ngrok-free.app/apiBaokim/getPaymentMethods');
+        '${dotenv.env['API_URL']}Baokim/getPaymentMethods');
 
     try {
       final response = await http.get(url);

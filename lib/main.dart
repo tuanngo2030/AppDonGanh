@@ -39,8 +39,10 @@ import 'package:don_ganh_app/forgotpassword_screen/otp_screen.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
 import 'package:don_ganh_app/screen/trang_xin_chao.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: "lib/.env");
   runApp(ChangeNotifierProvider(
       create: (context) => PaymentInfo(), child: const MyApp()));
 }

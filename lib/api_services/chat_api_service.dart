@@ -1,12 +1,12 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChatApiService{
    Future<bool> createConversation(String senderId, String receiverId) async {
-    const String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/Createconversation";
+    String apiUrl = "${dotenv.env['API_URL']}/chatsocket/Createconversation";
     try {
       Map<String, String> body = {
         'sender_id': senderId,
@@ -35,7 +35,7 @@ class ChatApiService{
 
   // Phương thức lấy danh sách cuộc trò chuyện theo ID
   Future<void> getListConversation(String conversationId) async {
-    const String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/getlistconversation/";
+    String apiUrl = "${dotenv.env['API_URL']}/chatsocket/getlistconversation/";
 
     try {
       final response = await http.get(
@@ -57,7 +57,7 @@ class ChatApiService{
 
 Future<String?> uploadFile(File file, String type) async {
   try {
-    String endpoint = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/upload_ImageOrVideo';
+    String endpoint = '${dotenv.env['API_URL']}/user/upload_ImageOrVideo';
     var request = http.MultipartRequest('POST', Uri.parse(endpoint));
 
     // Thêm file vào request

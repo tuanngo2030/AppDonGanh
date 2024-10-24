@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decode/jwt_decode.dart'; // For decoding JWT tokens
+import 'package:jwt_decode/jwt_decode.dart'; 
 
 class UserApiService {
   final String baseUrl =
-      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/login';
+      '${dotenv.env['API_URL']}/user/login';
   final String baseUrlid =
-      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/showUserID';
+      '${dotenv.env['API_URL']}/user/showUserID';
 
   final String updateUserUrl =
-      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/updateUser';
+      '${dotenv.env['API_URL']}/user/updateUser';
 
   Future<NguoiDung?> login(String gmail, String matKhau) async {
     final uri = Uri.parse(baseUrl);

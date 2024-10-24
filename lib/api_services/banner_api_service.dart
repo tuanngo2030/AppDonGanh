@@ -1,9 +1,10 @@
 import 'package:don_ganh_app/models/banner_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class BannerApiService {
-  final String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/banner/banners?";
+  final String apiUrl = "${dotenv.env['API_URL']}/banner/banners?";
 
   Future<List<BannerModel>> fetchBanner() async {
     final response = await http.get(Uri.parse(apiUrl));

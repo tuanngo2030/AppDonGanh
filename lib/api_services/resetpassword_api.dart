@@ -1,9 +1,10 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ResetPasswordApi {
   final String _resetPasswordUrl =
-      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/ResetPassword';
+      '${dotenv.env['API_URL']}/user/ResetPassword';
 
   Future<bool> resetPassword(String email, String newPassword) async {
     try {

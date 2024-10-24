@@ -3,6 +3,7 @@ import 'package:don_ganh_app/models/converstation_model.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/chat_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -37,8 +38,8 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
 
   // Fetch conversations and filter by userId
   Future<void> getListConversationsByUserId(String userId) async {
-    const String apiUrl =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/getlistconversation/";
+     String apiUrl =
+        "${dotenv.env['API_URL']}/chatsocket/getlistconversation/";
 
     try {
       final response = await http.get(

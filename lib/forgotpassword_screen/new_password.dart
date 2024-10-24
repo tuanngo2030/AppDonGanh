@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +25,7 @@ class _NewPasswordState extends State<NewPassword> {
         resetToken != null &&
         gmail != null) {
       final url = Uri.parse(
-          'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendPassword');
+          '${dotenv.env['API_URL']}/user/SendPassword');
 
       try {
         final response = await http.post(

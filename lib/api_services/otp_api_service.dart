@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class OtpApiService {
-  static const String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/verifyOtp';
-   static const String resendUrl= 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/resendOTP';
+  static String baseUrl = '${dotenv.env['API_URL']}/user/verifyOtp';
+   static String resendUrl= '${dotenv.env['API_URL']}/user/resendOTP';
 
   // Phương thức xác minh OTP
   Future<bool> verifyOtp(String otp, String gmail) async {

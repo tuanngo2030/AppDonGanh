@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/models/chat_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -159,7 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Tạo socket mới
     socket = IO.io(
-      "https://peacock-wealthy-vaguely.ngrok-free.app",
+      "${dotenv.env['API_SOCKET_URL']}",
       <String, dynamic>{
         "transports": ["websocket"],
         "autoConnect": true,
@@ -450,8 +451,8 @@ class _ChatScreenState extends State<ChatScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: SizedBox(
-                height: 250,
-                width: 150,
+                height: 150,
+                width: 250,
                 child: VideoPlayerWidget(videoUrl: message.videoUrl!),
               ),
             ),
@@ -524,8 +525,8 @@ class FullScreenVideoPlayer extends StatefulWidget {
 class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   late VideoPlayerController _controller;
   bool _isPlaying = true;
-  double _volume = 1.0; 
-  bool _isLoading = true; 
+  double _volume = 1.0;
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -556,9 +557,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     });
   }
 
-  Future<void> _saveVideo() async {
-    
-  }
+  Future<void> _saveVideo() async {}
 
   void _setVolume(double value) {
     setState(() {
@@ -624,8 +623,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                         child: RotatedBox(
                           quarterTurns: 3,
                           child: Container(
-                            height:
-                                40, 
+                            height: 40,
                             child: Slider(
                               value: _volume,
                               onChanged: _setVolume,
