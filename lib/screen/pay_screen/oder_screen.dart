@@ -7,13 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class OderScreen extends StatefulWidget {
   const OderScreen({super.key});
- 
+
   @override
   State<OderScreen> createState() => _OderScreenState();
 }
 
 class _OderScreenState extends State<OderScreen> {
-  late Future<List<OrderModel>> orderModel = Future.value([]); // Initialize with an empty Future
+  late Future<List<OrderModel>> orderModel =
+      Future.value([]); // Initialize with an empty Future
   String? userId;
 
   @override
@@ -22,18 +23,20 @@ class _OderScreenState extends State<OderScreen> {
     _loadUserId(); // Load userId
   }
 
-   Future<void> _loadUserId() async {
+  Future<void> _loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
     if (userId != null) {
       setState(() {
-        orderModel = OrderApiService().fetchOrder(userId!); // Fetch orders when userId is available
+        orderModel = OrderApiService()
+            .fetchOrder(userId!); // Fetch orders when userId is available
       });
     } else {
       // Handle the case where userId is null
       // For example, navigate to a login screen or show an error message
       setState(() {
-        orderModel = Future.value([]); // Initialize with an empty list if no userId
+        orderModel =
+            Future.value([]); // Initialize with an empty list if no userId
       });
     }
   }
@@ -154,12 +157,15 @@ class _OderScreenState extends State<OderScreen> {
                                           padding:
                                               const EdgeInsets.only(left: 20),
                                           child: ElevatedButton(
-                                            onPressed: () {}, // Handle detail action here
+                                            onPressed:
+                                                () {}, // Handle detail action here
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
-                                                  const Color.fromRGBO(41, 87, 35, 1),
+                                                  const Color.fromRGBO(
+                                                      41, 87, 35, 1),
                                               foregroundColor: Colors.white,
-                                              shape: const RoundedRectangleBorder(
+                                              shape:
+                                                  const RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.only(
                                                   bottomLeft:
                                                       Radius.circular(10),
@@ -215,6 +221,8 @@ class _OderScreenState extends State<OderScreen> {
         return 'Bắt đầu giao';
       case 3:
         return 'Hoàn thành đơn hàng';
+      case 4:
+        return 'Đã hủy đơn hàng';
       default:
         return 'Không xác định';
     }

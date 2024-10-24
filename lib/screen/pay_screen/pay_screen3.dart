@@ -11,22 +11,21 @@ class PayScreen3 extends StatefulWidget {
   @override
   State<PayScreen3> createState() => _PayScreen3State();
 }
- 
+
 class _PayScreen3State extends State<PayScreen3> {
   String paymentSubtitle = "";
   bool isPaymentSuccessful = false;
-    bool isOrderExpired = false;
+  bool isOrderExpired = false;
 
   late final WebViewController _webViewController;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-       ..setNavigationDelegate(
+      ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
             print('Page finished loading: $url');
@@ -36,39 +35,43 @@ class _PayScreen3State extends State<PayScreen3> {
           },
         ),
       );
-      // ..loadRequest(Uri.parse('https://baokim.vn/?id=181016&mrc_order_id=tuanngo-20241008155248&stat=d&checksum=c2343556762779cf21840ef525d276b07852d1e967b17a557ed332f8795121d3')); // Thay thế bằng URL bạn muốn hiển thị
-      _checkOrderStatus();
+    
+    _checkOrderStatus();
   }
 
-   Future<void> _checkOrderStatus() async {
-   final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-    try {
-      final data = await OrderApiService().checkDonHangBaoKim(orderId: paymentInfo.order_id);
-      setState(() {
-        isOrderExpired = data['isExpired'] ?? false;
-      });
+  Future<void> _checkOrderStatus() async {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+  
+    // Chỉ kiểm tra trạng thái đơn hàng nếu phương thức thanh toán là QR
+    if (paymentInfo.title == 'Bảo Kim') {
+      try {
+        final data = await OrderApiService().checkDonHangBaoKim(orderId: paymentInfo.order_id);
+        setState(() {
+          isOrderExpired = data['isExpired'] ?? false;
+        });
 
-      if (!isOrderExpired) {
-        _webViewController.loadRequest(Uri.parse(
-          paymentInfo.payment_url,
-        ));
+        if (!isOrderExpired) {
+          _webViewController.loadRequest(Uri.parse(paymentInfo.payment_url));
+        }
+      } catch (e) {
+        print('Lỗi khi kiểm tra đơn hàng: $e');
+        setState(() {
+          isOrderExpired = true;
+        });
       }
-    } catch (e) {
-      print('Lỗi khi kiểm tra đơn hàng: $e');
-      setState(() {
-        isOrderExpired = true;
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    
     return Scaffold(
       body: isOrderExpired
           ? _buildExpiredMessage()
           : isPaymentSuccessful
               ? _buildSuccessScreen()
-              : _buildPaymentScreen(),
+              : _buildPaymentScreen(paymentInfo),
     );
   }
 
@@ -96,85 +99,17 @@ class _PayScreen3State extends State<PayScreen3> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Thời gian giao dịch:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          ' 2023-10-16 03:33:38',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Mã đơn hàng:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '7R7O4UU3',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Số tiền:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '40.000 đ',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Hình thức thanh toán : ',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'COD',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
+                    // Add your success details here
                   ],
                 ),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Quý khách có thể tra cứu trạng thái đơn hàng'),
-              TextButton(
-                  onPressed: () {},
-                  child: const Text('Tại đây',
-                      style: TextStyle(
-                          color: Color.fromRGBO(248, 158, 25, 1),
-                          decoration: TextDecoration.underline)))
-            ],
           ),
           ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                 foregroundColor: Colors.white
-               
               ),
               child: const Text('Trở về')
             )
@@ -204,134 +139,110 @@ class _PayScreen3State extends State<PayScreen3> {
     );
   }
 
-  Widget _buildPaymentScreen() {
-    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Card(
-            child: ListTile(
-              leading: Image.asset(paymentInfo.assetPath,
-                  width: 40, height: 40),
-              title:  Text(paymentInfo.title),
-              subtitle: paymentInfo.subtitle == ''
-                  ? const Text('')
-                  : Text('${paymentInfo.subtitle}', style: const TextStyle(fontSize: 12)),
-            ),
+ Widget _buildPaymentScreen(PaymentInfo paymentInfo) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        Card(
+          child: ListTile(
+            leading: Image.asset(paymentInfo.assetPath, width: 40, height: 40),
+            title: Text(paymentInfo.title),
+            subtitle: paymentInfo.subtitle == ''
+                ? const Text('')
+                : Text('${paymentInfo.subtitle}', style: const TextStyle(fontSize: 12)),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: const Border.fromBorderSide(
-                    BorderSide(color: Color.fromARGB(255, 174, 172, 172))),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: const Border.fromBorderSide(
+                BorderSide(color: Color.fromARGB(255, 174, 172, 172)),
               ),
-              child:  Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Tổng giá trị thanh toán:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${paymentInfo.totalPrice} đ',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Giá trị đơn hàng:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${paymentInfo.totalPrice} đ',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Phí dịch vụ:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '40.000 đ',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Khuyến mãi:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '40.000 đ',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tổng giá trị thanh toán:',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${paymentInfo.totalPrice} đ',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Giá trị đơn hàng:',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${paymentInfo.totalPrice} đ',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+        
+        // Ẩn WebView nếu là COD
+        if (paymentInfo.title != 'Giao hàng thu tiền (COD)')
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: const Border.fromBorderSide(
-                    BorderSide(color: Color.fromARGB(255, 174, 172, 172))),
+                  BorderSide(color: Color.fromARGB(255, 174, 172, 172)),
+                ),
               ),
               child: WebViewWidget(controller: _webViewController),
             ),
           ),
-    
-           Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: widget.nextStep,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Thanh toán',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+
+        // Spacer để đẩy button xuống dưới
+        const Spacer(),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: widget.nextStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                paymentInfo.title == 'Giao hàng thu tiền (COD)' ? 'Hoàn tất' : 'Thanh toán',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }

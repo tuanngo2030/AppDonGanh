@@ -74,8 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(60),
+            const Padding(
+              padding: EdgeInsets.all(60),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -103,8 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
                     child: Text(
                       "Email",
                       style: TextStyle(
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(20.0),
+                      contentPadding: const EdgeInsets.all(20.0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
@@ -135,8 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
                     child: Text(
                       "Mật khẩu",
                       style: TextStyle(
@@ -150,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(20.0),
+                      contentPadding: const EdgeInsets.all(20.0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.pushNamed(context, '/Sendotpgmail');
                             // TODO: Implement password reset logic here
                           },
-                          child: Text(
+                          child: const Text(
                             "Quên mật khẩu ?",
                             textAlign: TextAlign.end,
                             style: TextStyle(
@@ -191,19 +191,19 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.all(15.0),
               child: ElevatedButton(
                 onPressed: _login,
-                child: Text(
-                  "Đăng nhập",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
                 style: ElevatedButton.styleFrom(
-                  fixedSize: Size(395, 55),
-                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                  fixedSize: const Size(395, 55),
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   elevation: 5,
+                ),
+                child: const Text(
+                  "Đăng nhập",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -221,8 +221,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 90,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       "Hoặc đăng nhập với",
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -230,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Container(
                       height: 2,
                       width: 90,
@@ -251,8 +251,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       print("Login with facebook");
                     },
                     child: Container(
+                      padding: const EdgeInsets.all(20),
                       child: Image.asset('lib/assets/fb_icon.png'),
-                      padding: EdgeInsets.all(20),
                     ),
                   ),
                   InkWell(
@@ -260,8 +260,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       signIn();
                     },
                     child: Container(
+                      padding: const EdgeInsets.all(20),
                       child: Image.asset('lib/assets/gg_icon.png'),
-                      padding: EdgeInsets.all(20),
                     ),
                   ),
                   InkWell(
@@ -269,8 +269,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       print("Login with twitter");
                     },
                     child: Container(
+                      padding: const EdgeInsets.all(20),
                       child: Image.asset('lib/assets/tw_icon.png'),
-                      padding: EdgeInsets.all(20),
                     ),
                   ),
                 ],
@@ -285,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Bạn chưa có tài khoản ? ",
                       style:
                           TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
@@ -295,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         print("Go to register");
                         Navigator.pushNamed(context, '/registerscreen');
                       },
-                      child: Text(
+                      child: const Text(
                         "Đăng ký",
                         style: TextStyle(
                           fontSize: 12,
@@ -317,7 +317,7 @@ Future<void> signIn() async {
   final user = await LoginWithApiGoogle.login();
   
   if (user == null) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đăng nhập thất bại')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
     return;
   } 
 
@@ -331,11 +331,11 @@ Future<void> signIn() async {
     await prefs.setString('userEmail', user.email);
     await prefs.setString('googleId', user.id);
 ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đăng nhập thành công')),
+      const SnackBar(content: Text('Đăng nhập thành công')),
     );
     // Điều hướng đến màn hình BanLa
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => BanLa()),
+      MaterialPageRoute(builder: (context) => const BanLa()),
     );
   } catch (error) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $error')));

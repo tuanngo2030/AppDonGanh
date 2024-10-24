@@ -151,6 +151,22 @@ class OrderApiService {
     }
   }
 
+  Future<void> cancelOrder(String hoadonId) async {
+    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/HuyDonHang/$hoadonId');
+
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        print('Order canceled successfully');
+      } else {
+        print('Failed to cancel order: ${response.body}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
   Future<OrderModel> updateTrangThaiHoaDon({
     required String hoadonId,
   }) async {
@@ -182,51 +198,47 @@ class OrderApiService {
     }
   }
 
- Future<OrderModel> updateTransactionHoaDonCOD({
-  required String hoadonId,
-  required String transactionId,
-}) async {
-  final String url =
-      "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId";
+  Future<OrderModel> updateTransactionHoaDonCOD({
+    required String hoadonId,
+    required String transactionId,
+  }) async {
+    // The base URL should point to your ngrok URL or production server
+    final String url =
+        'https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId';
 
-  final Map<String, dynamic> body = {
-    'transactionId': transactionId,
-  };
+    // Request body (transactionId)
+    final Map<String, dynamic> requestBody = {
+      'transactionId': transactionId,
+    };
 
-  try {
-    // Making the HTTP PUT request to update the invoice
-    final response = await http.put(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(body),
-    );
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json'
+        }, // Add appropriate headers
+        body: jsonEncode(requestBody), // Convert request body to JSON
+      );
 
-    // Logging the response status and body for debugging
-    print('Response Status: ${response.statusCode}');
-    print('Response Body: ${response.body}');
+      // Check the response status and body
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
 
-    // Handling the response based on the HTTP status code
-    if (response.statusCode == 200) {
-      final decodedResponse = json.decode(response.body);
-      print('Decoded Response: $decodedResponse');
-
-      // Checking if the API call was successful
-      if (decodedResponse['message'] == 'Cập nhật hóa đơn thành công' && decodedResponse['data'] != null) {
-        return OrderModel.fromJson(decodedResponse['data']);
+        // Assuming the API returns the updated hoa don data in the 'data' field
+        if (responseData['data'] != null) {
+          return OrderModel.fromJson(responseData['data']);
+        } else {
+          throw Exception('API returned no data');
+        }
       } else {
-        throw Exception('API returned error: ${decodedResponse['message']}');
+        // Handle error response
+        print("Error: ${response.statusCode} - ${response.body}");
+        throw Exception('Failed to update hoa don');
       }
-    } else {
-      // Handling non-200 responses
-      print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
-      throw Exception('Failed to update HoaDon');
+    } catch (e) {
+      // Handle exceptions, such as network errors
+      print('Error occurred: $e');
+      throw Exception('An error occurred while updating the transaction');
     }
-  } catch (e) {
-    // Catching and handling any potential errors
-    print('Error: $e');
-    throw Exception('Error occurred during the API call');
   }
-}
 }

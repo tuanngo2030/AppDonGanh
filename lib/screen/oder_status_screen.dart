@@ -40,11 +40,14 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
       buttonAction = () {
         _showCancelConfirmation();
       };
-    } else if (status >= 3) {
+    } else if (status == 3) {
       buttonText = "Đánh giá đơn hàng";
       buttonAction = () {
         Navigator.pushNamed(context, '/oder_review_screen');
       };
+    }else if (status == 4) {
+      buttonText = "Mua lại đơn hàng";
+      
     }
 
     return SafeArea(
@@ -242,7 +245,7 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
     // TODO: Implement order cancellation logic, e.g., call API to cancel the order
     // After successful cancellation, update order status
     setState(() {
-      status = -1; // Or some other value representing canceled order
+      status = 4; // Or some other value representing canceled order
     });
 
     ScaffoldMessenger.of(context).showSnackBar(

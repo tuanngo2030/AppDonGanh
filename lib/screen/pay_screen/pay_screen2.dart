@@ -239,6 +239,7 @@ Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String
         buildPaymentMethod(
           assetPath: 'lib/assets/ic_money.png',
           title: 'Giao hàng thu tiền (COD)',
+          subtitle: 'Thu bằng tiền mặt',
           value: 'COD',
         ),
         buildPaymentMethod(
