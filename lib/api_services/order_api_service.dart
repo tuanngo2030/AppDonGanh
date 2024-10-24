@@ -1,13 +1,14 @@
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/order_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class OrderApiService {
   Future<List<OrderModel>> fetchOrder(String userId) async {
     final String baseUrl =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/getHoaDonByUserId/$userId";
+        "${dotenv.env['API_URL']}/hoadon/getHoaDonByUserId/$userId";
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
@@ -39,8 +40,8 @@ class OrderApiService {
     required List<ChiTietGioHang> selectedItems,
     // required String YeuCauNhanHang,
   }) async {
-    const String url =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/createUserDiaChivaThongTinGiaoHang";
+    String url =
+        "${dotenv.env['API_URL']}/hoadon/createUserDiaChivaThongTinGiaoHang";
 
     final Map<String, dynamic> body = {
       'userId': userId,
@@ -86,7 +87,7 @@ class OrderApiService {
     required String transactionId,
   }) async {
     final String url =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final Map<String, dynamic> body = {
       'transactionId': transactionId,
@@ -125,7 +126,7 @@ class OrderApiService {
     required String orderId,
   }) async {
     final String url =
-        'https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/Checkdonhangbaokim/$orderId';
+        '${dotenv.env['API_URL']}/hoadon/Checkdonhangbaokim/$orderId';
 
     final response = await http.get(
       Uri.parse(url),
@@ -171,7 +172,7 @@ class OrderApiService {
     required String hoadonId,
   }) async {
     final String url =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDon/$hoadonId";
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final response = await http.post(
       Uri.parse(url),
@@ -198,13 +199,12 @@ class OrderApiService {
     }
   }
 
-  Future<OrderModel> updateTransactionHoaDonCOD({
-    required String hoadonId,
-    required String transactionId,
-  }) async {
-    // The base URL should point to your ngrok URL or production server
-    final String url =
-        'https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/updateTransactionHoaDonCOD/$hoadonId';
+ Future<OrderModel> updateTransactionHoaDonCOD({
+  required String hoadonId,
+  required String transactionId,
+}) async {
+  final String url =
+      "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDonCOD/$hoadonId";
 
     // Request body (transactionId)
     final Map<String, dynamic> requestBody = {
@@ -241,4 +241,53 @@ class OrderApiService {
       throw Exception('An error occurred while updating the transaction');
     }
   }
+
+Future<OrderModel> updateDiaChiGhiChuHoaDon({
+  required String hoadonId,
+  required diaChiList diaChiMoi,
+  required String ghiChu,
+}) async {
+  // URL của API Node.js
+  final String url = "${dotenv.env['API_URL']}/hoadon/updateDiaChighichuHoaDon/$hoadonId";
+
+  // Body của request
+  final Map<String, dynamic> requestBody = {
+    'diaChi': diaChiMoi.toJson(),
+    'ghiChu': ghiChu,
+  };
+
+  try {
+    // Gửi yêu cầu POST tới server Node.js
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json', // Định dạng JSON
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    // Kiểm tra phản hồi từ server
+    if (response.statusCode == 200) {
+      print('Cập nhật đơn hàng thành công');
+
+      // Giả sử bạn có một phương thức để chuyển response.body thành OrderModel
+      final order = OrderModel.fromJson(jsonDecode(response.body));
+      return order;
+    } else if (response.statusCode == 404) {
+      print('Đơn hàng không tồn tại');
+      throw Exception('Đơn hàng không tồn tại');
+    } else if (response.statusCode == 400) {
+      print('Cập nhật không hợp lệ');
+      throw Exception('Cập nhật không hợp lệ');
+    } else {
+      print('Lỗi không xác định: ${response.body}');
+      throw Exception('Lỗi không xác định');
+    }
+  } catch (error) {
+    // Xử lý lỗi trong trường hợp không kết nối được tới server
+    print('Lỗi khi cập nhật hóa đơn: $error');
+    throw Exception('Lỗi khi cập nhật hóa đơn');
+  }
+}
+
 }

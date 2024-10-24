@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/paymenthod_model.dart'; // Nhớ kiểm tra tên mô hình của bạn
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart'; // Thêm thư viện
 
 class PaymentMethodsScreen extends StatefulWidget {
+  const PaymentMethodsScreen({super.key});
+
   @override
   _PaymentMethodsScreenState createState() => _PaymentMethodsScreenState();
 }
@@ -39,7 +42,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   Future<void> fetchPaymentMethods() async {
     final url = Uri.parse(
-        'https://peacock-wealthy-vaguely.ngrok-free.app/apiBaokim/getPaymentMethods');
+        '${dotenv.env['API_URL']}Baokim/getPaymentMethods');
 
     try {
       final response = await http.get(url);
@@ -119,7 +122,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: filterSearchResults,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Search',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
@@ -128,7 +131,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: filteredMethods.length,
                     itemBuilder: (context, index) {
@@ -140,14 +143,14 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                             selectedId = method.id; // Đặt ID của mục đã chọn
                           });
                           saveSelectedId(
-                              method.id!); // Lưu ID vào SharedPreferences
+                              method.id); // Lưu ID vào SharedPreferences
 
                           // Trả lại ID đã chọn và quay lại màn hình trước
                           Navigator.pop(context,
                               method.id); // Trả về ID phương thức thanh toán
                         },
                         child: ListTile(
-                          leading: Container(
+                          leading: SizedBox(
                             width: 50.0,
                             height: 50.0,
                             child: Image.network(
@@ -182,6 +185,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                           ),
                         ),
                       );
+                      return null;
                     },
                   ),
           ),

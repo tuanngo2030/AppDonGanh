@@ -43,7 +43,7 @@ class _ReviewItemState extends State<ReviewItem> {
     switch (value) {
       case 'edit':
         _showEditDialog();
-        
+
         break;
       case 'delete':
         _deleteReview();
@@ -55,87 +55,94 @@ class _ReviewItemState extends State<ReviewItem> {
   }
 
   void _showEditDialog() {
-  TextEditingController commentController = TextEditingController(text: widget.review.binhLuan);
-  int selectedRating = widget.review.xepHang;  // Initially set to the current rating
+    TextEditingController commentController =
+        TextEditingController(text: widget.review.binhLuan);
+    int selectedRating =
+        widget.review.xepHang; // Initially set to the current rating
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {  // Use StatefulBuilder to update the stars dynamically
-          return AlertDialog(
-            title: const Text('Chỉnh sửa đánh giá'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: commentController,
-                  decoration: const InputDecoration(labelText: 'Bình luận'),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Use StatefulBuilder to update the stars dynamically
+            return AlertDialog(
+              title: const Text('Chỉnh sửa đánh giá'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: commentController,
+                    decoration: const InputDecoration(labelText: 'Bình luận'),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          index < selectedRating
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            selectedRating =
+                                index + 1; // Update selected rating
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Hủy'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog without saving
+                  },
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        index < selectedRating ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          selectedRating = index + 1;  // Update selected rating
-                        });
-                      },
-                    );
-                  }),
+                TextButton(
+                  child: const Text('Lưu'),
+                  onPressed: () {
+                    _updateReview(commentController.text,
+                        selectedRating); // Pass the updated rating
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
                 ),
               ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Hủy'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog without saving
-                },
-              ),
-              TextButton(
-                child: const Text('Lưu'),
-                onPressed: () {
-                  _updateReview(commentController.text, selectedRating);  // Pass the updated rating
-                  Navigator.of(context).pop();  // Close the dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-Future<void> _updateReview(String newComment, int newRating) async {
-  try {
-    await reviewApiService.updateReview(
-      danhGiaId: widget.review.id,
-      xepHang: newRating,
-      binhLuan: newComment,
-    );
-
-    // Update local review object after successful API call
-    setState(() {
-      widget.review.binhLuan = newComment;
-      widget.review.xepHang = newRating;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đánh giá đã được cập nhật')),
-    );
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Lỗi khi cập nhật đánh giá: $error')),
+            );
+          },
+        );
+      },
     );
   }
-}
+
+  Future<void> _updateReview(String newComment, int newRating) async {
+    try {
+      await reviewApiService.updateReview(
+        danhGiaId: widget.review.id,
+        xepHang: newRating,
+        binhLuan: newComment,
+      );
+
+      // Update local review object after successful API call
+      setState(() {
+        widget.review.binhLuan = newComment;
+        widget.review.xepHang = newRating;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đánh giá đã được cập nhật')),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi cập nhật đánh giá: $error')),
+      );
+    }
+  }
 
   Future<void> _deleteReview() async {
     try {
@@ -153,184 +160,221 @@ Future<void> _updateReview(String newComment, int newRating) async {
     }
   }
 
-Future<void> _updateLike() async {
-  if (_currentUserId != null) {
-    // Toggle like status immediately
-    setState(() {
-      _isLiked = !_isLiked;
-      if (_isLiked) {
-        // User likes the review
-        widget.review.likes.add(_currentUserId!);
-      } else {
-        // User unlikes the review
-        widget.review.likes.remove(_currentUserId!);
-      }
-    });
-
-    try {
-      // Now make the API call to update the like status
-      await reviewApiService.updateLike(widget.review.id, _currentUserId!);
-    } catch (error) {
-      // If there's an error, revert the like status
+  Future<void> _updateLike() async {
+    if (_currentUserId != null) {
+      // Toggle like status immediately
       setState(() {
-        _isLiked = !_isLiked; // Revert the like status
+        _isLiked = !_isLiked;
         if (_isLiked) {
-          widget.review.likes.remove(_currentUserId!);
-        } else {
+          // User likes the review
           widget.review.likes.add(_currentUserId!);
+        } else {
+          // User unlikes the review
+          widget.review.likes.remove(_currentUserId!);
         }
       });
 
-      // Show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi thích đánh giá: $error')),
-      );
+      try {
+        // Now make the API call to update the like status
+        await reviewApiService.updateLike(widget.review.id, _currentUserId!);
+      } catch (error) {
+        // If there's an error, revert the like status
+        setState(() {
+          _isLiked = !_isLiked; // Revert the like status
+          if (_isLiked) {
+            widget.review.likes.remove(_currentUserId!);
+          } else {
+            widget.review.likes.add(_currentUserId!);
+          }
+        });
+
+        // Show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi thích đánh giá: $error')),
+        );
+      }
     }
   }
-}
- @override
-Widget build(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 27),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: widget.review.userId.anhDaiDien !=
-                                null
-                            ? NetworkImage(widget.review.userId.anhDaiDien!)
-                            : const AssetImage('assets/default_avatar.png')
-                                as ImageProvider,
-                        radius: 15,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                _currentUserId == widget.review.userId.id
-                                    ? '${widget.review.userId.tenNguoiDung} (Bạn)'
-                                    : widget.review.userId.tenNguoiDung!,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                Icons.star,
-                                color: index < widget.review.xepHang
-                                    ? Colors.amber
-                                    : Colors.grey,
-                                size: 18,
-                              );
-                            }),
-                          ),
-                        ],
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 27),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: widget.review.userId.anhDaiDien !=
+                                  null
+                              ? NetworkImage(widget.review.userId.anhDaiDien!)
+                              : const AssetImage('assets/default_avatar.png')
+                                  as ImageProvider,
+                          radius: 15,
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  _currentUserId == widget.review.userId.id
+                                      ? '${widget.review.userId.tenNguoiDung} (Bạn)'
+                                      : widget.review.userId.tenNguoiDung!,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  Icons.star,
+                                  color: index < widget.review.xepHang
+                                      ? Colors.amber
+                                      : Colors.grey,
+                                  size: 18,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(widget.review.binhLuan),
+                    Text(widget.review.ngayTao
+                        .toLocal()
+                        .toString()
+                        .split(' ')[0]),
+
+                    // Hiển thị hình ảnh
+                    // Hiển thị hình ảnh
+                    if (widget.review.HinhAnh.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8.0, // Khoảng cách giữa các hình ảnh
+                        children: widget.review.HinhAnh.map((imageUrl) {
+                          return Image.network(
+                            imageUrl,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (BuildContext context, Widget child,
+                                ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null)
+                                return child; // Hiện hình ảnh khi tải xong
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                ),
+                              ); // Hiện progress indicator trong lúc tải
+                            },
+                            errorBuilder: (BuildContext context, Object error,
+                                StackTrace? stackTrace) {
+                              return const Text(
+                                  'Không thể tải hình ảnh'); // Hiện thông báo lỗi nếu tải không thành công
+                            },
+                          );
+                        }).toList(),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(widget.review.binhLuan),
-                  Text(widget.review.ngayTao
-                      .toLocal()
-                      .toString()
-                      .split(' ')[0]),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _showResponses = !_showResponses;
-                      });
-                    },
-                    child: Text(
-                      _showResponses
-                          ? 'Ẩn phản hồi'
-                          : 'Xem phản hồi (${widget.review.phanHoi.length})',
-                      style: const TextStyle(
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline),
+
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showResponses = !_showResponses;
+                        });
+                      },
+                      child: Text(
+                        _showResponses
+                            ? 'Ẩn phản hồi'
+                            : 'Xem phản hồi (${widget.review.phanHoi.length})',
+                        style: const TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline),
+                      ),
                     ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                      size: 15,
+                      color: _isLiked
+                          ? const Color.fromRGBO(41, 87, 35, 1)
+                          : null, // Change color based on like status
+                    ),
+                    onPressed: _updateLike, // Call the like function
+                  ),
+                  Text(
+                    'Hữu ích(${widget.review.likes.length})',
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                  const SizedBox(
+                      width: 10), // Add spacing between the text and popup menu
+                  PopupMenuButton<String>(
+                    onSelected: _handleMenuSelection,
+                    itemBuilder: (context) {
+                      return _currentUserId == widget.review.userId.id
+                          ? [
+                              const PopupMenuItem(
+                                  value: 'edit', child: Text('Sửa')),
+                              const PopupMenuItem(
+                                  value: 'delete', child: Text('Xóa')),
+                            ]
+                          : [
+                              const PopupMenuItem(
+                                  value: 'report', child: Text('Báo cáo')),
+                            ];
+                    },
+                    icon: const Icon(Icons.more_horiz),
                   ),
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    _isLiked
-                        ? Icons.thumb_up
-                        : Icons.thumb_up_alt_outlined,
-                    size: 15,
-                    color: _isLiked
-                        ? const Color.fromRGBO(41, 87, 35, 1)
-                        : null, // Change color based on like status
-                  ),
-                  onPressed: _updateLike, // Call the like function
-                ),
-                Text(
-                  'Hữu ích(${widget.review.likes.length})',
-                  style: const TextStyle(fontSize: 10),
-                ),
-                const SizedBox(width: 10), // Add spacing between the text and popup menu
-                PopupMenuButton<String>(
-                  onSelected: _handleMenuSelection,
-                  itemBuilder: (context) {
-                    return _currentUserId == widget.review.userId.id
-                        ? [
-                            const PopupMenuItem(
-                                value: 'edit', child: Text('Sửa')),
-                            const PopupMenuItem(
-                                value: 'delete', child: Text('Xóa')),
-                          ]
-                        : [
-                            const PopupMenuItem(
-                                value: 'report', child: Text('Báo cáo')),
-                          ];
-                  },
-                  icon: const Icon(Icons.more_horiz),
-                ),
-              ],
+            ],
+          ),
+        ),
+        if (_showResponses) ...[
+          for (var response in widget.review.phanHoi.take(2)) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 54, bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Người dùng: ${response.userId}'),
+                  Text('Nội dung: ${response.binhLuan}'),
+                  Text(
+                      'Ngày: ${response.ngayTao.toLocal().toString().split(' ')[0]}'),
+                  const Divider(),
+                ],
+              ),
             ),
           ],
-        ),
-      ),
-      if (_showResponses) ...[
-        for (var response in widget.review.phanHoi.take(2)) ...[
-          Padding(
-            padding: const EdgeInsets.only(left: 54, bottom: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Người dùng: ${response.userId}'),
-                Text('Nội dung: ${response.binhLuan}'),
-                Text(
-                    'Ngày: ${response.ngayTao.toLocal().toString().split(' ')[0]}'),
-                const Divider(),
-              ],
-            ),
-          ),
         ],
+        const Divider(),
       ],
-      const Divider(),
-    ],
-  );
-}
-
+    );
+  }
 }

@@ -46,7 +46,11 @@ class PaymentInfo with ChangeNotifier {
     this.ghiChu = ghiChu;
     this.selectedItems = selectedItems;
     this.totalPrice = totalPrice;
-    notifyListeners(); // Thông báo cho các widget lắng nghe về sự thay đổi
+
+     // Call notifyListeners() safely
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void paymentMehtod({
@@ -59,6 +63,36 @@ class PaymentInfo with ChangeNotifier {
     this.title = title;
     this.subtitle = subtitle;
     this.payment_url = payment_url;
-    notifyListeners();
+
+      // Call notifyListeners() safely
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
+
+   // Hàm để làm trống toàn bộ dữ liệu
+  void reset() {
+    order_id = '';
+    hoTen = '';
+    soDienThoai = '';
+    email = '';
+    yeuCauNhanHang = '';
+    tinhThanhPho = '';
+    quanHuyen = '';
+    phuongXa = '';
+    duongThonXom = '';
+    ghiChu = '';
+    selectedItems = [];
+    totalPrice = 0.0;
+    payment_url = '';
+    assetPath = '';
+    title = '';
+    subtitle = '';
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+  }
+
+
 }

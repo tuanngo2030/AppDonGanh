@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CartApiService {
-  final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/user/';
+  final String baseUrl = '${dotenv.env['API_URL']}/cart/gioHang/user/';
 
   Future<CartModel> getCart() async {
     // Retrieve userId from SharedPreferences
@@ -39,7 +40,7 @@ class CartApiService {
   Future<CartModel> addToCart(
       String userId, String idBienThe, int quantity, int donGia) async {
     final addToCartURL =
-        'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang?';
+        '${dotenv.env['API_URL']}/cart/gioHang?';
 
     Map<String, dynamic> data = {
       'userId': userId,
@@ -84,7 +85,7 @@ class CartApiService {
 
   Future<void> deleteFromCart(String idGioHang, String idBienThe) async {
     final deleteFromCartURL =
-        'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/$idGioHang';
+        '${dotenv.env['API_URL']}/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {
       'idBienThe': idBienThe,
@@ -105,7 +106,7 @@ class CartApiService {
   }
 
   Future<void> updateCart(String idGioHang, String idBienThe, int soLuong, int donGia) async {
-    final updateCartURL = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/cart/gioHang/$idGioHang';
+    final updateCartURL = '${dotenv.env['API_URL']}/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {
       'chiTietGioHang': [

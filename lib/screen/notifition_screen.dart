@@ -3,6 +3,7 @@ import 'package:don_ganh_app/models/converstation_model.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/chat_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -37,8 +38,8 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
 
   // Fetch conversations and filter by userId
   Future<void> getListConversationsByUserId(String userId) async {
-    const String apiUrl =
-        "https://peacock-wealthy-vaguely.ngrok-free.app/api/chatsocket/getlistconversation/";
+     String apiUrl =
+        "${dotenv.env['API_URL']}/chatsocket/getlistconversation/";
 
     try {
       final response = await http.get(
@@ -68,11 +69,20 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Thông báo'),
-      //   backgroundColor: Colors.white,
-      //   centerTitle: true,
-      // ),
+ appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+          ),
+        ),
+        title: Text(
+          'Thông báo',
+         style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: ListView.builder(
         itemCount: conversations.length,
         itemBuilder: (context, index) {

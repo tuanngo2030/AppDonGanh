@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:don_ganh_app/models/review_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewApiService {
-   final String baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api';
+   final String baseUrl = '${dotenv.env['API_URL']}';
    String? userId;
     
   // Method to fetch reviews for a specific product
@@ -34,7 +35,7 @@ class ReviewApiService {
     required String sanphamId,
     required int xepHang,
     required String binhLuan,
-    File? imageFile, // Optional image file
+    List<File>? imageFiles,
   }) async {
     final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
 
@@ -46,20 +47,22 @@ class ReviewApiService {
     request.fields['sanphamId'] = sanphamId;
     request.fields['XepHang'] = xepHang.toString();
     request.fields['BinhLuan'] = binhLuan;
+    
 
     // If there's an image file, add it to the request
-    if (imageFile != null) {
-      var fileStream = http.ByteStream(imageFile.openRead());
-      var length = await imageFile.length();
-      var multipartFile = http.MultipartFile(
-        'file', 
-        fileStream,
-        length,
-        filename: imageFile.path, // Use the file name from path
-      );
-      request.files.add(multipartFile);
+    if (imageFiles != null) {
+      for (var imageFile in imageFiles) {
+        var fileStream = http.ByteStream(imageFile.openRead());
+        var length = await imageFile.length();
+        var multipartFile = http.MultipartFile(
+          'files', // Tên trường hình ảnh phải trùng với tên trong API
+          fileStream,
+          length,
+          filename: imageFile.path, // Chỉ lấy tên file
+        );
+        request.files.add(multipartFile);
+      }
     }
-
     try {
       // Send the request
       var response = await request.send();

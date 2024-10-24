@@ -1,4 +1,5 @@
 import 'package:don_ganh_app/models/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decode/jwt_decode.dart';
@@ -10,7 +11,7 @@ class LoginWithApiGoogle {
   Future<void> registerUserGoogle(
     String displayName, String email, String googleId) async {
   final url =
-      'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/RegisterUserGG';
+      '${dotenv.env['API_URL']}/user/RegisterUserGG';
 
   try {
     final response = await http.post(
@@ -65,7 +66,7 @@ class LoginWithApiGoogle {
 
   // Thêm hàm này để lấy thông tin người dùng sau khi đăng nhập Google
   Future<NguoiDung?> fetchUserDetails(String userId) async {
-    final uri = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/showUserID');
+    final uri = Uri.parse('${dotenv.env['API_URL']}/user/showUserID');
 
     try {
       final response = await http.get(uri);

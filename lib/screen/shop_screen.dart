@@ -14,7 +14,20 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-
+ appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+          ),
+        ),
+        title: Text(
+          'Giỏ hàng',
+         style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),

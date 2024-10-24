@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:don_ganh_app/api_services/review_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderReviewScreen extends StatefulWidget {
@@ -14,10 +15,23 @@ class OrderReviewScreen extends StatefulWidget {
 }
 
 class _OrderReviewScreenState extends State<OrderReviewScreen> {
+  final ImagePicker _picker = ImagePicker();
   int _selectedStars = 0;
   final TextEditingController _reviewController = TextEditingController();
-  File? _imageFile;
+  List<File> _imageFiles = []; // Changed to a list for multiple images
   String? userId;
+
+  Future<void> _pickImage() async {
+    final pickedFiles =
+        await _picker.pickMultiImage(); // Sử dụng pickMultiImage
+
+    if (pickedFiles != null) {
+      setState(() {
+        _imageFiles.addAll(pickedFiles.map((pickedFile) =>
+            File(pickedFile.path))); // Thêm tất cả hình ảnh vào danh sách
+      });
+    }
+  }
 
   Future<void> _submitReview() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -30,7 +44,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
         sanphamId: widget.id,
         xepHang: _selectedStars,
         binhLuan: _reviewController.text,
-        imageFile: _imageFile, // Optional image file
+        imageFiles: _imageFiles, // Send the list of images
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đánh giá của bạn đã được gửi!')),
@@ -57,11 +71,9 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Container(
-                child: const ImageIcon(
-                  AssetImage('lib/assets/arrow_back.png'), // Hình ảnh logo
-                  size: 49, // Kích thước hình ảnh
-                ),
+              child: const ImageIcon(
+                AssetImage('lib/assets/arrow_back.png'),
+                size: 49,
               ),
             ),
           ),
@@ -76,7 +88,8 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                 children: [
                   Text(
                     'Bạn cảm thấy ${widget.title} thế nào?',
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   const Divider(thickness: 1),
@@ -85,7 +98,6 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                     'Đánh giá tổng thể',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
-                  // Hiển thị các sao có thể chọn
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) {
@@ -132,15 +144,45 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                             contentPadding: const EdgeInsets.all(16),
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Row(
-                            children: [
-                              Icon(Icons.camera_alt_outlined),
-                              Text('Thêm hình ảnh')
-                            ],
+                           SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child:  Padding(
+                            padding: EdgeInsets.only(top: 10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.camera_alt_outlined),
+                                      Text('Thêm hình ảnh'),
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                Row(
+                              children: [
+                                // Hiển thị hình ảnh đã chọn
+                                for (var image in _imageFiles)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: Image.file(
+                                      image,
+                                      width: 100, // Đặt chiều rộng theo ý muốn
+                                      height: 100, // Đặt chiều cao theo ý muốn
+                                      fit: BoxFit
+                                          .cover, // Để hình ảnh tự động điều chỉnh
+                                    ),
+                                  ),
+                               
+                              ],
+                            ),
+                              ],
+                            ),
                           ),
                         ),
+                     
                         Padding(
                           padding: const EdgeInsets.only(top: 30),
                           child: Row(

@@ -35,11 +35,13 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
     if (storedUserId != null && storedUserId.isNotEmpty) {
       NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
       if (user != null) {
+              if (mounted) {
         setState(() {
           _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
           _userId = storedUserId;
           _profileImageUrl = user.anhDaiDien;
         });
+      }
       } else {
         print('User details not found.');
       }

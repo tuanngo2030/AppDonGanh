@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';  // Import SharedPreferences
 
@@ -6,7 +7,7 @@ class ForgotpasswordApi {
   
   // Gửi OTP
   static Future<void> sendOtpForgotPassword(String gmail) async {
-    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendOtpForgotPassword');
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/SendOtpForgotPassword');
 
     try {
       final response = await http.post(
@@ -29,7 +30,7 @@ class ForgotpasswordApi {
   }
 
 Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
-  final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/CheckOtpForgotPassword');
+  final url = Uri.parse('${dotenv.env['API_URL']}/user/CheckOtpForgotPassword');
   
   try {
     final response = await http.post(
@@ -69,7 +70,7 @@ Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
 }
 
  static Future<void> sendNewPassword(String gmail, String matKhauMoi, String resetToken) async {
-    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/user/SendPassword');
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/SendPassword');
 
     try {
       final response = await http.post(

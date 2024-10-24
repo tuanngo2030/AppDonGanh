@@ -223,7 +223,9 @@ class _PayScreen3State extends State<PayScreen3> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: widget.nextStep,
+              onPressed: (){
+                  Provider.of<PaymentInfo>(context, listen: false).reset();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                 shape: RoundedRectangleBorder(

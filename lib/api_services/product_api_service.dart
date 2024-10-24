@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/product_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class ProductApiService{
-  final String apiUrl = "https://peacock-wealthy-vaguely.ngrok-free.app/api/sanpham";
+  final String apiUrl = "${dotenv.env['API_URL']}/sanpham";
 
   Future<List<ProductModel>> getListProduct() async {
     final response = await http.get(Uri.parse('$apiUrl/getlistSanPham'));

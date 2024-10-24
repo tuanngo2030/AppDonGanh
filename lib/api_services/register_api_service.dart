@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = 'https://peacock-wealthy-vaguely.ngrok-free.app/api/user/Register';
+  static String _baseUrl = '${dotenv.env['API_URL']}/user/Register';
 
   // Đăng ký người dùng mới
   Future<bool> registerUser(NguoiDung user) async {

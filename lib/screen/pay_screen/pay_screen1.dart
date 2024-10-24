@@ -56,12 +56,12 @@ class _PayScreen1State extends State<PayScreen1> {
     _fetchDefaultAddress();
   }
 
-    Future<void> _fetchDefaultAddress() async {
+  Future<void> _fetchDefaultAddress() async {
     try {
       // Giả sử có một service để lấy danh sách địa chỉ từ API
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? storedUserId = prefs.getString('userId');
-      
+
       if (storedUserId != null) {
         List<diaChiList> addresses =
             await DiaChiApiService().getDiaChiByUserId(storedUserId);
@@ -77,7 +77,7 @@ class _PayScreen1State extends State<PayScreen1> {
             hoTenController = firstAddress.name ?? '';
             soDienThoaiController = firstAddress.soDienThoai ?? '';
             duongThonController = firstAddress.duongThon ?? '';
-            _isLoading = false;  // Dừng hiển thị loading khi đã có dữ liệu
+            _isLoading = false; // Dừng hiển thị loading khi đã có dữ liệu
           });
         } else {
           setState(() {
@@ -159,8 +159,6 @@ class _PayScreen1State extends State<PayScreen1> {
       );
     }
   }
-
-
 
   // Show address selection dialog
   Future<void> _showDiaChiDialog() async {
@@ -244,7 +242,7 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  Future<void> _createOrder() async {
+  Future<void> _createOrUpdateOrder() async {
     setState(() {
       _isOrderProcessing = true;
     });
@@ -257,8 +255,10 @@ class _PayScreen1State extends State<PayScreen1> {
     String? quanHuyen = selectedQuanHuyen;
     String? phuongXa = selectedPhuongXa;
     String duongThonXom = duongThonController;
-     String ghiChu = ghiChuController.text.trim().isEmpty ? 'Không có ghi chú' : ghiChuController.text.trim(); // Kiểm tra và gán giá trị chuỗi rỗng nếu trống
-
+    String ghiChu = ghiChuController.text.trim().isEmpty
+        ? 'Không có ghi chú'
+        : ghiChuController.text
+            .trim(); // Kiểm tra và gán giá trị chuỗi rỗng nếu trống
 
     // Kiểm tra dữ liệu nhập vào
     if (_validateInput(
@@ -309,50 +309,79 @@ class _PayScreen1State extends State<PayScreen1> {
                 donGia: item.donGia,
               ))
           .toList();
-      int transactionId = 0;
 
-      // Gọi API để tạo đơn hàng
-      OrderModel? response =
-          await _orderApiService.createUserDiaChivaThongTinGiaoHang(
-        userId: userId,
-        diaChiMoi: newAddress,
-        ghiChu: ghiChu,
-        khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
-        TongTien: totalPrice,
-        selectedItems: chiTietGioHang,
-        // YeuCauNhanHang: yeuCauNhanHang,
-        // transactionId: transactionId,
-        // giohangId: "670492efb57221ab50c0baef", // ID giỏ hàng
-      );
-
-      print('Order Response: $response');
-
-      // Kiểm tra phản hồi và xử lý
+      // Lấy thông tin `order_id` từ Provider
       PaymentInfo paymentInfo =
           Provider.of<PaymentInfo>(context, listen: false);
-      paymentInfo.updateInfo(
-        order_id: response.id,
-        hoTen: hoTen,
-        soDienThoai: soDienThoai,
-        email: '',
-        yeuCauNhanHang: yeuCauNhanHang,
-        tinhThanhPho: tinhThanhPho,
-        quanHuyen: quanHuyen,
-        phuongXa: phuongXa,
-        duongThonXom: duongThonXom,
-        ghiChu: ghiChu,
-        selectedItems: selectedItems,
-        totalPrice: totalPrice,
-      );
+      String? orderId = paymentInfo.order_id;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đặt hàng thành công!')),
-      );
-      widget.nextStep();
+      if (orderId.isNotEmpty) {
+        // Nếu đã có `order_id`, cập nhật địa chỉ và ghi chú cho hóa đơn
+        await _orderApiService.updateDiaChiGhiChuHoaDon(
+          hoadonId: orderId,
+          diaChiMoi: newAddress,
+          ghiChu: ghiChu,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cập nhật địa chỉ và ghi chú thành công!')),
+        );
+
+         // Cập nhật thông tin `order_id` trong Provider
+        paymentInfo.updateInfo(
+          order_id: orderId,
+          hoTen: hoTen,
+          soDienThoai: soDienThoai,
+          email: '',
+          yeuCauNhanHang: yeuCauNhanHang,
+          tinhThanhPho: tinhThanhPho,
+          quanHuyen: quanHuyen,
+          phuongXa: phuongXa,
+          duongThonXom: duongThonXom,
+          ghiChu: ghiChu,
+          selectedItems: selectedItems,
+          totalPrice: totalPrice,
+          
+        );
+         widget.nextStep();
+      } else {
+        // Nếu chưa có `order_id`, tạo đơn hàng mới
+        OrderModel? response =
+            await _orderApiService.createUserDiaChivaThongTinGiaoHang(
+          userId: userId,
+          diaChiMoi: newAddress,
+          ghiChu: ghiChu,
+          khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
+          TongTien: totalPrice,
+          selectedItems: chiTietGioHang,
+        );
+
+        print('Order Response: $response');
+
+        // Cập nhật thông tin `order_id` trong Provider
+        paymentInfo.updateInfo(
+          order_id: response.id,
+          hoTen: hoTen,
+          soDienThoai: soDienThoai,
+          email: '',
+          yeuCauNhanHang: yeuCauNhanHang,
+          tinhThanhPho: tinhThanhPho,
+          quanHuyen: quanHuyen,
+          phuongXa: phuongXa,
+          duongThonXom: duongThonXom,
+          ghiChu: ghiChu,
+          selectedItems: selectedItems,
+          totalPrice: totalPrice,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đặt hàng thành công!')),
+        );
+        widget.nextStep();
+      }
     } catch (e) {
-      print('Lỗi khi tạo hóa đơn flutter: $e');
+      print('Lỗi khi tạo/cập nhật hóa đơn: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xảy ra lỗi khi đặt hàng.')),
+        SnackBar(content: Text('Đã xảy ra lỗi khi xử lý đơn hàng.')),
       );
     } finally {
       setState(() {
@@ -384,7 +413,6 @@ class _PayScreen1State extends State<PayScreen1> {
 
   @override
   Widget build(BuildContext context) {
-
     print('Building PayScreen1');
     print('Selected Items Count: ${selectedItems.length}');
     print('Products Map Keys: ${_productsMap.keys.toList()}');
@@ -674,7 +702,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                 border: Border.fromBorderSide(
                                     BorderSide(width: 1, color: Colors.grey))),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -703,8 +732,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
                                     child: RichText(
                                       text: TextSpan(
                                         children: [
@@ -958,7 +987,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                   height: 50,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      _createOrder();
+                                       _createOrUpdateOrder();
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
