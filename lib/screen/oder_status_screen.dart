@@ -1,3 +1,4 @@
+import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
@@ -240,20 +241,29 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
     );
   }
 
-  // Perform order cancellation
-  void _cancelOrder() {
-    // TODO: Implement order cancellation logic, e.g., call API to cancel the order
-    // After successful cancellation, update order status
+void _cancelOrder() async {
+  final orderApiService = OrderApiService(); // Create an instance of your API service
+
+  try {
+    await orderApiService.cancelOrder(widget.orderModel.id); // Call cancel API
+
+    // Update UI to reflect cancellation
     setState(() {
-      status = 4; // Or some other value representing canceled order
+      status = 4; // Or any other value indicating the order is canceled
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Đơn hàng đã được hủy.')),
     );
 
-    // Optionally, you can navigate the user back or refresh data
+    // Optionally navigate back or refresh order status
+    Navigator.pop(context); // Pop current screen if necessary
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Hủy đơn hàng thất bại.')),
+    );
   }
+}
 }
 
 class _StatusLabel extends StatelessWidget {
