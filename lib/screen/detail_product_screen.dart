@@ -8,6 +8,7 @@ import 'package:don_ganh_app/models/review_model.dart';
 import 'package:don_ganh_app/models/variant_model.dart';
 import 'package:don_ganh_app/screen/all_review.dart';
 import 'package:don_ganh_app/screen/order_review_screen.dart';
+import 'package:don_ganh_app/widget/FullImageDialog.dart';
 import 'package:don_ganh_app/widget/badge_widget.dart';
 import 'package:don_ganh_app/widget/review_widget.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     // variantModel = VariantApiService().getVariant(widget.product.id);
   }
 
- void _initializeProductData() {
+  void _initializeProductData() {
     donGia = widget.product.donGiaBan;
     soluong = widget.product.soLuongHienTai;
     mainImageUrl = widget.product.imageProduct;
@@ -60,16 +61,18 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   }
 
   Future<void> _fetchReviews() async {
-  // Fetch reviews once and don't call setState in every render cycle
-  _reviewsFuture = ReviewApiService().getReviewsByProductId(widget.product.id);
-  final reviews = await _reviewsFuture;
-  if (mounted) { // Ensure widget is still mounted before calling setState
-    setState(() {
-      _reviews = reviews;
-      _totalReviews = reviews.length; // Update the total reviews count
-    });
+    // Fetch reviews once and don't call setState in every render cycle
+    _reviewsFuture =
+        ReviewApiService().getReviewsByProductId(widget.product.id);
+    final reviews = await _reviewsFuture;
+    if (mounted) {
+      // Ensure widget is still mounted before calling setState
+      setState(() {
+        _reviews = reviews;
+        _totalReviews = reviews.length; // Update the total reviews count
+      });
+    }
   }
-}
 
   void plusQuantity() {
     setState(() {
@@ -83,15 +86,15 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     });
   }
 
-void _swapImage(int index) {
-  setState(() {
-    // Swap images without triggering any re-fetch of data
-    String selectedImage = supplementaryImages[index];
-    String oldMainImage = mainImageUrl;
-    mainImageUrl = selectedImage;
-    supplementaryImages[index] = oldMainImage;
-  });
-}
+  void _swapImage(int index) {
+    setState(() {
+      // Swap images without triggering any re-fetch of data
+      String selectedImage = supplementaryImages[index];
+      String oldMainImage = mainImageUrl;
+      mainImageUrl = selectedImage;
+      supplementaryImages[index] = oldMainImage;
+    });
+  }
 
   Future<void> addToCart(String variantId, int donGia) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -114,6 +117,28 @@ void _swapImage(int index) {
       Navigator.of(context).pop();
     }
   }
+void _showFullImage(String imageUrl) {
+  int initialIndex = supplementaryImages.indexOf(imageUrl);
+  
+  if (initialIndex == -1) {
+    if (imageUrl == mainImageUrl) {
+      initialIndex = 0; 
+    } else {
+      return;
+    }
+  }
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return FullImageDialog(
+        images: [mainImageUrl, ...supplementaryImages], // Kết hợp hình chính và hình bổ sung
+        initialIndex: initialIndex,    // Chỉ số hình ảnh hiện tại
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -147,107 +172,115 @@ void _swapImage(int index) {
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(
-                height: 250,
-                width: double.infinity,
-                child: Stack(
-                  alignment: Alignment.center,
-                  fit: StackFit.expand,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10)),
-                          image: DecorationImage(
-                            image: NetworkImage(mainImageUrl),
-                            fit: BoxFit.cover,
-                          )),
-                    ),
-                    Positioned(
-                      top: 30,
-                      left: 0,
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 25,
-                        width: 50,
+              GestureDetector(
+               onTap: () {
+                  // Hiển thị hình ảnh lớn và cho phép zoom
+                  _showFullImage(mainImageUrl);
+                },
+                child: SizedBox(
+                  height: 350,
+                  width: double.infinity,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: [
+                      Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              topRight: Radius.circular(20),
-                              bottomRight: Radius.circular(20)),
-                          color: Colors.green,
-                        ),
-                        child: Text(
-                          '-${widget.product.phanTramGiamGia}%',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10)),
+                            image: DecorationImage(
+                              image: NetworkImage(mainImageUrl),
+                              fit: BoxFit.cover,
+                            )),
+                      ),
+                      Positioned(
+                        top: 30,
+                        left: 0,
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 25,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(20),
+                                bottomRight: Radius.circular(20)),
+                            color: Colors.green,
                           ),
-                          textAlign: TextAlign.center,
+                          child: Text(
+                            '-${widget.product.phanTramGiamGia}%',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                        top: 15,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: () {
-                            print("Add to favorites");
-                          },
-                          child: Container(
-                            height: 35,
-                            width: 35,
-                            decoration: BoxDecoration(
-                                color: Color.fromRGBO(241, 247, 234, 1),
-                                borderRadius: BorderRadius.circular(50)),
-                            child: Center(
-                              child: Icon(
-                                Icons.favorite_border_outlined,
-                                color: Color.fromRGBO(142, 198, 65, 1),
+                      Positioned(
+                          top: 15,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: () {
+                              print("Add to favorites");
+                            },
+                            child: Container(
+                              height: 35,
+                              width: 35,
+                              decoration: BoxDecoration(
+                                  color: Color.fromRGBO(241, 247, 234, 1),
+                                  borderRadius: BorderRadius.circular(50)),
+                              child: Center(
+                                child: Icon(
+                                  Icons.favorite_border_outlined,
+                                  color: Color.fromRGBO(142, 198, 65, 1),
+                                ),
                               ),
                             ),
+                          )),
+                      Positioned(
+                        bottom: 10,
+                        child: Container(
+                          height: 60,
+                          width: 270,
+                          decoration: BoxDecoration(
+                            color:
+                                Color.fromRGBO(217, 217, 217, 1).withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                        )),
-                    Positioned(
-                      bottom: 10,
-                      child: Container(
-                        height: 60,
-                        width: 270,
-                        decoration: BoxDecoration(
-                          color:
-                              Color.fromRGBO(217, 217, 217, 1).withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: SizedBox(
-                          height: 50,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: supplementaryImages.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  _swapImage(index);
-                                },
-                                child: Container(
-                                  width: 50,
-                                  margin: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    image: DecorationImage(
-                                        image: NetworkImage(
-                                            supplementaryImages[index]),
-                                        fit: BoxFit.cover),
+                          child: SizedBox(
+                            height: 50,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: supplementaryImages.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    // Chỉ thay đổi hình ảnh chính
+                                    _swapImage(index);
+                                  },
+                                  child: Container(
+                                    width: 50,
+                                    margin: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                        image: NetworkImage(supplementaryImages[
+                                            index]), // Hiển thị hình ảnh nhỏ
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
               Padding(
@@ -679,8 +712,8 @@ void _swapImage(int index) {
                       ),
                       Divider(thickness: 1, color: Colors.grey),
                       FutureBuilder<List<DanhGia>>(
-                        future: ReviewApiService()
-                            .getReviewsByProductId(widget.product.id),
+                        future:
+                            _reviewsFuture, // Sử dụng biến _reviewsFuture đã được khởi tạo
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -694,14 +727,13 @@ void _swapImage(int index) {
                                 child: Text('Chưa có lượt đánh giá nào'));
                           }
 
-                          // Get the most recent two reviews
+                          // Lấy 2 đánh giá gần nhất
                           final reviews = snapshot.data!;
-                          final recentReviews = reviews.reversed
-                              .take(2)
-                              .toList(); // Take the first 2 reviews
+                          final recentReviews =
+                              reviews.reversed.take(2).toList();
                           _totalReviews = reviews.length;
 
-                          // Display the list of recent reviews
+                          // Hiển thị danh sách đánh giá gần nhất
                           return SizedBox(
                             child: ListView.builder(
                               shrinkWrap: true,
@@ -711,7 +743,8 @@ void _swapImage(int index) {
                                 final review = recentReviews[index];
                                 return ReviewItem(
                                   review: review,
-                                  onDelete: _fetchReviews,
+                                  onDelete:
+                                      _fetchReviews, // Nếu cần thiết, bạn có thể gọi lại đánh giá
                                 );
                               },
                             ),
