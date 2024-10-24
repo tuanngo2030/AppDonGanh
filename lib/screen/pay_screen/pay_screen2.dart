@@ -111,9 +111,9 @@ Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
-                  text: const TextSpan(
+                  text:  TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Mã đơn hàng: ',
                         style: TextStyle(
                           fontSize: 14,
@@ -122,8 +122,8 @@ Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String
                         ),
                       ),
                       TextSpan(
-                        text: '7R704UU3',
-                        style: TextStyle(
+                        text: paymentInfo.order_id,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -239,6 +239,7 @@ Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String
         buildPaymentMethod(
           assetPath: 'lib/assets/ic_money.png',
           title: 'Giao hàng thu tiền (COD)',
+          subtitle: 'Thu bằng tiền mặt',
           value: 'COD',
         ),
         buildPaymentMethod(

@@ -152,6 +152,22 @@ class OrderApiService {
     }
   }
 
+  Future<void> cancelOrder(String hoadonId) async {
+    final url = Uri.parse('https://peacock-wealthy-vaguely.ngrok-free.app/api/hoadon/HuyDonHang/$hoadonId');
+
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        print('Order canceled successfully');
+      } else {
+        print('Failed to cancel order: ${response.body}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
   Future<OrderModel> updateTrangThaiHoaDon({
     required String hoadonId,
   }) async {
@@ -190,38 +206,88 @@ class OrderApiService {
   final String url =
       "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDonCOD/$hoadonId";
 
-  final Map<String, dynamic> body = {
-    'transactionId': transactionId,
-  };
+    // Request body (transactionId)
+    final Map<String, dynamic> requestBody = {
+      'transactionId': transactionId,
+    };
 
-  final response = await http.put(
-    Uri.parse(url),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: json.encode(body),
-  );
-
-  print('Response Status: ${response.statusCode}');
-  print('Response Body: ${response.body}');
-
-  if (response.statusCode == 200) {
     try {
-      final decodedResponse = json.decode(response.body);
-      print('Decoded Response: $decodedResponse'); // Log the response
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json'
+        }, // Add appropriate headers
+        body: jsonEncode(requestBody), // Convert request body to JSON
+      );
 
-      if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
-        return OrderModel.fromJson(decodedResponse['data']);
+      // Check the response status and body
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Assuming the API returns the updated hoa don data in the 'data' field
+        if (responseData['data'] != null) {
+          return OrderModel.fromJson(responseData['data']);
+        } else {
+          throw Exception('API returned no data');
+        }
       } else {
-        throw Exception('API returned error: ${decodedResponse['message']}');
+        // Handle error response
+        print("Error: ${response.statusCode} - ${response.body}");
+        throw Exception('Failed to update hoa don');
       }
     } catch (e) {
-      print('Error decoding JSON: $e');
-      throw Exception('Failed to decode JSON');
+      // Handle exceptions, such as network errors
+      print('Error occurred: $e');
+      throw Exception('An error occurred while updating the transaction');
     }
-  } else {
-    print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
-    throw Exception('Failed to update HoaDon');
+  }
+
+Future<OrderModel> updateDiaChiGhiChuHoaDon({
+  required String hoadonId,
+  required diaChiList diaChiMoi,
+  required String ghiChu,
+}) async {
+  // URL của API Node.js
+  final String url = "${dotenv.env['API_URL']}/hoadon/updateDiaChighichuHoaDon/$hoadonId";
+
+  // Body của request
+  final Map<String, dynamic> requestBody = {
+    'diaChi': diaChiMoi.toJson(),
+    'ghiChu': ghiChu,
+  };
+
+  try {
+    // Gửi yêu cầu POST tới server Node.js
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json', // Định dạng JSON
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    // Kiểm tra phản hồi từ server
+    if (response.statusCode == 200) {
+      print('Cập nhật đơn hàng thành công');
+
+      // Giả sử bạn có một phương thức để chuyển response.body thành OrderModel
+      final order = OrderModel.fromJson(jsonDecode(response.body));
+      return order;
+    } else if (response.statusCode == 404) {
+      print('Đơn hàng không tồn tại');
+      throw Exception('Đơn hàng không tồn tại');
+    } else if (response.statusCode == 400) {
+      print('Cập nhật không hợp lệ');
+      throw Exception('Cập nhật không hợp lệ');
+    } else {
+      print('Lỗi không xác định: ${response.body}');
+      throw Exception('Lỗi không xác định');
+    }
+  } catch (error) {
+    // Xử lý lỗi trong trường hợp không kết nối được tới server
+    print('Lỗi khi cập nhật hóa đơn: $error');
+    throw Exception('Lỗi khi cập nhật hóa đơn');
   }
 }
+
 }

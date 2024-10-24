@@ -1,8 +1,10 @@
 import 'package:don_ganh_app/models/cart_model.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen1.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen2.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen3.dart';
+import 'package:provider/provider.dart';
 
 class PayProcessScreen extends StatefulWidget {
   const PayProcessScreen({super.key});
@@ -14,6 +16,20 @@ class PayProcessScreen extends StatefulWidget {
 class _PayProcessScreenState extends State<PayProcessScreen> {
   final PageController _pageController = PageController(initialPage: 0);
   int currentStep = 0;
+  late PaymentInfo paymentInfo; // Declare a variable to store the PaymentInfo
+
+  @override
+  void initState() {
+    super.initState();
+    // You can initialize things here if needed
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Store the PaymentInfo from the context into the local variable
+    paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+  }
 
   // Hàm để chuyển qua bước tiếp theo
   void _nextStep() {
@@ -43,21 +59,35 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
 
   // Hàm để cập nhật màu sắc dựa trên bước hiện tại
   Color _getColor(int step) {
-    return (step <= currentStep) ? const Color.fromRGBO(59, 99, 53, 1) : Colors.white;
+    return (step <= currentStep)
+        ? const Color.fromRGBO(59, 99, 53, 1)
+        : Colors.white;
   }
 
   // Hàm để cập nhật độ dày của đường kết nối
   Color _getColorStick(int step) {
-    return (step <= currentStep) ? const Color.fromRGBO(59, 99, 53, 1) : Colors.grey;
+    return (step <= currentStep)
+        ? const Color.fromRGBO(59, 99, 53, 1)
+        : Colors.grey;
   }
 
   Color _getColorIcon(int step) {
-    return (step <= currentStep) ? Colors.white : const Color.fromRGBO(59, 99, 53, 1);
+    return (step <= currentStep)
+        ? Colors.white
+        : const Color.fromRGBO(59, 99, 53, 1);
+  }
+
+  @override
+  void dispose() {
+    // Reset the PaymentInfo data using the locally stored reference
+    paymentInfo.reset();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<ChiTietGioHang> selectedItems = ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
+    final List<ChiTietGioHang> selectedItems =
+        ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
 
     return SafeArea(
       child: Scaffold(
@@ -99,7 +129,7 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      if (currentStep >= 1) _goToStep(1); // Chỉ cho phép quay lại nếu đã đến bước 1
+                      if (currentStep >= 1) _goToStep(1);
                     },
                     child: Container(
                       width: 50,
@@ -125,7 +155,7 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      if (currentStep >= 2) _goToStep(2); // Chỉ cho phép quay lại nếu đã đến bước 2
+                      if (currentStep >= 2) _goToStep(2);
                     },
                     child: Container(
                       width: 50,
