@@ -1,6 +1,8 @@
 import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
+import 'package:don_ganh_app/screen/pay_screen/choose_payment_screen.dart';
+import 'package:don_ganh_app/screen/pay_screen/exprire_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,27 +16,206 @@ class OderStatusScreen extends StatefulWidget {
 
 class _OderStatusScreenState extends State<OderStatusScreen> {
   late int status;
+  bool dialogShown = false;
+  bool showExprireButton = false;
 
   @override
   void initState() {
     super.initState();
-    status = widget.orderModel.TrangThai; // Get status from orderModel
+    status = widget.orderModel.TrangThai;
+
+    // Check if transactionId is neither 0 nor 111 and payment status is false, then show the extension notification
+    if (widget.orderModel.transactionId != 0 &&
+        widget.orderModel.transactionId != 111 &&
+        !widget.orderModel.thanhToan) {
+      _checkBaoKimStatus();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Show payment method dialog if transactionId is 0 and dialog hasn't been shown
+    if (widget.orderModel.transactionId == 0 &&
+        !dialogShown &&
+        widget.orderModel.TrangThai == 0) {
+      dialogShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showPaymentMethodDialog();
+      });
+    }
+  }
+
+  Future<void> _checkBaoKimStatus() async {
+    final orderApiService = OrderApiService();
+
+    try {
+      final response = await orderApiService.checkDonHangBaoKim(
+        orderId: widget.orderModel.id,
+      );
+
+      print(response); // Log response to confirm structure and values
+
+      // Check if order is expired
+      if (mounted && response.containsKey('message')) {
+        final statusMessage = response['message'];
+
+        if (statusMessage == 'Đơn hàng đã hết hạn') {
+          _showGiaHanBaoKimDialog(); // Show dialog for expired order
+        } else if (statusMessage == 'Đơn hàng Chưa thanh toán') {
+          setState(() {
+            showExprireButton =
+                true; // Show the button to navigate to ExprireScreen
+          });
+          print("Order is pending.");
+        } else if (statusMessage == 'Order paid successfully') {
+          // Order has been paid, handle accordingly if needed
+          print("Order has been paid successfully.");
+        } else if (statusMessage == 'Order canceled or failed') {
+          // Order was canceled or failed
+          print("Order was canceled or failed.");
+        } else {
+          // Unexpected status message
+          print("Unexpected order status: $statusMessage");
+        }
+      } else {
+        print("Failed to retrieve 'message' from response");
+      }
+    } catch (error) {
+      print("Failed to check Bảo Kim status: $error");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lỗi khi kiểm tra trạng thái đơn hàng Bảo Kim.'),
+          ),
+        );
+      }
+    }
+  }
+
+// Show notification for extending Bảo Kim
+  void _showGiaHanBaoKimDialog() {
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Gia hạn Bảo Kim'),
+            content: const Text(
+                'Thanh toán online Bảo Kim đã hết hạn. Bạn có muốn gia hạn để tiếp tục xử lý?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                },
+                child: const Text('Đóng'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  _giaHanHoaDon();
+                },
+                child: const Text('Gia hạn'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+// Show dialog to select payment method
+  void _showPaymentMethodDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Bạn chưa chọn phương thức thanh toán'),
+          content: const Text('Bạn có muốn chọn phương thức thanh toán không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Không'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ChoosePaymentScreen(orderModel: widget.orderModel),
+                  ),
+                );
+              },
+              child: const Text('Có'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Color _getColor(int step) {
     return (step <= status) ? const Color.fromRGBO(41, 87, 35, 1) : Colors.grey;
   }
 
+  Future<void> _giaHanHoaDon() async {
+    final orderApiService = OrderApiService();
+
+    try {
+      // Gọi API updateTransactionHoaDon với hoadonId và transactionId mới
+      final response = await orderApiService.updateTransactionHoaDon(
+        hoadonId: widget.orderModel.id,
+        transactionId: '${widget.orderModel.transactionId}',
+        khuyeimaiId: '',
+        giaTriGiam: 0,
+      );
+
+      // // Cập nhật UI với thông tin đơn hàng đã gia hạn
+      // setState(() {
+      //   widget.orderModel.transactionId = updatedOrder.transactionId;
+      //   widget.orderModel.thanhToan = updatedOrder.thanhToan;
+      // });
+
+      final String paymentUrl = response.payment_url ?? '';
+      print('payment url: $paymentUrl');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExprireScreen(
+            orderModel: widget.orderModel,
+            paymentUrl: paymentUrl,
+            title: 'Gia hạn',
+          ),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã gia hạn đơn hàng thành công.')),
+      );
+    } catch (error) {
+      // Hiển thị thông báo lỗi nếu gia hạn thất bại
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gia hạn đơn hàng thất bại.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-    
+
     // Determine button text and action based on status
     String buttonText = "";
     VoidCallback? buttonAction;
 
     if (status == 2) {
-      buttonText = "Đánh giá đơn hàng"; // Still show the button but not clickable
+      buttonText =
+          "Đánh giá đơn hàng"; // Still show the button but not clickable
       buttonAction = null;
     } else if (status <= 1) {
       buttonText = "Hủy đơn hàng";
@@ -44,11 +225,10 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
     } else if (status == 3) {
       buttonText = "Đánh giá đơn hàng";
       buttonAction = () {
-        Navigator.pushNamed(context, '/oder_review_screen');
+        // Navigator.pushNamed(context, '/oder_review_screen');
       };
-    }else if (status == 4) {
+    } else if (status == 4) {
       buttonText = "Mua lại đơn hàng";
-      
     }
 
     return SafeArea(
@@ -108,8 +288,47 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                 // Display shipping address information if available
                 Text('${widget.orderModel.diaChi.name}'),
                 Text('${widget.orderModel.diaChi.soDienThoai}'),
-                Text('${widget.orderModel.diaChi.duongThon}, ${widget.orderModel.diaChi.phuongXa}, ${widget.orderModel.diaChi.tinhThanhPho}'),
-                const SizedBox(height: 20),
+                Text(
+                    '${widget.orderModel.diaChi.duongThon}, ${widget.orderModel.diaChi.phuongXa}, ${widget.orderModel.diaChi.tinhThanhPho}'),
+
+                Row(
+                  children: [
+                    buildPaymentMethodsList(),
+                    if (showExprireButton)
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExprireScreen(
+                                    title: 'Gia hạn',
+                                      orderModel: widget.orderModel,
+                                      paymentUrl:
+                                          widget.orderModel.payment_url),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromRGBO(59, 99, 53, 1),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.all(13),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            child: const Text('Thanh toán'), // Button text
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 15),
                 const Text(
                   'Tình trạng',
                   style: TextStyle(
@@ -132,7 +351,8 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                                   borderRadius: BorderRadius.circular(50),
                                   color: _getColor(index),
                                 ),
-                                child: const Icon(Icons.check, color: Colors.white),
+                                child: const Icon(Icons.check,
+                                    color: Colors.white),
                               ),
                               if (index < 3)
                                 Container(
@@ -181,15 +401,18 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                       ? ElevatedButton(
                           onPressed: buttonAction,
                           style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
                               (states) {
                                 if (states.contains(WidgetState.disabled)) {
                                   return Colors.grey; // Color when disabled
                                 }
-                                return const Color.fromRGBO(59, 99, 53, 1); // Normal color
+                                return const Color.fromRGBO(
+                                    59, 99, 53, 1); // Normal color
                               },
                             ),
-                            foregroundColor: WidgetStateProperty.all(Colors.white),
+                            foregroundColor:
+                                WidgetStateProperty.all(Colors.white),
                             padding: WidgetStateProperty.all(
                               const EdgeInsets.all(13),
                             ),
@@ -202,7 +425,8 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                           ),
                           child: Text(buttonText),
                         )
-                      : const SizedBox.shrink(), // Do not display button if not needed
+                      : const SizedBox
+                          .shrink(), // Do not display button if not needed
                 ),
               ],
             ),
@@ -210,6 +434,50 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
         ),
       ),
     );
+  }
+
+  Widget buildPaymentMethod({
+    required String assetPath,
+    required String title,
+    String? subtitle,
+    required String value,
+  }) {
+    return Expanded(
+      flex: 2,
+      child: SizedBox(
+        child: Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            leading: Image.asset(assetPath, width: 40, height: 40),
+            title: Text(title),
+            subtitle: subtitle != null
+                ? Text(subtitle, style: const TextStyle(fontSize: 12))
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildPaymentMethodsList() {
+    if (widget.orderModel.transactionId == 111) {
+      return buildPaymentMethod(
+        assetPath: 'lib/assets/ic_money.png',
+        title: 'Giao hàng thu tiền (COD)',
+        subtitle: 'Thu bằng tiền mặt',
+        value: 'COD',
+      );
+    } else if (widget.orderModel.transactionId == 0) {
+      return const Text(
+          'Bạn chưa chọn phương thức thanh toán cho đơn hàng này');
+    } else {
+      return buildPaymentMethod(
+        assetPath: 'lib/assets/Baokim-logo.png',
+        title: 'Bảo Kim',
+        subtitle: 'Chuyển tiền nhanh chóng',
+        value: 'Qr',
+      );
+    }
   }
 
   // Show cancel order confirmation dialog
@@ -241,29 +509,31 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
     );
   }
 
-void _cancelOrder() async {
-  final orderApiService = OrderApiService(); // Create an instance of your API service
+  void _cancelOrder() async {
+    final orderApiService =
+        OrderApiService(); // Create an instance of your API service
 
-  try {
-    await orderApiService.cancelOrder(widget.orderModel.id); // Call cancel API
+    try {
+      await orderApiService
+          .cancelOrder(widget.orderModel.id); // Call cancel API
 
-    // Update UI to reflect cancellation
-    setState(() {
-      status = 4; // Or any other value indicating the order is canceled
-    });
+      // Update UI to reflect cancellation
+      setState(() {
+        status = 4; // Or any other value indicating the order is canceled
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đơn hàng đã được hủy.')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đơn hàng đã được hủy.')),
+      );
 
-    // Optionally navigate back or refresh order status
-    Navigator.pop(context); // Pop current screen if necessary
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Hủy đơn hàng thất bại.')),
-    );
+      // Optionally navigate back or refresh order status
+      Navigator.pop(context); // Pop current screen if necessary
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hủy đơn hàng thất bại.')),
+      );
+    }
   }
-}
 }
 
 class _StatusLabel extends StatelessWidget {

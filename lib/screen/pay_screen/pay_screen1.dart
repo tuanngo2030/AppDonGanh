@@ -350,7 +350,7 @@ class _PayScreen1State extends State<PayScreen1> {
           userId: userId,
           diaChiMoi: newAddress,
           ghiChu: ghiChu,
-          khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
+          khuyenmaiId: "", // ID khuyến mãi nếu có
           TongTien: totalPrice,
           selectedItems: chiTietGioHang,
         );
