@@ -24,49 +24,58 @@ class _LoginScreenState extends State<LoginScreen> {
   // Biến trạng thái lỗi
   String? _emailError;
   String? _passwordError;
+  bool _isLoading = false; // Biến trạng thái cho loading
 
   Future<void> _login() async {
-  final String gmail =
-      _emailController.text.trim(); // Loại bỏ khoảng trắng thừa
-  final String matKhau = _passwordController.text.trim();
+    final String gmail =
+        _emailController.text.trim(); // Loại bỏ khoảng trắng thừa
+    final String matKhau = _passwordController.text.trim();
 
-  setState(() {
-    _emailError = null;
-    _passwordError = null;
-  });
-
-  if (gmail.isEmpty || matKhau.isEmpty) {
     setState(() {
-      if (gmail.isEmpty) _emailError = 'Vui lòng nhập email.';
-      if (matKhau.isEmpty) _passwordError = 'Vui lòng nhập mật khẩu.';
+      _emailError = null;
+      _passwordError = null;
     });
-    return;
-  }
 
-  try {
-    final NguoiDung? user = await _apiService.login(gmail, matKhau);
-    print('Response from API: $user');
-    if (user != null) {
-      // Lưu thông tin người dùng vào SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
-      await prefs.setString('userId', user.id ?? '');
-
-      // Điều hướng đến màn hình khác sau khi đăng nhập thành công
-      Navigator.pushNamed(context, '/ban_la');
-    } else {
-      // Hiển thị lỗi khi đăng nhập không thành công
+    if (gmail.isEmpty || matKhau.isEmpty) {
       setState(() {
-        _emailError = 'Email hoặc mật khẩu không chính xác.';
+        if (gmail.isEmpty) _emailError = 'Vui lòng nhập email.';
+        if (matKhau.isEmpty) _passwordError = 'Vui lòng nhập mật khẩu.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // Bắt đầu loading
+    });
+
+    try {
+      final NguoiDung? user = await _apiService.login(gmail, matKhau);
+      print('Response from API: $user');
+      if (user != null) {
+        // Lưu thông tin người dùng vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
+        await prefs.setString('userId', user.id ?? '');
+
+        // Điều hướng đến màn hình khác sau khi đăng nhập thành công
+        Navigator.pushNamed(context, '/ban_la');
+      } else {
+        // Hiển thị lỗi khi đăng nhập không thành công
+        setState(() {
+          _emailError = 'Email hoặc mật khẩu không chính xác.';
+        });
+      }
+    } catch (e) {
+      // Xử lý lỗi
+      setState(() {
+        _emailError = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // Kết thúc loading
       });
     }
-  } catch (e) {
-    // Xử lý lỗi
-    setState(() {
-      _emailError = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
-    });
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: ElevatedButton(
-                onPressed: _login,
+                onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(395, 55),
                   backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
@@ -201,10 +210,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.all(10),
                   elevation: 5,
                 ),
-                child: const Text(
-                  "Đăng nhập",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Đăng nhập",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
               ),
             ),
 
@@ -313,36 +325,36 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-Future<void> signIn() async {
-  final user = await LoginWithApiGoogle.login();
-  
-  if (user == null) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
-    return;
-  } 
 
-  try {
-    // Gọi API để đăng ký người dùng Google
-    await _apiGoogle.registerUserGoogle(user.displayName ?? '', user.email, user.id);
+  Future<void> signIn() async {
+    final user = await LoginWithApiGoogle.login();
 
-    // Lưu thông tin người dùng vào SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userDisplayName', user.displayName ?? '');
-    await prefs.setString('userEmail', user.email);
-    await prefs.setString('googleId', user.id);
-ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đăng nhập thành công')),
-    );
-    // Điều hướng đến màn hình BanLa
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const BanLa()),
-    );
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $error')));
+    if (user == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
+      return;
+    }
+
+    try {
+      // Gọi API để đăng ký người dùng Google
+      await _apiGoogle.registerUserGoogle(
+          user.displayName ?? '', user.email, user.id);
+
+      // Lưu thông tin người dùng vào SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userDisplayName', user.displayName ?? '');
+      await prefs.setString('userEmail', user.email);
+      await prefs.setString('googleId', user.id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập thành công')),
+      );
+      // Điều hướng đến màn hình BanLa
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const BanLa()),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Lỗi: $error')));
+    }
   }
 }
-
-
-}
-
-

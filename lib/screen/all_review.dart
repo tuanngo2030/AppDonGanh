@@ -14,8 +14,8 @@ class AllReviewsPage extends StatefulWidget {
 
 class _AllReviewsPageState extends State<AllReviewsPage> {
   late Future<List<DanhGia>> _reviewsFuture;
-  int? selectedRating; // Biến lưu trữ xếp hạng được chọn
-  List<int> ratings = [1, 2, 3, 4, 5]; // Các xếp hạng có sẵn
+  int? selectedRating; // Variable to store selected rating
+  List<int> ratings = [1, 2, 3, 4, 5]; // Available ratings
 
   @override
   void initState() {
@@ -25,16 +25,17 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
 
   Future<void> _refreshReviews() async {
     setState(() {
-      _reviewsFuture = ReviewApiService().getReviewsByProductId(widget.productId);
+      _reviewsFuture =
+          ReviewApiService().getReviewsByProductId(widget.productId);
     });
   }
 
   Future<List<DanhGia>> _getFilteredReviews() async {
     final reviews = await _reviewsFuture;
     if (selectedRating == null) {
-      return reviews; // Nếu không có xếp hạng nào được chọn, trả về tất cả đánh giá
+      return reviews; // If no rating is selected, return all reviews
     }
-    // Lọc danh sách đánh giá theo xếp hạng
+    // Filter reviews by selected rating
     return reviews.where((review) => review.xepHang == selectedRating).toList();
   }
 
@@ -46,44 +47,72 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
       ),
       body: Column(
         children: [
-          // Dropdown menu để chọn xếp hạng
+          // Row containing the button and dropdown
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: DropdownButton<int>(
-              hint: const Text('Chọn xếp hạng'),
-              value: selectedRating,
-              items: ratings.map((rating) {
-                return DropdownMenuItem<int>(
-                  value: rating,
-                  child: Row(
-                    children: [
-                      // Hiển thị số sao tương ứng
-                      ...List.generate(rating, (index) => const Icon(Icons.star, color: Colors.amber)),
-                      const SizedBox(width: 8), // Khoảng cách giữa sao và số
-                      Text(rating.toString()), // Hiển thị số xếp hạng
-                    ],
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Row(
+              children: [
+                // Square button to display all reviews with a border based on selection
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedRating = null; // Reset filter
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // color: selectedRating == null ? Colors.blue : Colors.white,
+                      border: Border.all(
+                        color: selectedRating == null ?Colors.green  : Colors.grey,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child:  Text(
+                      'Hiển thị tất cả',
+                      style: TextStyle(
+                        color: selectedRating == null ?Colors.green  : Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedRating = value; // Cập nhật xếp hạng được chọn
-                });
-              },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                  child: DropdownButton<int>(
+                    hint: const Text('Chọn xếp hạng'),
+                    value: selectedRating,
+                    items: ratings.map((rating) {
+                      return DropdownMenuItem<int>(
+                        value: rating,
+                        child: Row(
+                          children: [
+                            // Show corresponding stars
+                            ...List.generate(
+                                rating,
+                                (index) =>
+                                    const Icon(Icons.star, color: Colors.amber)),
+                            const SizedBox(width: 8), // Space between star and number
+                            Text(rating.toString()), // Show rating number
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRating = value; // Update selected rating
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-          // Nút để hiển thị tất cả đánh giá
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                selectedRating = null; // Đặt lại bộ lọc
-              });
-            },
-            child: const Text('Hiển thị tất cả'),
-          ),
+
           Expanded(
             child: FutureBuilder<List<DanhGia>>(
-              future: _getFilteredReviews(), // Gọi hàm lọc đánh giá
+              future: _getFilteredReviews(), // Call to filter reviews
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -93,7 +122,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
                   return const Center(child: Text('No reviews available.'));
                 }
 
-                // Hiển thị danh sách đánh giá đã lọc
+                // Display filtered reviews list
                 final reviews = snapshot.data!;
                 return ListView.builder(
                   itemCount: reviews.length,

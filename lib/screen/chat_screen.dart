@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/models/chat_model.dart';
+import 'package:don_ganh_app/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,12 +15,16 @@ class ChatScreen extends StatefulWidget {
   final String title;
   final String userId; // ID của người dùng hiện tại
   final String conversationId;
+  final Map<String, dynamic>? receiverData; // Thêm receiverData
+  final ProductModel productModel;
 
   const ChatScreen({
     super.key,
     required this.title,
     required this.userId,
     required this.conversationId,
+    this.receiverData, // Nhận dữ liệu receiver
+    required this.productModel,
   });
 
   @override
@@ -42,6 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadTokenAndConnect();
+    _controller.text = widget.productModel.nameProduct;
   }
 
   // @override
@@ -62,6 +68,22 @@ class _ChatScreenState extends State<ChatScreen> {
     _videoController?.dispose();
     super.dispose();
   }
+
+  // Function to clear selected image
+  void _clearImage() {
+    setState(() {
+      _image = null;
+    });
+  }
+
+  // Clear selected video
+void _clearVideo() {
+  setState(() {
+    _video = null;
+    _videoController?.dispose();
+    _videoController = null;
+  });
+}
 
   void _showFullImage(String imageUrl) {
     showDialog(
@@ -124,18 +146,16 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       // Nén video trước khi sử dụng
-      final compressedVideo = await (_video!);
-      if (compressedVideo != null) {
-        setState(() {
-          _video = compressedVideo; // Cập nhật video đã được nén
-          _videoController = VideoPlayerController.file(_video!)
-            ..initialize().then((_) {
-              setState(
-                  () {}); // Rebuild the widget when the video is ready to play
-              _videoController!.play(); // Auto-play the video
-            });
-        });
-      }
+      final compressedVideo = (_video!);
+      setState(() {
+        _video = compressedVideo; // Cập nhật video đã được nén
+        _videoController = VideoPlayerController.file(_video!)
+          ..initialize().then((_) {
+            setState(
+                () {}); // Rebuild the widget when the video is ready to play
+            _videoController!.play(); // Auto-play the video
+          });
+      });
     }
   }
 
@@ -263,12 +283,15 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
 
+      bool sendWithProductId = text == widget.productModel.nameProduct;
+
       // Tạo tin nhắn mới và gửi tới server
       socket!.emit('sendMessage', {
         'conversationId': widget.conversationId,
         'text': text,
         'imageUrl': imageUrl,
         'videoUrl': videoUrl,
+        if (sendWithProductId) 'IDSanPham': widget.productModel.id,
       });
 
       // Xóa dữ liệu sau khi gửi tin nhắn
@@ -308,83 +331,83 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.green[700],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+      body: SafeArea(
         child: Column(
           children: <Widget>[
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  return _buildMessage(message);
-                },
-              ),
-            ),
-            if (_isLoading) // Hiển thị chỉ báo tải
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: CircularProgressIndicator(),
+            // Header với avatar và thông tin người nhận
+            Container(
+              height: 150,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
+                color: Color.fromRGBO(41, 87, 35, 1),
               ),
-            if (_image != null) // Hiển thị hình ảnh nếu có
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                        width: 100, height: 100, child: Image.file(_image!))),
-              ),
-            if (_videoController != null &&
-                _videoController!.value.isInitialized)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  height: 150,
-                  width: 200,
-                  child: AspectRatio(
-                    aspectRatio: _videoController!.value.aspectRatio,
-                    child:
-                        VideoPlayer(_videoController!), // Display video player
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.photo),
-                    onPressed: _pickImage,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.video_library),
-                    onPressed: _pickVideo,
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Nhập tin nhắn...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        height: 40,
+                        width: 40,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                          color: Colors.white,
                         ),
+                        child: const Icon(Icons.arrow_back,
+                            color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () => sendMessage(_controller.text),
-                  ),
-                ],
+                    const SizedBox(width: 30),
+                    CircleAvatar(
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage:
+                          widget.receiverData?['anhDaiDien'] != null
+                              ? NetworkImage(widget.receiverData!['anhDaiDien'])
+                              : null,
+                      radius: 25,
+                      child: widget.receiverData?['anhDaiDien'] == null
+                          ? const Icon(Icons.person, color: Colors.grey)
+                          : null,
+                    ),
+                    const SizedBox(width: 15),
+                    if (widget.receiverData != null)
+                      Text(
+                        widget.receiverData!['tenNguoiDung'] ?? 'Unknown User',
+                        style: const TextStyle(
+                            fontSize: 20, color: Colors.white70),
+                      ),
+                  ],
+                ),
               ),
             ),
+
+            // Danh sách sản phẩm và tin nhắn
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: messages.length + 1, // Sản phẩm + tin nhắn
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      // Hiển thị sản phẩm ở đầu danh sách
+                      return _buildProductWidget();
+                    } else {
+                      // Hiển thị tin nhắn
+                      final message = messages[index - 1];
+                      return _buildMessage(message);
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            // Vùng nhập tin nhắn
+            _buildInputArea(),
           ],
         ),
       ),
@@ -457,6 +480,198 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+ Widget _buildInputArea() {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Display image preview if an image is selected
+        if (_image != null)
+          Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                child: Image.file(
+                  _image!,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 2,
+                right: 2,
+                child: GestureDetector(
+                  onTap: _clearImage,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        
+        // Display video preview if a video is selected
+        if (_video != null)
+          Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                width: 100,
+                height: 100,
+                child: AspectRatio(
+                  aspectRatio: _videoController?.value.aspectRatio ?? 1.0,
+                  child: VideoPlayer(_videoController!),
+                ),
+              ),
+              Positioned(
+                top: 2,
+                right: 2,
+                child: GestureDetector(
+                  onTap: _clearVideo,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        
+        Row(
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.photo),
+              onPressed: _pickImage,
+            ),
+            IconButton(
+              icon: const Icon(Icons.video_library),
+              onPressed: _pickVideo,
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: 'Nhập tin nhắn...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: () => sendMessage(_controller.text),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+  Widget _buildProductWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 60),
+      child: Container(
+        // padding: const EdgeInsets.all(10),
+        // margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(10),
+            color: const Color.fromARGB(255, 220, 218, 218)),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                children: [
+                  Container(
+                      height: 80,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            widget.productModel.imageProduct,
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      )),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.productModel.nameProduct ?? 'Unknown Product',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(41, 87, 35, 1),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '\$${widget.productModel.donGiaBan ?? '0.00'}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.grey, // Màu của viền
+                      width: 1.0, // Độ dày của viền
+                    ),
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Chi tiết',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Color.fromRGBO(41, 87, 35, 1), fontSize: 15),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -622,7 +837,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                         right: 20,
                         child: RotatedBox(
                           quarterTurns: 3,
-                          child: Container(
+                          child: SizedBox(
                             height: 40,
                             child: Slider(
                               value: _volume,

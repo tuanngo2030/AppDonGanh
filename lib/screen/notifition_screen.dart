@@ -75,7 +75,7 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
           child: GestureDetector(
           ),
         ),
-        title: Text(
+        title: const Text(
           'Thông báo',
          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
         ),
@@ -83,60 +83,60 @@ class _NotifitionScreenState extends State<NotifitionScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: ListView.builder(
-        itemCount: conversations.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: const CircleAvatar(
-              radius: 30,
-              child: Icon(Icons.message), // Placeholder for icon
-            ),
-            title: Text(
-              conversations[index]
-                  .id, // Display conversation ID (or other info)
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-                'Messages: ${conversations[index].messageIds.length}'), // Show number of messages
-            trailing: Text(conversations[index]
-                .updatedAt
-                .toIso8601String()), // Show last updated time
-            onTap: () async {
-              if (userId != null) {
-                try {
-                  // In ra userId
-                  print('User ID: $userId'); // Thêm dòng này để in ra userId
+  //     body: ListView.builder(
+  //       itemCount: conversations.length,
+  //       itemBuilder: (context, index) {
+  //         return ListTile(
+  //           leading: const CircleAvatar(
+  //             radius: 30,
+  //             child: Icon(Icons.message), // Placeholder for icon
+  //           ),
+  //           title: Text(
+  //             conversations[index]
+  //                 .id, // Display conversation ID (or other info)
+  //             style: const TextStyle(fontWeight: FontWeight.bold),
+  //           ),
+  //           subtitle: Text(
+  //               'Messages: ${conversations[index].messageIds.length}'), // Show number of messages
+  //           trailing: Text(conversations[index]
+  //               .updatedAt
+  //               .toIso8601String()), // Show last updated time
+  //           onTap: () async {
+  //             if (userId != null) {
+  //               try {
+  //                 // In ra userId
+  //                 print('User ID: $userId'); // Thêm dòng này để in ra userId
 
-                  final conversationId = conversations[index].id;
-                  String receiverId = '671326ec38c65820c766c473';
-                  final success =
-                      await apiService.createConversation(userId!, receiverId);
-                  print('conversationId: $conversationId');
-                  if (success) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          title: conversations[index].receiverId,
-                          userId: userId!, // Gửi userId tới ChatScreen
-                          conversationId:
-                              conversationId, // Gửi conversationId tới ChatScreen // Set chat screen title as conversation ID
-                        ),
-                      ),
-                    );
-                  } else {
-                    _showSnackBar('Không thể tạo cuộc trò chuyện.');
-                  }
-                } catch (e) {
-                  _showSnackBar('Đã xảy ra lỗi: $e');
-                }
-              } else {
-                _showSnackBar('Không tìm thấy người dùng.');
-              }
-            },
-          );
-        },
-      ),
+  //                 final conversationId = conversations[index].id;
+  //                 String receiverId = '671326ec38c65820c766c473';
+  //                 final success =
+  //                     await apiService.createConversation(userId!, receiverId);
+  //                 print('conversationId: $conversationId');
+  //                 if (success != null) {
+  //                   Navigator.push(
+  //                     context,
+  //                     MaterialPageRoute(
+  //                       builder: (context) => ChatScreen(
+  //                         title: conversations[index].receiverId.id!,
+  //                         userId: userId!, // Gửi userId tới ChatScreen
+  //                         conversationId:
+  //                             conversationId, // Gửi conversationId tới ChatScreen // Set chat screen title as conversation ID
+  //                       ),
+  //                     ),
+  //                   );
+  //                 } else {
+  //                   _showSnackBar('Không thể tạo cuộc trò chuyện.');
+  //                 }
+  //               } catch (e) {
+  //                 _showSnackBar('Đã xảy ra lỗi: $e');
+  //               }
+  //             } else {
+  //               _showSnackBar('Không tìm thấy người dùng.');
+  //             }
+  //           },
+  //         );
+  //       },
+  //     ),
     );
   }
 

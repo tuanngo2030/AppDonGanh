@@ -21,7 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
   if (!_agreedToTerms) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
+      const SnackBar(content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
     );
     return;
   }
@@ -39,16 +39,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   if (isSuccess) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đăng ký thành công')),
+      const SnackBar(content: Text('Đăng ký thành công')),
     );
 Navigator.pushNamed(
   context,
   '/xacminhtk',
+   arguments: _emailController.text,
 );
 
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đăng ký thất bại')),
+      const SnackBar(content: Text('Đăng ký thất bại')),
     );
   }
 }
@@ -60,8 +61,8 @@ Navigator.pushNamed(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(50),
+            const Padding(
+              padding: EdgeInsets.all(50),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -88,8 +89,8 @@ Navigator.pushNamed(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
                     child: Text(
                       "Tên đăng nhập",
                       style: TextStyle(
@@ -101,7 +102,7 @@ Navigator.pushNamed(
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(20.0),
+                        contentPadding: const EdgeInsets.all(20.0),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         hintText: "example"),
@@ -114,8 +115,8 @@ Navigator.pushNamed(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
                     child: Text(
                       "Email",
                       style: TextStyle(
@@ -127,7 +128,7 @@ Navigator.pushNamed(
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(20.0),
+                        contentPadding: const EdgeInsets.all(20.0),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         hintText: "abc@gmail.com"),
@@ -140,8 +141,8 @@ Navigator.pushNamed(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
                     child: Text(
                       "Mật khẩu",
                       style: TextStyle(
@@ -154,7 +155,7 @@ Navigator.pushNamed(
                   TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(20.0),
+                        contentPadding: const EdgeInsets.all(20.0),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         hintText: "********"),
@@ -176,7 +177,7 @@ Navigator.pushNamed(
                                       });
                                     },
                                   ),
-                                  Text(
+                                  const Text(
                                     "Tôi đồng ý với ",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
@@ -184,7 +185,7 @@ Navigator.pushNamed(
                                         fontWeight: FontWeight.w400,
                                         color: Colors.black),
                                   ),
-                                  Text(
+                                  const Text(
                                     "Điều khoản ",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
@@ -192,7 +193,7 @@ Navigator.pushNamed(
                                         fontWeight: FontWeight.w400,
                                         color: Color.fromRGBO(248, 158, 25, 1)),
                                   ),
-                                  Text(
+                                  const Text(
                                     "& ",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
@@ -200,7 +201,7 @@ Navigator.pushNamed(
                                         fontWeight: FontWeight.w400,
                                         color: Colors.black),
                                   ),
-                                  Text(
+                                  const Text(
                                     "Chính sách bảo mật ",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
@@ -217,19 +218,19 @@ Navigator.pushNamed(
               padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
               child: ElevatedButton(
                 onPressed: _register,
-                child: Text(
-                  "Đăng ký",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
                 style: ElevatedButton.styleFrom(
-                  fixedSize: Size(395, 55),
-                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                  fixedSize: const Size(395, 55),
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   elevation: 5,
+                ),
+                child: const Text(
+                  "Đăng ký",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -246,8 +247,8 @@ Navigator.pushNamed(
                       width: 90,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       "Hoặc đăng nhập với",
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -255,7 +256,7 @@ Navigator.pushNamed(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Container(
                       height: 2,
                       width: 90,
@@ -275,24 +276,24 @@ Navigator.pushNamed(
                         print("Login with facebook");
                       },
                       child: Container(
+                        padding: const EdgeInsets.all(20),
                         child: Image.asset('lib/assets/fb_icon.png'),
-                        padding: EdgeInsets.all(20),
                       )),
                   InkWell(
                       onTap: () async {
                       
                       },
                       child: Container(
+                        padding: const EdgeInsets.all(20),
                         child: Image.asset('lib/assets/gg_icon.png'),
-                        padding: EdgeInsets.all(20),
                       )),
                   InkWell(
                       onTap: () {
                         print("Login with twitter");
                       },
                       child: Container(
+                        padding: const EdgeInsets.all(20),
                         child: Image.asset('lib/assets/tw_icon.png'),
-                        padding: EdgeInsets.all(20),
                       )),
                 ],
               ),
@@ -305,7 +306,7 @@ Navigator.pushNamed(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         "Bạn đã có tài khoản ? ",
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                       ),
@@ -314,7 +315,7 @@ Navigator.pushNamed(
                           Navigator.pushNamed(context, "/loginscreen");
                           print("Go to login");
                         },
-                        child: Text(
+                        child: const Text(
                           "Đăng nhập",
                           style: TextStyle(
                               fontSize: 12,
