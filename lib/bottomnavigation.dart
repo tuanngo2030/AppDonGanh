@@ -9,7 +9,7 @@ import 'package:don_ganh_app/screen/shop_screen.dart';
 import 'package:flutter/material.dart';
 
 class BottomnavigationMenu extends StatefulWidget {
-  BottomnavigationMenu({super.key});
+  const BottomnavigationMenu({super.key});
 
   @override
   State<BottomnavigationMenu> createState() => _BottomnavigationMenuState();
@@ -25,9 +25,9 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
   }
 
   final List screens = [
-    HomeScreen(),
-    ShopScreen(),
-    FavoriteScreen(),
+    const HomeScreen(),
+    const ShopScreen(),
+    const FavoriteScreen(),
     NotifitionScreen(),
     ManageraccountScreen()
   ];
@@ -37,7 +37,7 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     return Scaffold(
       body: screens[selectedIndex],
       bottomNavigationBar: ClipRRect(
-         borderRadius: BorderRadius.only(
+         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10.0),
           topRight: Radius.circular(10.0),
         ),
@@ -47,71 +47,71 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
           showSelectedLabels: false,
           unselectedItemColor: Colors.white,
           currentIndex: selectedIndex,
-          backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+          backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
           onTap: _onItemTapped,
           items: [
             BottomNavigationBarItem(
-              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-              icon: Icon(Icons.home_outlined),
+              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+              icon: const Icon(Icons.home_outlined),
               activeIcon: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: Icon(Icons.home_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+                child: const Icon(Icons.home_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
               ),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-              icon: Icon(Icons.shopping_cart_outlined),
+              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+              icon: const Icon(Icons.shopping_cart_outlined),
               activeIcon: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: Icon(Icons.shopping_cart_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+                child: const Icon(Icons.shopping_cart_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
               ),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-              icon: Icon(Icons.favorite_outline),
+              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+              icon: const Icon(Icons.favorite_outline),
               activeIcon: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: Icon(Icons.favorite_outline, color: Color.fromRGBO(41, 87, 35, 1)),
+                child: const Icon(Icons.favorite_outline, color: Color.fromRGBO(41, 87, 35, 1)),
               ),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-              icon: Icon(Icons.chat_outlined),
+              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+              icon: const Icon(Icons.chat_outlined),
               activeIcon: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: Icon(Icons.chat_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+                child: const Icon(Icons.chat_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
               ),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-              icon: Icon(Icons.person_pin_outlined),
+              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+              icon: const Icon(Icons.person_pin_outlined),
               activeIcon: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: Icon(Icons.person_pin_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
+                child: const Icon(Icons.person_pin_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
               ),
               label: "Home",
             ),

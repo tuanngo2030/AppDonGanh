@@ -18,24 +18,27 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
   final ImagePicker _picker = ImagePicker();
   int _selectedStars = 0;
   final TextEditingController _reviewController = TextEditingController();
-  List<File> _imageFiles = []; // Changed to a list for multiple images
+  final List<File> _imageFiles = []; // Changed to a list for multiple images
   String? userId;
+  bool _isLoading = false; // Add loading state
 
   Future<void> _pickImage() async {
     final pickedFiles =
         await _picker.pickMultiImage(); // Sử dụng pickMultiImage
 
-    if (pickedFiles != null) {
-      setState(() {
-        _imageFiles.addAll(pickedFiles.map((pickedFile) =>
-            File(pickedFile.path))); // Thêm tất cả hình ảnh vào danh sách
-      });
-    }
+    setState(() {
+      _imageFiles.addAll(pickedFiles.map((pickedFile) =>
+          File(pickedFile.path))); // Thêm tất cả hình ảnh vào danh sách
+    });
   }
 
   Future<void> _submitReview() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
+
+    setState(() {
+      _isLoading = true; // Start loading
+    });
 
     try {
       // Call API to create review
@@ -55,6 +58,10 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lỗi khi gửi đánh giá')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
@@ -144,82 +151,114 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                             contentPadding: const EdgeInsets.all(16),
                           ),
                         ),
-                           SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _pickImage,
-                          child:  Padding(
-                            padding: EdgeInsets.only(top: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
+                                const Row(
                                   children: [
                                     Icon(Icons.camera_alt_outlined),
-                                      Text('Thêm hình ảnh'),
+                                    Text('Thêm hình ảnh'),
                                   ],
                                 ),
-                                SizedBox(height: 20),
-                                Row(
-                              children: [
-                                // Hiển thị hình ảnh đã chọn
-                                for (var image in _imageFiles)
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 4),
-                                    child: Image.file(
-                                      image,
-                                      width: 100, // Đặt chiều rộng theo ý muốn
-                                      height: 100, // Đặt chiều cao theo ý muốn
-                                      fit: BoxFit
-                                          .cover, // Để hình ảnh tự động điều chỉnh
-                                    ),
-                                  ),
-                               
-                              ],
-                            ),
+                                const SizedBox(height: 20),
+                                Wrap(
+                                  spacing:
+                                      8, // Khoảng cách ngang giữa các hình ảnh
+                                  runSpacing:
+                                      8, // Khoảng cách dọc giữa các hàng hình ảnh
+                                  children: [
+                                    // Hiển thị hình ảnh đã chọn
+                                    for (var image in _imageFiles)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 4),
+                                        child: Image.file(
+                                          image,
+                                          width:
+                                              100, // Đặt chiều rộng theo ý muốn
+                                          height:
+                                              100, // Đặt chiều cao theo ý muốn
+                                          fit: BoxFit
+                                              .cover, // Để hình ảnh tự động điều chỉnh
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
                         ),
-                     
                         Padding(
                           padding: const EdgeInsets.only(top: 30),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  // Action for "Bỏ qua" button
+                                },
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromRGBO(59, 99, 53, 1),
-                                    foregroundColor: Colors.white),
+                                  backgroundColor:
+                                      const Color.fromRGBO(59, 99, 53, 1),
+                                  foregroundColor: Colors.white,
+                                ),
                                 child: const Padding(
                                   padding: EdgeInsets.all(13),
                                   child: Text(
                                     'Bỏ qua',
                                     style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed: () async {
-                                  await _submitReview();
-                                },
+                                onPressed: _isLoading
+                                    ? null // Disable button if loading
+                                    : () async {
+                                        setState(() {
+                                          _isLoading = true; // Start loading
+                                        });
+                                        await _submitReview();
+                                        setState(() {
+                                          _isLoading =
+                                              false; // End loading after submission
+                                        });
+                                      },
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromRGBO(59, 99, 53, 1),
-                                    foregroundColor: Colors.white),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(13),
-                                  child: Text(
-                                    'Xác nhận',
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700),
-                                  ),
+                                  backgroundColor:
+                                      const Color.fromRGBO(59, 99, 53, 1),
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(13),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          height:
+                                              20, // Fixed height for the button
+                                          width:
+                                              20, // Fixed width for the button
+                                          child: CircularProgressIndicator(
+                                            color: Colors
+                                                .white, // Progress indicator color
+                                            strokeWidth:
+                                                2, // Thickness of the loading indicator
+                                          ),
+                                        )
+                                      : const Text(
+                                          'Xác nhận',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ],
@@ -227,7 +266,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                         )
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

@@ -15,6 +15,7 @@ import 'package:don_ganh_app/reponsive.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:don_ganh_app/screen/creat_blog_screen.dart';
+import 'package:don_ganh_app/screen/khuyen_mai_screen.dart';
 import 'package:don_ganh_app/screen/oder_status_screen.dart';
 import 'package:don_ganh_app/screen/order_review_screen.dart';
 import 'package:don_ganh_app/screen/otp_xac_minh_tkScreen.dart';
@@ -59,7 +60,7 @@ class MyApp extends StatelessWidget {
       //   Tablet: SettingScreen(),
       //   Desktop: RegisterScreen()
       // ),
-      home: const gioithieu(),
+      home: const LoginScreen(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -92,11 +93,12 @@ class MyApp extends StatelessWidget {
         '/search_screen': (context) => const SearchScreen(),
         '/creat_blog_screen': (context) => const CreatBlogScreen(),
         '/webview': (context) => const WebViewPage(),
-        '/payment_screen': (context) => PaymentMethodsScreen(),
+        '/payment_screen': (context) => const PaymentMethodsScreen(),
         '/CardLinkScreen': (context) => CardLinkScreen(),
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
         '/Resetpassword':(context)=>const Resetpassword(),
+        //  '/KhuyenMaiScreen':(context)=>const KhuyenMaiScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

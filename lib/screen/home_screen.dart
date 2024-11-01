@@ -24,14 +24,65 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<BannerModel>> bannerImage;
-  late Future<List<ProductModel>> productsModel;
+  // late Future<List<ProductModel>> productsModel;
   int _currentIndex = 0;
-
+  int currentPage = 1;
+  int totalPages = 1;
+  List<ProductModel> productList = [];
+  bool isLoading = true;
+  bool hasMore = true;
+  final ScrollController _scrollController = ScrollController();
+  int productsPerPage = 10;
   @override
   void initState() {
     super.initState();
     bannerImage = BannerApiService().fetchBanner();
-    productsModel = ProductApiService().getListProduct();
+    // productsModel = ProductApiService().getListProduct();
+    // fetchPaginatedProducts();
+    fetchProducts(currentPage);
+    _scrollController.addListener(_scrollListener);
+  }
+
+  Future<void> fetchProducts(int page) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final response = await ProductApiService().getProducts(page);
+      List<ProductModel> products = response['sanphams']
+          .map<ProductModel>((json) => ProductModel.fromJSON(json))
+          .where((product) => product.tinhTrang != 'Đã xóa')
+          .toList();
+
+      setState(() {
+        if (page == 1) {
+          productList = products; // Replace the list on the first page
+        } else {
+          productList.addAll(products); // Add to the list on subsequent pages
+        }
+        totalPages = (response['totalProducts'] / productsPerPage).ceil();
+        hasMore = productList.length < response['totalProducts'];
+      });
+    } catch (error) {
+      print("Error fetching products: $error");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.extentAfter < 300 && !isLoading && hasMore) {
+      currentPage++;
+      fetchProducts(currentPage);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
+          controller: _scrollController,
           child: Padding(
             padding: const EdgeInsets.only(top: 30, left: 27, right: 27),
             child: Column(
@@ -255,232 +307,243 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 8,
                 ),
 
-                // List product
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30),
-                  child: FutureBuilder<List<ProductModel>>(
-                    future: productsModel,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Lỗi: ${snapshot.error}'));
-                      } else if (!snapshot.hasData ||
-                          snapshot.data == null ||
-                          snapshot.data!.isEmpty) {
-                        return Center(child: Text('Không tìm thấy dữ liệu'));
-                      }
-
-                      List<ProductModel> products = snapshot.data!;
-                      List<ProductModel> activeProducts = products
-                          .where((product) => product.tinhTrang != 'Đã xóa')
-                          .toList();
-
-                      if (activeProducts.isEmpty) {
-                        return Center(
-                            child: Text('Không có sản phẩm nào để hiển thị'));
-                      }
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics:
-                            NeverScrollableScrollPhysics(), // Tránh xung đột với cuộn của SingleChildScrollView
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 0.7),
-                        itemCount: activeProducts.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              print("Detail Product");
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DetailProductScreen(
-                                          product: activeProducts[index])));
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(
-                                  child: Stack(children: [
-                                    SizedBox(
-                                      height: 150,
-                                      width: 200,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                          activeProducts[index].imageProduct,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-
-                                    Positioned(
-                                        top: 15,
-                                        child: Container(
-                                          width: 50,
-                                          height: 25,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(5),
-                                                topRight: Radius.circular(10),
-                                                bottomRight:
-                                                    Radius.circular(10)),
-                                            color:
-                                                Color.fromRGBO(142, 198, 65, 1),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              "- ${activeProducts[index].phanTramGiamGia}%",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            ),
-                                          ),
-                                        )),
-
-                                    // Icon favorites
-                                    Positioned(
-                                        top: 10,
-                                        right: 5,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            print("Add to favorites");
-                                          },
-                                          child: Container(
-                                            height: 35,
-                                            width: 35,
-                                            decoration: BoxDecoration(
-                                                color: Color.fromRGBO(
-                                                    241, 247, 234, 1),
-                                                borderRadius:
-                                                    BorderRadius.circular(50)),
-                                            child: Center(
-                                              child: Icon(
-                                                Icons.favorite_border_outlined,
-                                                color: Color.fromRGBO(
-                                                    142, 198, 65, 1),
-                                              ),
-                                            ),
-                                          ),
-                                        ))
-                                  ]),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          activeProducts[index].nameProduct,
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            overflow: TextOverflow.ellipsis,
-                                            fontWeight: FontWeight.w900,
-                                            color:
-                                                Color.fromRGBO(41, 87, 35, 1),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-
-                                      //rate
-                                      Container(
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                            ),
-                                            Text("5")
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 7.0),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        '${activeProducts[index].donGiaBan} đ/kg',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400),
-                                      )
-                                    ],
-                                  ),
-                                ),
-
-                                //Button add to cart
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      print('add to cart');
-                                    },
-                                    child: Container(
-                                      height: 35,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          border: Border.fromBorderSide(
-                                              BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1.5)),
-                                          color: Color.fromRGBO(41, 87, 35, 1),
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 2,
-                                            child: SizedBox(
-                                                width: 60,
-                                                child: Icon(
-                                                  Icons.shopping_cart_outlined,
-                                                  color: Colors.white,
-                                                )),
-                                          ),
-                                          Container(
-                                            height: double.infinity,
-                                            width: 1,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Center(
-                                              child: SizedBox(
-                                                width: 100,
-                                                child: Text(
-                                                  'Mua Ngay',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.7,
+                    ),
+                    itemCount: productList.length,
+                    itemBuilder: (context, index) {
+                      final product = productList[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DetailProductScreen(product: product),
                             ),
                           );
                         },
+                        child: Column(
+                          children: [
+                            Flexible(
+                              child: Stack(children: [
+                                SizedBox(
+                                  height: 150,
+                                  width: 200,
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        productList[index].imageProduct,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return Image.asset(
+                                            'lib/assets/avt2.jpg', // Ensure this path is correct
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )),
+                                ),
+
+                                Positioned(
+                                    top: 15,
+                                    child: Container(
+                                      width: 50,
+                                      height: 25,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(5),
+                                            topRight: Radius.circular(10),
+                                            bottomRight: Radius.circular(10)),
+                                        color: Color.fromRGBO(142, 198, 65, 1),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "- ${productList[index].phanTramGiamGia}%",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    )),
+
+                                // Icon favorites
+                                Positioned(
+                                    top: 10,
+                                    right: 5,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        print("Add to favorites");
+                                      },
+                                      child: Container(
+                                        height: 35,
+                                        width: 35,
+                                        decoration: BoxDecoration(
+                                            color: Color.fromRGBO(
+                                                241, 247, 234, 1),
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.favorite_border_outlined,
+                                            color:
+                                                Color.fromRGBO(142, 198, 65, 1),
+                                          ),
+                                        ),
+                                      ),
+                                    ))
+                              ]),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      productList[index].nameProduct,
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        overflow: TextOverflow.ellipsis,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color.fromRGBO(41, 87, 35, 1),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+
+                                  //rate
+                                  Container(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                        ),
+                                        Text("5")
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 7.0),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '${productList[index].donGiaBan} đ/kg',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  print('add to cart');
+                                },
+                                child: Container(
+                                  height: 35,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      border: Border.fromBorderSide(BorderSide(
+                                          color: Colors.black, width: 1.5)),
+                                      color: Color.fromRGBO(41, 87, 35, 1),
+                                      borderRadius: BorderRadius.circular(20)),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                            width: 60,
+                                            child: Icon(
+                                              Icons.shopping_cart_outlined,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                      Container(
+                                        height: double.infinity,
+                                        width: 1,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 100,
+                                            child: Text(
+                                              'Mua Ngay',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
-                )
+                ),
+                if (isLoading) // Check if loading
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16.0), // Add some vertical padding
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+
+//                Row(
+//   mainAxisAlignment: MainAxisAlignment.center,
+//   children: [
+//     ElevatedButton(
+//       onPressed: currentPage > 1
+//           ? () {
+//               setState(() {
+//                 currentPage--;
+//               });
+//               fetchProducts(currentPage, isPageNavigation: true);
+//             }
+//           : null,
+//       child: Text('Previous'),
+//     ),
+//     SizedBox(width: 20),
+//     ElevatedButton(
+//       onPressed: currentPage < totalPages
+//           ? () {
+//               setState(() {
+//                 currentPage++;
+//               });
+//               fetchProducts(currentPage, isPageNavigation: true);
+//             }
+//           : null,
+//       child: Text('Next'),
+//     ),
+//   ],
+// )
               ],
             ),
           ),

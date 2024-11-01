@@ -5,33 +5,33 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChatApiService{
-   Future<bool> createConversation(String senderId, String receiverId) async {
-    String apiUrl = "${dotenv.env['API_URL']}/chatsocket/Createconversation";
-    try {
-      Map<String, String> body = {
-        'sender_id': senderId,
-        'receiver_id': receiverId,
-      };
+   Future<Map<String, dynamic>?> createConversation(String senderId, String receiverId) async {
+  String apiUrl = "${dotenv.env['API_URL']}/chatsocket/Createconversation";
+  try {
+    Map<String, String> body = {
+      'sender_id': senderId,
+      'receiver_id': receiverId,
+    };
 
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        print('Conversation created: $data');
-        return true; // Indicate success
-      } else {
-        print('Failed to create conversation: ${response.body}');
-        return false; // Indicate failure
-      }
-    } catch (error) {
-      print('Error: $error');
-      return false; // Indicate failure
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print('Conversation created: $data');
+      return data; // Trả về toàn bộ dữ liệu, bao gồm receiverData
+    } else {
+      print('Failed to create conversation: ${response.body}');
+      return null;
     }
+  } catch (error) {
+    print('Error: $error');
+    return null;
   }
+}
 
   // Phương thức lấy danh sách cuộc trò chuyện theo ID
   Future<void> getListConversation(String conversationId) async {

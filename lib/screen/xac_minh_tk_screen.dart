@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class XacMinhTkScreen extends StatefulWidget {
     final String email;
-      XacMinhTkScreen({required this.email});
+      const XacMinhTkScreen({super.key, required this.email});
   @override
   _XacMinhTkScreen createState() => _XacMinhTkScreen();
 }
@@ -26,11 +26,11 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title:Text(
+        title:const Text(
                 'Email',
                 style: TextStyle(
                   fontSize: 24,
@@ -47,7 +47,7 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -56,18 +56,18 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
               'lib/assets/icongmail.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
                   hintText: 'Nhập email của bạn',
                   filled: true,
-                  fillColor: Color(0xFFF5F5F5),
+                  fillColor: const Color(0xFFF5F5F5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30.0),
                     borderSide: BorderSide.none,
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -80,18 +80,18 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 50),
                 ),
-                child: Text(
+                child: const Text(
                   'Tiếp theo',
                   style: TextStyle(fontSize: 18,color: Color.fromRGBO(255, 255, 255, 1)),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Checkbox(
@@ -102,7 +102,7 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
                       });
                     },
                   ),
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       'Gửi tôi thông tin sản phẩm mới, sản phẩm hot, chương trình khuyến mãi và cập nhật mới nhất của Đòn Gánh',
                       style: TextStyle(fontSize: 14),

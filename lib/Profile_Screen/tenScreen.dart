@@ -15,8 +15,10 @@ class _Tenscreen extends State<Tenscreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
   String _tenNguoiDung = 'Chưa cập nhật';
-    final TextEditingController _tenNguoiDungController = TextEditingController();
+  final TextEditingController _tenNguoiDungController = TextEditingController();
   String? _selectedtenNguoiDung;
+  bool _isLoading = false;  // Loading state variable
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +35,7 @@ class _Tenscreen extends State<Tenscreen> {
         setState(() {
           _userId = storedUserId;
           _tenNguoiDung = user.tenNguoiDung ?? 'Chưa cập nhật';
-          _tenNguoiDungController.text=_tenNguoiDung;
+          _tenNguoiDungController.text = _tenNguoiDung;
         });
       } else {
         print('User details not found.');
@@ -42,33 +44,46 @@ class _Tenscreen extends State<Tenscreen> {
       print('User ID is not available.');
     }
   }
- Future<void> _updateName(String newName) async {
-    if (_userId.isNotEmpty) {
-      bool success =
-          await _apiService.updateUserInformation(_userId, 'tenNguoiDung', newName);
+
+  Future<void> _updateName() async {
+    // Use the value from the controller or the existing name if not changed
+    String newName = _selectedtenNguoiDung?.isNotEmpty == true ? _selectedtenNguoiDung! : _tenNguoiDung;
+
+    if (_userId.isNotEmpty && newName != _tenNguoiDung) {
+      setState(() {
+        _isLoading = true;  // Set loading state to true
+      });
+
+      bool success = await _apiService.updateUserInformation(_userId, 'tenNguoiDung', newName);
+
+      setState(() {
+        _isLoading = false;  // Reset loading state
+      });
 
       if (success) {
         setState(() {
-          _tenNguoiDung = newName;
+          _tenNguoiDung = newName; // Update the displayed name
         });
-        // Lưu gmail mới vào SharedPreferences
+        // Save new name to SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('gmail', newName);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật họ và tên thành công')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cập nhật họ và tên thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pop(context);
+          Navigator.pop(context);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật họ và tên thất bại')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cập nhật họ và tên thất bại')));
       }
+    } else {
+      // If the name is the same or userId is empty, just show a message
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không có thay đổi nào để cập nhật')));
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -79,13 +94,13 @@ class _Tenscreen extends State<Tenscreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title: Text(
+        title: const Text(
           'Hồ sơ',
-         style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -96,43 +111,45 @@ class _Tenscreen extends State<Tenscreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-         Column(
-                children: [
-                  TextFormField(
-                    controller: _tenNguoiDungController,  // Prepopulate with the existing email
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedtenNguoiDung = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Nhập họ và tên',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0), // Rounded corners
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: '$_tenNguoiDung',
-                      counterText: 'Tối đa 100 ký tự', // Custom character limit hint
-                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+            Column(
+              children: [
+                TextFormField(
+                  controller: _tenNguoiDungController,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedtenNguoiDung = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Nhập họ và tên',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    maxLength: 100,
-                  )
-                ],
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: _tenNguoiDung,
+                    counterText: 'Tối đa 100 ký tự',
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  ),
+                  keyboardType: TextInputType.name,
+                  maxLength: 100,
+                )
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isLoading 
+                    ? null  // Disable button if loading
+                    : _updateName,  // Call the updated method without parameters
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)  // Show loading indicator
+                    : const Text('Cập nhật họ và tên', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
               ),
-               const SizedBox(height: 20),
-              SizedBox(
-                 width: double.infinity,  // Full width button
-                height: 50, 
-                child: ElevatedButton(
-                  onPressed: () {
-                      _updateName(_selectedtenNguoiDung!);                
-                  }, 
-                  child: const Text('Cập nhật họ và tên', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
-                ),
-              ),
+            ),
           ],
         ),
       ),

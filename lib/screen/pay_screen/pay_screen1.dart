@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
 import 'package:don_ganh_app/api_services/address_api.dart';
 import 'package:don_ganh_app/api_services/diachi_api.dart';
 import 'package:don_ganh_app/api_services/order_api_service.dart';
@@ -160,62 +161,123 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
-  // Show address selection dialog
+  void _navigateToAddAddress() {
+    Navigator.of(context).pop();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            AddressScreen(), // Điều hướng đến trang thêm địa chỉ
+      ),
+    ).then((result) {
+      if (result == true) {
+        _showDiaChiDialog(); // Gọi lại hộp thoại chọn địa chỉ sau khi thêm
+      }
+    });
+  }
+
+// Phương thức hiển thị hộp thoại chọn địa chỉ
   Future<void> _showDiaChiDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedUserId = prefs.getString('userId');
 
     if (storedUserId == null || storedUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không tìm thấy userId.')),
+        const SnackBar(content: Text('Không tìm thấy userId.')),
       );
       return;
     }
 
     try {
-      // Fetch address list from API
+      // Gọi API để lấy danh sách địa chỉ
       List<diaChiList> addresses =
           await DiaChiApiService().getDiaChiByUserId(storedUserId);
 
       if (addresses.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
-        );
+        // Chuyển đến màn hình thêm địa chỉ nếu không có địa chỉ nào
+        _navigateToAddAddress();
         return;
       }
 
+      // Hiển thị hộp thoại nếu có địa chỉ
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Chọn địa chỉ'),
+            title: const Text('Chọn địa chỉ'),
             content: SizedBox(
               width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: addresses.length,
-                itemBuilder: (context, index) {
-                  final address = addresses[index];
-                  return ListTile(
-                    title: Text(address.name ?? 'Tên không có'),
-                    subtitle: Text(
-                      '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
-                    ),
-                    onTap: () async {
-                      setState(() {
-                        selectedTinhThanhPho = address.tinhThanhPho ?? '';
-                        selectedQuanHuyen = address.quanHuyen ?? '';
-                        selectedPhuongXa = address.phuongXa ?? '';
+              child: Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: addresses.length,
+                    itemBuilder: (context, index) {
+                      final address = addresses[index];
+                      return ListTile(
+                        title: Text(address.name ?? 'Tên không có'),
+                        subtitle: Text(
+                          '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
+                        ),
+                        onTap: () async {
+                          // Cập nhật các trường địa chỉ đã chọn
+                          setState(() {
+                            selectedTinhThanhPho = address.tinhThanhPho ?? '';
+                            selectedQuanHuyen = address.quanHuyen ?? '';
+                            selectedPhuongXa = address.phuongXa ?? '';
 
-                        hoTenController = address.name ?? '';
-                        soDienThoaiController = address.soDienThoai ?? '';
-                        duongThonController = address.duongThon ?? '';
-                      });
+                            hoTenController = address.name ?? '';
+                            soDienThoaiController = address.soDienThoai ?? '';
+                            duongThonController = address.duongThon ?? '';
+                          });
 
-                      Navigator.of(context).pop();
+                          Navigator.of(context).pop(); // Đóng hộp thoại
+                        },
+                      );
                     },
-                  );
-                },
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: _navigateToAddAddress,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Center the icon and text
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(
+                                4), // Add some padding inside the border
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color.fromRGBO(
+                                    59, 99, 53, 1), // Border color
+                                width: 1, // Border width
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(100), // Rounded corners
+                            ),
+                            child: Icon(
+                              size: 20,
+                              Icons.add, // Icon
+                              color:
+                                  Color.fromRGBO(59, 99, 53, 1), // Icon color
+                            ),
+                          ),
+                          SizedBox(
+                              width:
+                                  8), // Add some spacing between the icon and text
+                          Text('Thêm địa chỉ mới',
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color.fromRGBO(59, 99, 53, 1))),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -224,7 +286,7 @@ class _PayScreen1State extends State<PayScreen1> {
     } catch (e) {
       print('Error fetching addresses: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
+        const SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
       );
     }
   }
@@ -326,7 +388,7 @@ class _PayScreen1State extends State<PayScreen1> {
           SnackBar(content: Text('Cập nhật địa chỉ và ghi chú thành công!')),
         );
 
-         // Cập nhật thông tin `order_id` trong Provider
+        // Cập nhật thông tin `order_id` trong Provider
         paymentInfo.updateInfo(
           order_id: orderId,
           hoTen: hoTen,
@@ -340,9 +402,8 @@ class _PayScreen1State extends State<PayScreen1> {
           ghiChu: ghiChu,
           selectedItems: selectedItems,
           totalPrice: totalPrice,
-          
         );
-         widget.nextStep();
+        widget.nextStep();
       } else {
         // Nếu chưa có `order_id`, tạo đơn hàng mới
         OrderModel? response =
@@ -350,7 +411,7 @@ class _PayScreen1State extends State<PayScreen1> {
           userId: userId,
           diaChiMoi: newAddress,
           ghiChu: ghiChu,
-          khuyenmaiId: "66e8f14a8d3c9f33e31c200e", // ID khuyến mãi nếu có
+          khuyenmaiId: "", // ID khuyến mãi nếu có
           TongTien: totalPrice,
           selectedItems: chiTietGioHang,
         );
@@ -639,11 +700,26 @@ class _PayScreen1State extends State<PayScreen1> {
                           // ),
                           SizedBox(height: 16),
 
-                          TextButton(
+                          ElevatedButton(
                             onPressed: _showDiaChiDialog,
-                            child: Text('Chọn địa chỉ'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              backgroundColor: const Color.fromRGBO(
+                                  41, 87, 35, 1), // Màu nền của nút
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(8), // Bo góc nút
+                              ),
+                            ),
+                            child: const Text(
+                              'Chọn địa chỉ',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white), // Văn bản trên nút
+                            ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
                           // Row(
                           //   children: [
@@ -694,74 +770,95 @@ class _PayScreen1State extends State<PayScreen1> {
                           //   ),
                           // ),
 
-                          Container(
-                            width: double.infinity,
-                            height: 150,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.fromBorderSide(
-                                    BorderSide(width: 1, color: Colors.grey))),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 20),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
+                          hoTenController.isEmpty || duongThonController.isEmpty
+                              ? Container(
+                                  width: double.infinity,
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        width: 1, color: Colors.grey),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Bạn chưa có địa chỉ nào.',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  width: double.infinity,
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.fromBorderSide(BorderSide(
+                                          width: 1, color: Colors.grey))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 20),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const TextSpan(
-                                          text: 'Người nhận hàng: ',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              const TextSpan(
+                                                text: 'Người nhận hàng: ',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    '$hoTenController, $soDienThoaiController',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        TextSpan(
-                                          text:
-                                              '$hoTenController, $soDienThoaiController',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                const TextSpan(
+                                                  text: 'Địa chỉ nhận: ',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text:
+                                                      '$duongThonController, $selectedPhuongXa, $selectedQuanHuyen, $selectedTinhThanhPho',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Địa chỉ nhận: ',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.normal,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text:
-                                                '$duongThonController, $selectedPhuongXa, $selectedQuanHuyen, $selectedTinhThanhPho',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                                ),
 
                           SizedBox(height: 20),
                           Padding(
@@ -987,7 +1084,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                   height: 50,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                       _createOrUpdateOrder();
+                                      _createOrUpdateOrder();
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:

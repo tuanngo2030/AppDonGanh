@@ -2,14 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
- 	<key>NSAllowsArbitraryLoads</key>
-    <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Chúng tôi cần truy cập thư viện ảnh của bạn để bạn có thể chọn ảnh.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>Chúng tôi cần truy cập camera của bạn để bạn có thể chụp ảnh.</string>
-    <!-- Các quyền và cấu hình khác -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

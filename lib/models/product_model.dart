@@ -86,6 +86,8 @@ class ProductModel {
       ImgBoSung: ImgBoSung,
     );
   }
+
+  
 }
 
 class danhSachThuocTinh {
