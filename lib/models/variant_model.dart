@@ -24,7 +24,7 @@ class VariantModel {
     return VariantModel(
       id: data['_id'],
       idProduct: data['IDSanPham'],
-      sku: data['sku'],
+      sku: data['sku'] ?? '',
       gia: data['gia'],
       soLuong: data['soLuong'],
       ketHopThuocTinh: ketHopThuocTinh,

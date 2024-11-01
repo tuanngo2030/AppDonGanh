@@ -162,6 +162,7 @@ class _PayScreen1State extends State<PayScreen1> {
   }
 
   void _navigateToAddAddress() {
+    Navigator.of(context).pop();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -206,32 +207,77 @@ class _PayScreen1State extends State<PayScreen1> {
             title: const Text('Chọn địa chỉ'),
             content: SizedBox(
               width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: addresses.length,
-                itemBuilder: (context, index) {
-                  final address = addresses[index];
-                  return ListTile(
-                    title: Text(address.name ?? 'Tên không có'),
-                    subtitle: Text(
-                      '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
-                    ),
-                    onTap: () async {
-                      // Cập nhật các trường địa chỉ đã chọn
-                      setState(() {
-                        selectedTinhThanhPho = address.tinhThanhPho ?? '';
-                        selectedQuanHuyen = address.quanHuyen ?? '';
-                        selectedPhuongXa = address.phuongXa ?? '';
+              child: Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: addresses.length,
+                    itemBuilder: (context, index) {
+                      final address = addresses[index];
+                      return ListTile(
+                        title: Text(address.name ?? 'Tên không có'),
+                        subtitle: Text(
+                          '${address.soDienThoai} \n${address.tinhThanhPho}, ${address.quanHuyen}, ${address.phuongXa}, ${address.duongThon}',
+                        ),
+                        onTap: () async {
+                          // Cập nhật các trường địa chỉ đã chọn
+                          setState(() {
+                            selectedTinhThanhPho = address.tinhThanhPho ?? '';
+                            selectedQuanHuyen = address.quanHuyen ?? '';
+                            selectedPhuongXa = address.phuongXa ?? '';
 
-                        hoTenController = address.name ?? '';
-                        soDienThoaiController = address.soDienThoai ?? '';
-                        duongThonController = address.duongThon ?? '';
-                      });
+                            hoTenController = address.name ?? '';
+                            soDienThoaiController = address.soDienThoai ?? '';
+                            duongThonController = address.duongThon ?? '';
+                          });
 
-                      Navigator.of(context).pop(); // Đóng hộp thoại
+                          Navigator.of(context).pop(); // Đóng hộp thoại
+                        },
+                      );
                     },
-                  );
-                },
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: _navigateToAddAddress,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Center the icon and text
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(
+                                4), // Add some padding inside the border
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color.fromRGBO(
+                                    59, 99, 53, 1), // Border color
+                                width: 1, // Border width
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(100), // Rounded corners
+                            ),
+                            child: Icon(
+                              size: 20,
+                              Icons.add, // Icon
+                              color:
+                                  Color.fromRGBO(59, 99, 53, 1), // Icon color
+                            ),
+                          ),
+                          SizedBox(
+                              width:
+                                  8), // Add some spacing between the icon and text
+                          Text('Thêm địa chỉ mới',
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color.fromRGBO(59, 99, 53, 1))),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -659,7 +705,8 @@ class _PayScreen1State extends State<PayScreen1> {
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 12),
-                              backgroundColor: const Color.fromRGBO(41, 87, 35, 1), // Màu nền của nút
+                              backgroundColor: const Color.fromRGBO(
+                                  41, 87, 35, 1), // Màu nền của nút
                               shape: RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.circular(8), // Bo góc nút

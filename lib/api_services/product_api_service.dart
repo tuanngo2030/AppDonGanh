@@ -30,7 +30,7 @@ class ProductApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getProducts(int page, {int limit = 5}) async {
+  Future<Map<String, dynamic>> getProducts(int page, {int limit = 6}) async {
     final response = await http.get(Uri.parse('${dotenv.env['API_URL']}/sanpham/getlistPageSanPham/$page?limit=$limit'));
 
     if (response.statusCode == 200) {

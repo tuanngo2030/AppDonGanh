@@ -507,7 +507,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                 padding: EdgeInsets.all(20),
                                                 gridDelegate:
                                                     SliverGridDelegateWithMaxCrossAxisExtent(
-                                                  maxCrossAxisExtent: 50,
+                                                  maxCrossAxisExtent: 100,
                                                   mainAxisSpacing: 10,
                                                   crossAxisSpacing: 30,
                                                 ),
