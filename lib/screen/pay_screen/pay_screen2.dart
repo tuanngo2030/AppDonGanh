@@ -199,30 +199,30 @@ Future<void> _updateTransactionCOD(String hoadonId, String transactionId, String
                   : buildSelectedMethodDetails(),
 
                // Nút Tiếp tục
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: widget.nextStep,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Tiếp tục',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            //   child: SizedBox(
+            //     width: double.infinity,
+            //     height: 50,
+            //     child: ElevatedButton(
+            //       onPressed: widget.nextStep,
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(8),
+            //         ),
+            //       ),
+            //       child: const Text(
+            //         'Tiếp tục',
+            //         style: TextStyle(
+            //           color: Colors.white,
+            //           fontSize: 18,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             ],
           ),
         ),
