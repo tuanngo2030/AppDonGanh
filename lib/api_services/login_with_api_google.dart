@@ -43,6 +43,7 @@ class LoginWithApiGoogle {
         // Lưu userId vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', userId);
+        await prefs.setString('token', token);
 
         print("User ID saved to SharedPreferences successfully.");
       }

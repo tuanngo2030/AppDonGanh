@@ -56,11 +56,11 @@ class DanhGia {
   }) : ngayTao = ngayTao ?? DateTime.now();
 
   factory DanhGia.fromJson(Map<String, dynamic> json) {
-    var phanHoiList = json['PhanHoi'] as List;
+    var phanHoiList = json['PhanHoi'] as List? ?? [];
     List<PhanHoi> phanHoiItems = phanHoiList.map((i) => PhanHoi.fromJson(i)).toList();
 
     // Lấy danh sách hình ảnh từ JSON
-    var hinhAnhList = json['HinhAnh'] as List<dynamic>;
+    var hinhAnhList = json['HinhAnh'] as List<dynamic> ?? [];
     List<String> hinhAnhItems = hinhAnhList.map((i) => i.toString()).toList(); 
 
     return DanhGia(

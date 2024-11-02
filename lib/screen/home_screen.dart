@@ -14,6 +14,7 @@ import 'package:don_ganh_app/api_services/category_api_service.dart';
 import 'package:don_ganh_app/models/categories_model.dart';
 import 'package:don_ganh_app/api_services/banner_api_service.dart';
 import 'package:don_ganh_app/models/banner_model.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -440,11 +441,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Row(
                                 children: [
                                   Text(
-                                    '${productList[index].donGiaBan} đ/kg',
+                                    '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(productList[index].donGiaBan)} đ/kg',
                                     style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400),
-                                  )
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

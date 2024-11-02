@@ -10,6 +10,8 @@ import 'package:don_ganh_app/api_services/Imguser_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageraccountScreen extends StatefulWidget {
+  const ManageraccountScreen({super.key});
+
   @override
   _ManageraccountScreen createState() => _ManageraccountScreen();
 }
@@ -65,11 +67,11 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
 
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
+              const SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
+              const SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
             );
           }
         } catch (e) {
@@ -79,12 +81,12 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không tìm thấy userId.')),
+          const SnackBar(content: Text('Không tìm thấy userId.')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bạn chưa chọn ảnh.')),
+        const SnackBar(content: Text('Bạn chưa chọn ảnh.')),
       );
     }
   }
@@ -95,19 +97,19 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 90),
+            const SizedBox(height: 90),
             GestureDetector(
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 50,
-                backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                 backgroundImage: _image != null
                     ? FileImage(_image!)
                     : _profileImageUrl != null
                         ? NetworkImage(_profileImageUrl!)
                         : null,
                 child: _image == null && _profileImageUrl == null
-                    ? Icon(
+                    ? const Icon(
                         Icons.camera_alt,
                         color: Colors.white,
                         size: 50,
@@ -115,59 +117,59 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                     : null,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               _tenNguoiDung, // Hiển thị tên người dùng
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color.fromRGBO(41, 87, 35, 1),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ListTile(
               leading: Image.asset("lib/assets/hoso_icon.png"),
-              title: Text('Hồ sơ'),
+              title: const Text('Hồ sơ'),
               onTap: () {
                 Navigator.pushNamed(context, '/ProfileScreen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/lienketthu_icon.png"),
-              title: Text('Liên kết thẻ'),
+              title: const Text('Liên kết thẻ'),
               onTap: () {
                 Navigator.pushNamed(context, '/CardLinkScreen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),
-              title: Text('Đơn hàng'),
+              title: const Text('Đơn hàng'),
               onTap: () {
                 Navigator.pushNamed(context, '/oder_screen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/caidat_icon.png"),
-              title: Text('Cài đặt'),
+              title: const Text('Cài đặt'),
               onTap: () {
                 Navigator.pushNamed(context, '/setting_screen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/trungtamhotro_icon.png"),
-              title: Text('Trung tâm hỗ trợ'),
+              title: const Text('Trung tâm hỗ trợ'),
               onTap: () {},
             ),
             ListTile(
               leading: Image.asset("lib/assets/baomat_icon.png"),
-              title: Text('Bảo mật'),
+              title: const Text('Bảo mật'),
               onTap: () {
                 Navigator.pushNamed(context, '/SecurityScreen');
               },
             ),
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
-              title: Text('Đăng xuất'),
+              title: const Text('Đăng xuất'),
               // Trong phần onTap của danh sách đăng xuất
               onTap: () async {
                 // Xóa thông tin người dùng từ SharedPreferences
@@ -175,11 +177,12 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 await prefs.remove('userDisplayName');
                 await prefs.remove('userEmail');
                 await prefs.remove('userId');
+                  await prefs.remove('token');
                 await GoogleSignIn().signOut();
                 // Điều hướng về màn hình đăng nhập
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                   (Route<dynamic> route) =>
                       false, // Xóa tất cả các route trước đó
                 );
