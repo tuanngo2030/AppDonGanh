@@ -17,6 +17,7 @@ class ChatScreen extends StatefulWidget {
   final String conversationId;
   final Map<String, dynamic>? receiverData; // Thêm receiverData
   final ProductModel productModel;
+  final String token;
 
   const ChatScreen({
     super.key,
@@ -25,6 +26,7 @@ class ChatScreen extends StatefulWidget {
     required this.conversationId,
     this.receiverData, // Nhận dữ liệu receiver
     required this.productModel,
+    required this.token,
   });
 
   @override
@@ -50,15 +52,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.text = widget.productModel.nameProduct;
   }
 
-  // @override
-  // void dispose() {
-  //   _scrollController.dispose();
-  //   _controller.dispose();
-  //   socket?.disconnect();
-  //   socket?.dispose();
-  //   _videoController?.dispose();
-  //   super.dispose();
-  // }
   @override
   void dispose() {
     _scrollController.dispose();
@@ -77,13 +70,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // Clear selected video
-void _clearVideo() {
-  setState(() {
-    _video = null;
-    _videoController?.dispose();
-    _videoController = null;
-  });
-}
+  void _clearVideo() {
+    setState(() {
+      _video = null;
+      _videoController?.dispose();
+      _videoController = null;
+    });
+  }
 
   void _showFullImage(String imageUrl) {
     showDialog(
@@ -164,6 +157,7 @@ void _clearVideo() {
     token = prefs.getString('token');
 
     if (token != null) {
+      print('user $token');
       connect();
     } else {
       print("Token not found");
@@ -171,12 +165,19 @@ void _clearVideo() {
   }
 
   void connect() {
-    // Hủy bỏ các sự kiện nếu socket đã tồn tại
-    socket?.off('Joined');
-    socket?.off('message');
-    socket?.off('error');
-    socket?.off('disconnect');
-    socket?.off('reconnect');
+    if (socket != null && socket!.connected) {
+      // Hủy các sự kiện và ngắt kết nối socket
+      socket!.off('Joined');
+      socket!.off('message');
+      socket!.off('error');
+      socket!.off('disconnect');
+      socket!.off('reconnect');
+      // socket!.disconnect();
+      socket = null; // Giải phóng socket để chuẩn bị tạo kết nối mới
+      socket!.disconnect();
+      socket!.clearListeners(); // Clear all previous listeners
+    }
+
 
     // Tạo socket mới
     socket = IO.io(
@@ -195,7 +196,7 @@ void _clearVideo() {
 
     // Thêm các sự kiện sau khi socket được kết nối
     socket!.onConnect((_) {
-      print("Connected to the server");
+      print("Connected to the server with token: $token");
       socket!.emit("join", {
         'token': token,
         'conversationId': widget.conversationId,
@@ -241,6 +242,7 @@ void _clearVideo() {
 
     socket!.onDisconnect((_) {
       print("Disconnected from the server");
+      // Clear the token from the socket
     });
 
     socket!.onReconnect((_) {
@@ -292,6 +294,7 @@ void _clearVideo() {
         'imageUrl': imageUrl,
         'videoUrl': videoUrl,
         if (sendWithProductId) 'IDSanPham': widget.productModel.id,
+        'token': token,
       });
 
       // Xóa dữ liệu sau khi gửi tin nhắn
@@ -484,112 +487,113 @@ void _clearVideo() {
     );
   }
 
- Widget _buildInputArea() {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Display image preview if an image is selected
-        if (_image != null)
-          Stack(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 8.0),
-                child: Image.file(
-                  _image!,
+  Widget _buildInputArea() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Display image preview if an image is selected
+          if (_image != null)
+            Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: Image.file(
+                    _image!,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 2,
+                  right: 2,
+                  child: GestureDetector(
+                    onTap: _clearImage,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          // Display video preview if a video is selected
+          if (_video != null)
+            Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8.0),
                   width: 100,
                   height: 100,
-                  fit: BoxFit.cover,
+                  child: AspectRatio(
+                    aspectRatio: _videoController?.value.aspectRatio ?? 1.0,
+                    child: VideoPlayer(_videoController!),
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 2,
-                right: 2,
-                child: GestureDetector(
-                  onTap: _clearImage,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 18,
+                Positioned(
+                  top: 2,
+                  right: 2,
+                  child: GestureDetector(
+                    onTap: _clearVideo,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
+              ],
+            ),
+
+          Row(
+            children: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.photo),
+                onPressed: _pickImage,
+              ),
+              IconButton(
+                icon: const Icon(Icons.video_library),
+                onPressed: _pickVideo,
+              ),
+              Expanded(
+                child: TextFormField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Nhập tin nhắn...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () => sendMessage(_controller.text),
               ),
             ],
           ),
-        
-        // Display video preview if a video is selected
-        if (_video != null)
-          Stack(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 8.0),
-                width: 100,
-                height: 100,
-                child: AspectRatio(
-                  aspectRatio: _videoController?.value.aspectRatio ?? 1.0,
-                  child: VideoPlayer(_videoController!),
-                ),
-              ),
-              Positioned(
-                top: 2,
-                right: 2,
-                child: GestureDetector(
-                  onTap: _clearVideo,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        
-        Row(
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.photo),
-              onPressed: _pickImage,
-            ),
-            IconButton(
-              icon: const Icon(Icons.video_library),
-              onPressed: _pickVideo,
-            ),
-            Expanded(
-              child: TextFormField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Nhập tin nhắn...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: () => sendMessage(_controller.text),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
+
   Widget _buildProductWidget() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 60),

@@ -5,6 +5,7 @@ import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -78,16 +79,25 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  int calculateTotalPrice() {
-    int total = 0;
-    for (int i = 0; i < (cartModel?.chiTietGioHang.length ?? 0); i++) {
-      if (isChecked[i]) {
-        final item = cartModel!.chiTietGioHang[i];
-        total += item.soLuong * item.donGia;
-      }
+int calculateTotalPrice() {
+  int total = 0;
+  for (int i = 0; i < (cartModel?.chiTietGioHang.length ?? 0); i++) {
+    if (isChecked[i]) {
+      final item = cartModel!.chiTietGioHang[i];
+      total += item.soLuong * item.donGia;
     }
-    return total;
   }
+  return total;
+}
+
+  // New method to format the total price
+String formatTotalPrice(int totalPrice) {
+  return NumberFormat.currency(
+    locale: 'vi_VN', // Use Vietnamese locale
+    symbol: '', // No currency symbol
+    decimalDigits: 0, // No decimal places
+  ).format(totalPrice);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +241,7 @@ class _CartScreenState extends State<CartScreen> {
                                               }).toList(),
                                             ),
                                             const SizedBox(height: 4),
-                                            Text('Đơn giá: ${item.donGia} đ/kg'),
+                                            Text('Đơn giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(item.donGia)} đ/kg'),
                                             const SizedBox(height: 4),
                                             SizedBox(
                                               width: double.infinity,
@@ -334,7 +344,7 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${calculateTotalPrice()} đ',
+                                  '${formatTotalPrice(calculateTotalPrice())} đ',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 20,

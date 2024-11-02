@@ -16,6 +16,7 @@ import 'package:don_ganh_app/widget/FullImageDialog.dart';
 import 'package:don_ganh_app/widget/badge_widget.dart';
 import 'package:don_ganh_app/widget/review_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,11 +46,16 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   bool isButtonHidden = false;
   Timer? _timer;
   String? userId;
+  String? token;
+
+  final TextEditingController _quantityController = TextEditingController();
+  final FocusNode _quantityFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _initializeProductData();
+    _quantityController.text = quantity.toString();
     // donGia = widget.product.donGiaBan;
     // soluong = widget.product.soLuongHienTai;
     // mainImageUrl = widget.product.imageProduct;
@@ -84,17 +90,22 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   }
 
   void plusQuantity() {
-    setState(() {
-      if (quantity < 10) quantity++;
-    });
-  }
+  setState(() {
+    if (quantity < soluong) {
+      quantity++;
+      _quantityController.text = quantity.toString(); // Update the TextField
+    }
+  });
+}
 
-  void minusQuantity() {
-    setState(() {
-      if (quantity > 1) quantity--;
-    });
-  }
-
+void minusQuantity() {
+  setState(() {
+    if (quantity > 1) {
+      quantity--;
+      _quantityController.text = quantity.toString(); // Update the TextField
+    }
+  });
+}
   void _swapImage(int index) {
     setState(() {
       // Swap images without triggering any re-fetch of data
@@ -170,56 +181,72 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     _startHideTimer(); // Khởi động lại bộ đếm
   }
 
- void _onChat() async {
-  final ChatApiService apiService = ChatApiService();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  userId = prefs.getString('userId');
+  void _onChat() async {
+    final ChatApiService apiService = ChatApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    token = prefs.getString('token');
+    
 
-  if (userId != null) {
-    try {
-      // Print user ID for debugging
-      print('User ID: $userId');
+    if (userId != null) {
+      try {
+        // Print user ID for debugging
+        print('User ID: $userId');
+        print(token);
 
-      // Define the receiver ID for the conversation
-      String receiverId = '671fa0042871b08206a87749';
-      
-      // Create a conversation and wait for the response
-      final response = await apiService.createConversation(userId!, receiverId);
+        // Define the receiver ID for the conversation
+        String receiverId = '6725a59421c28ad87ab2b22f';
 
-      if (response != null && response['_id'] != null) {
-        String conversationId = response['_id']; // Retrieve the conversation ID from response
+        // Create a conversation and wait for the response
+        final response =
+            await apiService.createConversation(userId!, receiverId);
 
-        print('conversationId: $conversationId');
+        if (response != null && response['_id'] != null) {
+          String conversationId =
+              response['_id']; // Retrieve the conversation ID from response
 
-        // Navigate to the ChatScreen with the new conversationId
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(
-              title: conversationId,
-              userId: userId!, // Send userId to ChatScreen
-              conversationId: conversationId,
-              receiverData: response['receiver_id'], // Pass receiver data if needed
-              productModel: widget.product,
+          print('conversationId: $conversationId');
+
+          // Navigate to the ChatScreen with the new conversationId
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                token: token!,
+                title: conversationId,
+                userId: userId!, // Send userId to ChatScreen
+                conversationId: conversationId,
+                receiverData:
+                    response['receiver_id'], // Pass receiver data if needed
+                productModel: widget.product,
+              ),
             ),
-          ),
-        );
-      } else {
-        _showSnackBar('Không thể tạo cuộc trò chuyện.');
+          );
+        } else {
+          _showSnackBar('Không thể tạo cuộc trò chuyện.');
+        }
+      } catch (e) {
+        _showSnackBar('Đã xảy ra lỗi: $e');
       }
-    } catch (e) {
-      _showSnackBar('Đã xảy ra lỗi: $e');
     }
   }
-}
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void updateQuantity() {
+    setState(() {
+      quantity = int.tryParse(_quantityController.text) ??
+          1; // Update quantity based on input
+    });
+  }
+
   @override
   void dispose() {
+    _quantityController.dispose();
+    _quantityFocusNode.dispose();
     _timer?.cancel(); // Hủy bộ đếm khi màn hình bị hủy
     super.dispose();
   }
@@ -406,11 +433,13 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('${widget.product.donGiaBan} đ/kg',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            )),
+                        Text(
+                          '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(widget.product.donGiaBan)} đ/kg',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () {
                             setState(() {
@@ -604,12 +633,44 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                           ),
                                                         ),
                                                       ),
-                                                      Text(
-                                                        "$quantity",
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: TextStyle(
-                                                            fontSize: 16),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(context)
+                                                              .requestFocus(
+                                                                  _quantityFocusNode); // Request focus on the quantity input
+                                                        },
+                                                        child: SizedBox(
+                                                          width: 50,
+                                                          child: TextField(
+                                                            controller:
+                                                                _quantityController,
+                                                            focusNode:
+                                                                _quantityFocusNode,
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .number,
+                                                            textAlign: TextAlign
+                                                                .center, // Center the text horizontally
+                                                            style: TextStyle(
+                                                                fontSize: 16),
+                                                            decoration:
+                                                                InputDecoration(
+                                                              border: InputBorder
+                                                                  .none, // Removes the underline
+                                                              contentPadding:
+                                                                  EdgeInsets.only(
+                                                                      bottom:
+                                                                          17.0), // Adjusts vertical padding to center text
+                                                            ),
+                                                            onSubmitted:
+                                                                (value) {
+                                                              updateQuantity(); // Update quantity when input is submitted
+                                                              FocusScope.of(
+                                                                      context)
+                                                                  .unfocus(); // Dismiss the keyboard
+                                                            },
+                                                          ),
+                                                        ),
                                                       ),
                                                       Expanded(
                                                         child: Align(

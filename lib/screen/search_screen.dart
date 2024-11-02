@@ -29,7 +29,9 @@ class _SearchScreenState extends State<SearchScreen> {
       final results = await searchSanPham(tenSanPham);
       setState(() {
         // Convert each result to ProductModel
-        sanphams = results.map<ProductModel>((item) => ProductModel.fromJSON(item)).toList();
+        sanphams = results
+            .map<ProductModel>((item) => ProductModel.fromJSON(item))
+            .toList();
         filteredSanphams = sanphams; // Initialize filtered list
       });
     } catch (e) {
@@ -93,9 +95,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   onTap: () {
                     setState(() {
-                      searchTerm = keyword; // Set the search term to the selected keyword
+                      searchTerm =
+                          keyword; // Set the search term to the selected keyword
                     });
-                    fetchSanPhams(keyword); // Fetch products based on the selected keyword
+                    fetchSanPhams(
+                        keyword); // Fetch products based on the selected keyword
                   },
                 ),
               ),
@@ -138,7 +142,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
-                      searchTerm = value.trim(); // Trim whitespace from search term
+                      searchTerm =
+                          value.trim(); // Trim whitespace from search term
                     });
                     if (searchTerm.isNotEmpty) {
                       fetchSanPhams(searchTerm);
@@ -151,8 +156,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                   decoration: InputDecoration(
                     prefixIcon: IconButton(
-                      icon: const Icon(Icons.search, color: Color.fromRGBO(131, 183, 60, 1), size: 30,),
-                      onPressed: navigateToResults, // Call navigateToResults when search icon is pressed
+                      icon: const Icon(
+                        Icons.search,
+                        color: Color.fromRGBO(131, 183, 60, 1),
+                        size: 30,
+                      ),
+                      onPressed:
+                          navigateToResults, // Call navigateToResults when search icon is pressed
                     ),
                     hintText: "Tìm kiếm sản phẩm",
                     border: OutlineInputBorder(
@@ -199,13 +209,16 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: ListView.builder(
                           itemCount: filteredSanphams.length,
                           itemBuilder: (context, index) {
-                            final product = filteredSanphams[index]; // Get the ProductModel instance
+                            final product = filteredSanphams[
+                                index]; // Get the ProductModel instance
                             return GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DetailProductScreen(product: product), // Pass the product instance
+                                    builder: (context) => DetailProductScreen(
+                                        product:
+                                            product), // Pass the product instance
                                   ),
                                 );
                               },
@@ -218,18 +231,31 @@ class _SearchScreenState extends State<SearchScreen> {
                                       child: product.imageProduct.isNotEmpty
                                           ? Image.network(
                                               product.imageProduct,
-                                              width: 50,
-                                              height: 50,
                                               fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (BuildContext context,
+                                                      Object exception,
+                                                      StackTrace? stackTrace) {
+                                                return Image.asset(
+                                                  'lib/assets/avt2.jpg', // Ensure this path is correct
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
                                             )
                                           : const Icon(Icons.image, size: 50),
                                     ),
                                     title: Text(product.nameProduct),
                                     subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text("DonGiaBan: ${product.donGiaBan}"),
-                                        Text("MoTa: ${product.moTa}"),
+                                        Text("Đơn giá bán: ${product.donGiaBan}"),
+                                        Text(
+                                          "Mô tả: ${product.moTa}",
+                                          maxLines: 2, // Limit to one line
+                                          overflow: TextOverflow
+                                              .ellipsis, // Show ellipsis when overflowed
+                                        ),
                                       ],
                                     ),
                                   ),
