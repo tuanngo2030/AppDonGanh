@@ -112,29 +112,37 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
+                                  Column(
                                     children: [
-                                      Icon(Icons.local_offer,
-                                          color: isEligible
-                                              ? const Color.fromRGBO(
-                                                  41, 87, 35, 1)
-                                              : Colors.grey),
-                                      const SizedBox(width: 8.0),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.local_offer,
+                                              color: isEligible
+                                                  ? const Color.fromRGBO(
+                                                      41, 87, 35, 1)
+                                                  : Colors.grey),
+                                          const SizedBox(width: 8.0),
+                                          Text(
+                                            'Giảm ngay $formattedGiaTriđ', // Use formattedGiaTri here
+                                            style: TextStyle(
+                                                color: isEligible
+                                                    ? Colors.black
+                                                    : Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
                                       Text(
-                                        'Giảm ngay $formattedGiaTriđ', // Use formattedGiaTri here
+                                        'Áp dụng tới: ${DateFormat('dd/MM/yyyy').format(voucher.ngayKetThuc)}',
                                         style: TextStyle(
-                                            color: isEligible
-                                                ? Colors.black
-                                                : Colors.grey),
+                                          color: isEligible
+                                              ? Colors.grey
+                                              : Colors.grey[600],
+                                        ),
                                       ),
                                     ],
-                                  ),
-                                  Text(
-                                    'Áp dụng tới: ${voucher.ngayKetThuc}',
-                                    style: TextStyle(
-                                        color: isEligible
-                                            ? Colors.grey
-                                            : Colors.grey[600]),
                                   ),
                                 ],
                               ),

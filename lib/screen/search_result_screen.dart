@@ -73,14 +73,19 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           children: [
                             // Product Image
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                sanpham['HinhSanPham'] ?? '',
-                                width: double.infinity,
-                                height: 150,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  sanpham['HinhSanPham'] ?? '',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (BuildContext context,
+                                      Object exception,
+                                      StackTrace? stackTrace) {
+                                    return Image.asset(
+                                      'lib/assets/avt2.jpg', // Ensure this path is correct
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                )),
                             // Discount Badge
                             if (sanpham['PhanTramGiamGia'] != null)
                               Positioned(
