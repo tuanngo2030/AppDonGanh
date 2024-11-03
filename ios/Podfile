@@ -48,3 +48,4 @@ post_install do |installer|
   end
 end
 
+ENV['IMP_HOT_RELOAD_DISABLED'] = 'YES'
