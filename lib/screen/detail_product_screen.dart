@@ -51,6 +51,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   final TextEditingController _quantityController = TextEditingController();
   final FocusNode _quantityFocusNode = FocusNode();
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -90,22 +92,23 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   }
 
   void plusQuantity() {
-  setState(() {
-    if (quantity < soluong) {
-      quantity++;
-      _quantityController.text = quantity.toString(); // Update the TextField
-    }
-  });
-}
+    setState(() {
+      if (quantity < soluong) {
+        quantity++;
+        _quantityController.text = quantity.toString(); // Update the TextField
+      }
+    });
+  }
 
-void minusQuantity() {
-  setState(() {
-    if (quantity > 1) {
-      quantity--;
-      _quantityController.text = quantity.toString(); // Update the TextField
-    }
-  });
-}
+  void minusQuantity() {
+    setState(() {
+      if (quantity > 1) {
+        quantity--;
+        _quantityController.text = quantity.toString(); // Update the TextField
+      }
+    });
+  }
+
   void _swapImage(int index) {
     setState(() {
       // Swap images without triggering any re-fetch of data
@@ -123,6 +126,10 @@ void minusQuantity() {
     if (userId == null) {
       throw Exception('User ID not found in SharedPreferences');
     }
+
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await CartApiService().addToCart(userId, variantId, quantity, donGia);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,6 +140,10 @@ void minusQuantity() {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
+
+      setState(() {
+        _isLoading = false;
+      });
 
       Navigator.of(context).pop();
     }
@@ -186,7 +197,6 @@ void minusQuantity() {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
     token = prefs.getString('token');
-    
 
     if (userId != null) {
       try {
@@ -701,7 +711,8 @@ void minusQuantity() {
                                           child: Center(
                                             child: ElevatedButton(
                                               onPressed:
-                                                  selectedVariantId.isEmpty
+                                                  selectedVariantId.isEmpty ||
+                                                          _isLoading
                                                       ? null
                                                       : () {
                                                           addToCart(
@@ -710,11 +721,12 @@ void minusQuantity() {
                                                         },
                                               style: ElevatedButton.styleFrom(
                                                 minimumSize:
-                                                    Size.fromHeight(60),
+                                                    const Size.fromHeight(60),
                                                 backgroundColor:
-                                                    selectedVariantId.isEmpty
+                                                    selectedVariantId.isEmpty ||
+                                                            _isLoading
                                                         ? Colors.grey
-                                                        : Color.fromRGBO(
+                                                        : const Color.fromRGBO(
                                                             41, 87, 35, 1),
                                                 foregroundColor: Colors.white,
                                                 shape: RoundedRectangleBorder(
@@ -722,10 +734,18 @@ void minusQuantity() {
                                                       BorderRadius.circular(0),
                                                 ),
                                               ),
-                                              child: Text('Thêm Vào Giỏ Hàng'),
+                                              child: _isLoading
+                                                  ? const CircularProgressIndicator(
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                              Colors.white),
+                                                    )
+                                                  : const Text(
+                                                      'Thêm Vào Giỏ Hàng'),
                                             ),
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
                                   );

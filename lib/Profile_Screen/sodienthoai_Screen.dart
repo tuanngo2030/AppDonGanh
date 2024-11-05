@@ -13,9 +13,10 @@ class SodienthoaiScreen extends StatefulWidget {
 class _SodienthoaiScreen extends State<SodienthoaiScreen> {
   final UserApiService _apiService = UserApiService();
   String _userId = '';
-  String _soDienThoai = '';  // Change to String
+  String _soDienThoai = ''; // Change to String
   final TextEditingController _soDienThoaiController = TextEditingController();
   String? _selectedSdt;
+  bool _isLoading = false; // Loading state variable
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -33,8 +34,10 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
       if (user != null) {
         setState(() {
           _userId = storedUserId;
-          _soDienThoai = user.soDienThoai?.toString() ?? '';  // Store phone number as string
-          _soDienThoaiController.text = _soDienThoai;  // Set the controller to show the phone number
+          _soDienThoai = user.soDienThoai?.toString() ??
+              ''; // Store phone number as string
+          _soDienThoaiController.text =
+              _soDienThoai; // Set the controller to show the phone number
         });
       } else {
         print('User details not found.');
@@ -46,31 +49,38 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
 
   Future<void> _updateSoDienThoai(String newSdt) async {
     if (_userId.isNotEmpty) {
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+
       bool success = await _apiService.updateUserInformation(
           _userId, 'soDienThoai', newSdt);
 
       if (success) {
         setState(() {
-          _soDienThoai = newSdt;  // Update the phone number in the UI
+          _soDienThoai = newSdt; // Update the phone number in the UI
         });
         // Save the new phone number to SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('soDienThoai', newSdt);
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật số điện thoại thành công')));
+            const SnackBar(content: Text('Cập nhật số điện thoại thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pop(context);
+          Navigator.pop(context);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật số điện thoại thất bại')));
+            const SnackBar(content: Text('Cập nhật số điện thoại thất bại')));
       }
+
+      setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
     }
   }
 
   String? _validateSoDienThoai(String? value) {
-    const pattern =
-        r'(^(?:[+0]9)?[0-9]{10,12}$)';
+    const pattern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
     final regex = RegExp(pattern);
     if (value == null || value.isEmpty) {
       return 'Vui lòng nhập số điện thoại';
@@ -85,10 +95,11 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
     if (number == null) {
       return 'Số điện thoại phải là số';
     }
-        if (!regex.hasMatch(value))
-      return 'lỗi';
-    else
-    return null;
+    if (!regex.hasMatch(value)) {
+      return 'Lỗi';
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -105,13 +116,15 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title: Text(
+        title: const Text(
           'Hồ sơ',
-                 style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -136,30 +149,40 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
                 decoration: InputDecoration(
                   labelText: 'Nhập số điện thoại mới',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0), // Rounded corners
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderRadius:
+                        BorderRadius.circular(25.0), // Rounded corners
+                    borderSide: const BorderSide(color: Colors.grey),
                   ),
                   filled: true,
                   fillColor: Colors.white,
                   hintText: 'Nhập số điện thoại của bạn',
                   counterText: 'Tối đa 10 ký tự',
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15, horizontal: 20), // Padding inside the field
                 ),
                 keyboardType: TextInputType.number,
-                maxLength: 10,  // Restrict to 10 digits
+                maxLength: 10, // Restrict to 10 digits
               ),
               const SizedBox(height: 20),
               SizedBox(
-                width: double.infinity,  // Full width button
-                height: 50, 
+                width: double.infinity, // Full width button
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() == true) {
-                      _updateSoDienThoai(_selectedSdt!);
-                    }
-                  },
-                  child: const Text('Cập nhật Số điện thoại', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                  onPressed: _isLoading // Disable button when loading
+                      ? null
+                      : () {
+                          if (_formKey.currentState?.validate() == true) {
+                            _updateSoDienThoai(_selectedSdt!);
+                          }
+                        },
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text('Cập nhật Số điện thoại',
+                          style:
+                              TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
                 ),
               ),
             ],

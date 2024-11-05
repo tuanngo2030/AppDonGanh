@@ -17,43 +17,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _apiService = ApiService();
   bool _agreedToTerms = false;
+   bool _isLoading = false;
 
   void _register() async {
-  if (!_agreedToTerms) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
+      );
+      return;
+    }
+
+    setState(() {
+    _isLoading = true;
+  });
+
+
+    NguoiDung newUser = NguoiDung(
+      tenNguoiDung: _usernameController.text,
+      gmail: _emailController.text,
+      matKhau: _passwordController.text,
+      soDienThoai: _phoneController.text,
+      ngayTao: DateTime.now(),
+      // Thêm các trường khác nếu cần thiết
     );
-    return;
+
+    bool isSuccess = await _apiService.registerUser(newUser);
+
+     setState(() {
+    _isLoading = false;
+  });
+
+
+    if (isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng ký thành công')),
+      );
+      Navigator.pushNamed(
+        context,
+        '/xacminhtk',
+        arguments: _emailController.text,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng ký thất bại')),
+      );
+    }
   }
-
-  NguoiDung newUser = NguoiDung(
-    tenNguoiDung: _usernameController.text,
-    gmail: _emailController.text,
-    matKhau: _passwordController.text,
-    soDienThoai: _phoneController.text,
-    ngayTao: DateTime.now(),
-    // Thêm các trường khác nếu cần thiết
-  );
-
-  bool isSuccess = await _apiService.registerUser(newUser);
-
-  if (isSuccess) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đăng ký thành công')),
-    );
-Navigator.pushNamed(
-  context,
-  '/xacminhtk',
-   arguments: _emailController.text,
-);
-
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đăng ký thất bại')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +227,7 @@ Navigator.pushNamed(
             Padding(
               padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
               child: ElevatedButton(
-                onPressed: _register,
+                onPressed: _isLoading ? null : _register,
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(395, 55),
                   backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
@@ -228,10 +238,15 @@ Navigator.pushNamed(
                   padding: const EdgeInsets.all(10),
                   elevation: 5,
                 ),
-                child: const Text(
-                  "Đăng ký",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text(
+                        "Đăng ký",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
               ),
             ),
             Padding(
@@ -280,9 +295,7 @@ Navigator.pushNamed(
                         child: Image.asset('lib/assets/fb_icon.png'),
                       )),
                   InkWell(
-                      onTap: () async {
-                      
-                      },
+                      onTap: () async {},
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         child: Image.asset('lib/assets/gg_icon.png'),
@@ -308,7 +321,8 @@ Navigator.pushNamed(
                     children: [
                       const Text(
                         "Bạn đã có tài khoản ? ",
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                       GestureDetector(
                         onTap: () {

@@ -443,43 +443,42 @@ class _PayScreen2State extends State<PayScreen2> {
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () async {
-                final paymentInfo =
-                    Provider.of<PaymentInfo>(context, listen: false);
-                String hoadonId = paymentInfo.order_id;
-                String transactionId = '151';
-                String transactionIdCod = '111';
-                if (selectedPaymentMethod == 'Qr') {
-                  // Điều hướng sang PaymentMethodsScreen khi chọn "Tài khoản ngân hàng"
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => PaymentMethodsScreen(),
-                  //   ),
-                  // ).then((selectedId) {
-                  //   if (selectedId != null) {
-                  //     setState(() {
-                  //       this.selectedPaymentMethod = selectedId.toString(); // Lưu ID đã chọn
-                  //     });
-                  //   }
-                  // });
-                  // final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-                  // String hoadonId = paymentInfo.order_id;
-                  // String transactionId = '151';
+              onPressed: _isProcessing
+                  ? null
+                  : () async {
+                      final paymentInfo =
+                          Provider.of<PaymentInfo>(context, listen: false);
+                      String hoadonId = paymentInfo.order_id;
+                      String transactionId = '151';
+                      String transactionIdCod = '111';
 
-                  await _updateTransaction(hoadonId, transactionId, assetPath,
-                      paymentDetails, paymentSubtitle);
-                } else if (selectedPaymentMethod == 'COD') {
-                  // Nếu chọn COD, gọi API riêng
-                  await _updateTransactionCOD(hoadonId, transactionIdCod,
-                      assetPath, paymentDetails, paymentSubtitle);
-                }
-              },
+                      if (selectedPaymentMethod == 'Qr') {
+                        await _updateTransaction(
+                          hoadonId,
+                          transactionId,
+                          assetPath,
+                          paymentDetails,
+                          paymentSubtitle,
+                        );
+                      } else if (selectedPaymentMethod == 'COD') {
+                        await _updateTransactionCOD(
+                          hoadonId,
+                          transactionIdCod,
+                          assetPath,
+                          paymentDetails,
+                          paymentSubtitle,
+                        );
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Tiếp tục'),
+              child: _isProcessing
+                  ? const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
+                  : const Text('Tiếp tục'),
             ),
           ),
         )
