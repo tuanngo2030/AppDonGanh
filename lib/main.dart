@@ -1,3 +1,9 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:don_ganh_app/Profile_Screen/bao_mat.dart';
 import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
 import 'package:don_ganh_app/Profile_Screen/gioitinh_screen.dart';
@@ -10,8 +16,6 @@ import 'package:don_ganh_app/Profile_Screen/sodienthoai_Screen.dart';
 import 'package:don_ganh_app/Profile_Screen/tenScreen.dart';
 import 'package:don_ganh_app/Profile_Screen/them_the_ngan_hang.dart';
 import 'package:don_ganh_app/forgotpassword_screen/sendotpgmail.dart';
-import 'package:don_ganh_app/models/paymentInfo.dart';
-import 'package:don_ganh_app/reponsive.dart';
 import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:don_ganh_app/screen/chat_screen.dart';
 import 'package:don_ganh_app/screen/creat_blog_screen.dart';
@@ -26,7 +30,6 @@ import 'package:don_ganh_app/screen/setting_screen.dart';
 import 'package:don_ganh_app/screen/xac_minh_tk_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/bottomnavThumua_screen.dart';
 import 'package:don_ganh_app/widget/web_view.dart';
-import 'package:flutter/material.dart';
 import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/ban_la.dart';
@@ -39,13 +42,18 @@ import 'package:don_ganh_app/forgotpassword_screen/new_password.dart';
 import 'package:don_ganh_app/forgotpassword_screen/otp_screen.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
 import 'package:don_ganh_app/screen/trang_xin_chao.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   await dotenv.load(fileName: "lib/.env");
-  runApp(ChangeNotifierProvider(
-      create: (context) => PaymentInfo(), child: const MyApp()));
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => ChangeNotifierProvider(
+        create: (context) => PaymentInfo(),
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -55,11 +63,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // home: ReponsiveScreen(
-      //   Mobile: CreatBlogScreen(),
-      //   Tablet: SettingScreen(),
-      //   Desktop: RegisterScreen()
-      // ),
       home: const LoginScreen(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
@@ -72,9 +75,6 @@ class MyApp extends StatelessWidget {
         '/manageraccount_screen': (context_) => ManageraccountScreen(),
         '/bottomnavigation': (context_) => BottomnavigationMenu(),
         '/cart_screen': (context_) => const CartScreen(),
-        '/trang_xin_chao': (context) => const TrangXinChao(),
-        '/bottom': (context) => BottomnavigationMenu(),
-        '/manageraccount_screen': (context) => ManageraccountScreen(),
         '/ProfileScreen': (context) => ProfileScreen(),
         '/ten': (context) => const Tenscreen(),
         '/NgaySinh': (context) => const NgaySinh(),
@@ -82,13 +82,9 @@ class MyApp extends StatelessWidget {
         '/gmail': (context) => const Gmailscreen(),
         '/diachiScreen': (context) => const AddressScreen(),
         '/gioitinh': (context) => const GioitinhScreen(),
-        // '/xacminhtk': (context) => XacMinhTkScreen(email: ,),
         '/oder_screen': (context) => const OderScreen(),
-        // '/oder_status_screen': (context) => OderStatusScreen(),
         '/pay_screen': (context) => const PayProcessScreen(),
         '/bottomThumuan': (context) => const BottomnavthumuaScreen(),
-        // '/chatscreen': (context) => const ChatScreen(title: 'Chat',),
-        // '/oder_review_screen': (context) => const OrderReviewScreen(),
         '/setting_screen': (context) => const SettingScreen(),
         '/search_screen': (context) => const SearchScreen(),
         '/creat_blog_screen': (context) => const CreatBlogScreen(),
@@ -97,8 +93,7 @@ class MyApp extends StatelessWidget {
         '/CardLinkScreen': (context) => CardLinkScreen(),
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
-        '/Resetpassword':(context)=>const Resetpassword(),
-        //  '/KhuyenMaiScreen':(context)=>const KhuyenMaiScreen(),
+        '/Resetpassword': (context) => const Resetpassword(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
