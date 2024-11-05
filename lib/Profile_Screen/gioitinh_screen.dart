@@ -15,6 +15,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
   String _userId = '';
   String _gioiTinh = 'Chưa cập nhật'; // Giá trị mặc định
   String? _selectedGioiTinh; // Giá trị giới tính mới được chọn
+  bool _isUpdatingGender = false;
 
   @override
   void initState() {
@@ -43,23 +44,32 @@ class _GioitinhScreen extends State<GioitinhScreen> {
 
   Future<void> _updateGioiTinh(String newGioiTinh) async {
     if (_userId.isNotEmpty) {
-      bool success = await _apiService.updateUserInformation(_userId, 'GioiTinh', newGioiTinh);
-      
+      bool success = await _apiService.updateUserInformation(
+          _userId, 'GioiTinh', newGioiTinh);
+      setState(() {
+        _gioiTinh = newGioiTinh;
+      });
+
       if (success) {
-        
         setState(() {
           _gioiTinh = newGioiTinh;
         });
         // Lưu giới tính mới vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('gioiTinh', newGioiTinh);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thành công')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cập nhật giới tính thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-             Navigator.pop(context);
-          });
+          Navigator.pop(context);
+        });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cập nhật giới tính thất bại')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cập nhật giới tính thất bại')));
       }
+
+      setState(() {
+        _isUpdatingGender = false;
+      });
     }
   }
 
@@ -83,7 +93,9 @@ class _GioitinhScreen extends State<GioitinhScreen> {
         ),
         title: const Text(
           'Hồ sơ',
-                 style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -96,10 +108,10 @@ class _GioitinhScreen extends State<GioitinhScreen> {
           children: [
             Row(
               children: [
-            Text('Giới Tính: ', style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
+                const Text('Giới Tính: ', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 20),
                 DropdownButton<String>(
-                  hint:Text('$_gioiTinh', style: const TextStyle(fontSize: 16)),
+                  hint: Text(_gioiTinh, style: const TextStyle(fontSize: 16)),
                   value: _selectedGioiTinh,
                   items: ['Nam', 'Nữ', 'Khác'].map((String value) {
                     return DropdownMenuItem<String>(
@@ -116,16 +128,31 @@ class _GioitinhScreen extends State<GioitinhScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            SizedBox(
-                   width: double.infinity,  // Full width button
-                height: 50, 
-              child: ElevatedButton(
-                onPressed: _selectedGioiTinh != null
-                    ? () => _updateGioiTinh(_selectedGioiTinh!)
-                    : null, // Nút chỉ có thể nhấn khi người dùng chọn giới tính
-                child: const Text('Cập nhật giới tính', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity, // Full-width button
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _selectedGioiTinh != null && !_isUpdatingGender
+                      ? () => _updateGioiTinh(_selectedGioiTinh!)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: _isUpdatingGender
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text(
+                          'Cập nhật giới tính',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
               ),
-            ),
+            )
           ],
         ),
       ),

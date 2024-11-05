@@ -16,6 +16,7 @@ class _NgaySinh extends State<NgaySinh> {
   String _userId = '';
   String _ngaySinh = 'Chưa cập nhật';
   DateTime? _selectedDate;
+  bool _isLoading = false; // Loading state variable
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -61,24 +62,31 @@ class _NgaySinh extends State<NgaySinh> {
 
   Future<void> _updateNgaySinh() async {
     if (_userId.isNotEmpty && _selectedDate != null) {
-      bool success = await _apiService.updateUserInformation(
-          _userId, 'ngaySinh', _ngaySinh);
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+
+      bool success = await _apiService.updateUserInformation(_userId, 'ngaySinh', _ngaySinh);
 
       if (success) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('ngaySinh', _ngaySinh);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cập nhật ngày sinh thành công')),
+          const SnackBar(content: Text('Cập nhật ngày sinh thành công')),
         );
         Future.delayed(const Duration(seconds: 1), () {
           Navigator.pop(context);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cập nhật ngày sinh thất bại')),
+          const SnackBar(content: Text('Cập nhật ngày sinh thất bại')),
         );
       }
+
+      setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
     }
   }
 
@@ -96,13 +104,13 @@ class _NgaySinh extends State<NgaySinh> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title: Text(
+        title: const Text(
           'Hồ sơ',
-                style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -115,32 +123,41 @@ class _NgaySinh extends State<NgaySinh> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Ngày sinh: $_ngaySinh', style: TextStyle(fontSize: 16)),
+              Text('Ngày sinh: $_ngaySinh', style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 20),
-              
+
               // Button for selecting date
               SizedBox(
                 width: double.infinity,  // Full width button
                 height: 50,  // Height of the button
                 child: ElevatedButton(
                   onPressed: () => _pickDate(context),
-                  child: const Text('Chọn ngày sinh',
-                       style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                  child: const Text(
+                    'Chọn ngày sinh',
+                    style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
 
-              // Button for updating date of birth
+              // Button for updating date of birth with loading indicator
               SizedBox(
                 width: double.infinity,  // Full width button
                 height: 50,  // Height of the button
                 child: ElevatedButton(
-                  onPressed: _updateNgaySinh,
-                  child: const Text('Cập nhật Ngày sinh',
-                   style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                  onPressed: _isLoading ? null : _updateNgaySinh,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text(
+                          'Cập nhật Ngày sinh',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ],
