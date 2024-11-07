@@ -1,6 +1,7 @@
 import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -18,6 +19,7 @@ class _PayScreen3State extends State<PayScreen3> {
   bool isOrderExpired = false;
 
   late final WebViewController _webViewController;
+  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
   @override
   void initState() {
@@ -171,9 +173,6 @@ class _PayScreen3State extends State<PayScreen3> {
               ),
             ),
           ),
-
-          
-
           ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/bottomnavigation');
@@ -240,6 +239,36 @@ class _PayScreen3State extends State<PayScreen3> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Giá trị đơn hàng:',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                         Text(
+                          currencyFormat.format(paymentInfo.totalPrice),
+                          style: const TextStyle(fontSize: 14),
+                        )
+                      ],
+                    ),
+
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Giá trị khuyến mãi:',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                         Text(
+                          currencyFormat.format(paymentInfo.giaTriGiam),
+                          style: const TextStyle(fontSize: 14),
+                        )
+                      ],
+                    ),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -249,25 +278,12 @@ class _PayScreen3State extends State<PayScreen3> {
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${paymentInfo.totalPrice} đ',
+                          currencyFormat.format(paymentInfo.totalPrice - paymentInfo.giaTriGiam),
                           style: const TextStyle(fontSize: 14),
-                        ),
+                        )
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Giá trị đơn hàng:',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${paymentInfo.totalPrice} đ',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
+                   
                   ],
                 ),
               ),
@@ -287,9 +303,6 @@ class _PayScreen3State extends State<PayScreen3> {
                 child: WebViewWidget(controller: _webViewController),
               ),
             ),
-
-          // Spacer để đẩy button xuống dưới
-          const Spacer(),
 
           Padding(
             padding:

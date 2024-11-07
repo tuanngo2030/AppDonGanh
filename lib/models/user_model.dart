@@ -17,6 +17,7 @@ class NguoiDung {
   final bool? isVerified;
   final String? googleId;
   final String? facebookId;
+  final String? IDYeuThich;
 
   NguoiDung({
     this.id,
@@ -37,6 +38,7 @@ class NguoiDung {
     this.isVerified,
     this.googleId,
     this.facebookId,
+    this.IDYeuThich,
   });
 
   // Convert JSON to NguoiDung
@@ -62,6 +64,7 @@ class NguoiDung {
       isVerified: json['isVerified'] != null ? json['isVerified'] as bool : false,
       googleId: json['googleId'] as String?,
       facebookId: json['facebookId'] as String?,
+      IDYeuThich: json['IDYeuThich'] as String?
     );
   }
 
@@ -86,6 +89,7 @@ class NguoiDung {
       'isVerified': isVerified,
       'googleId': googleId,
       'facebookId': facebookId,
+      'IDYeuThich' : IDYeuThich
     };
   }
 }

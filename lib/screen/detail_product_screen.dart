@@ -23,7 +23,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailProductScreen extends StatefulWidget {
   final ProductModel product;
-  const DetailProductScreen({super.key, required this.product});
+  final bool isfavorited;
+  const DetailProductScreen(
+      {super.key, required this.product, required this.isfavorited});
 
   @override
   State<DetailProductScreen> createState() => _DetailProductScreenState();
@@ -141,11 +143,12 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
 
-      setState(() {
-        _isLoading = false;
-      });
-
       Navigator.of(context).pop();
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading indicator
+        print("Loading stopped: $_isLoading");
+      });
     }
   }
 
@@ -205,7 +208,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         print(token);
 
         // Define the receiver ID for the conversation
-        String receiverId = '6725a59421c28ad87ab2b22f';
+        String receiverId = '671fa0042871b08206a87749';
 
         // Create a conversation and wait for the response
         final response =
@@ -343,26 +346,37 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                             ),
                           ),
                           Positioned(
-                              top: 15,
-                              right: 10,
-                              child: GestureDetector(
-                                onTap: () {
-                                  print("Add to favorites");
-                                },
-                                child: Container(
-                                  height: 35,
-                                  width: 35,
-                                  decoration: BoxDecoration(
-                                      color: Color.fromRGBO(241, 247, 234, 1),
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.favorite_border_outlined,
-                                      color: Color.fromRGBO(142, 198, 65, 1),
-                                    ),
+                            top: 15,
+                            right: 10,
+                            child: GestureDetector(
+                              onTap: () {
+                                print("Add to favorites");
+                                // You can toggle the isfavorited value here if needed.
+                                // For now, it is not updating because it is passed as a parameter.
+                              },
+                              child: Container(
+                                height: 35,
+                                width: 35,
+                                decoration: BoxDecoration(
+                                  color: widget.isfavorited
+                                      ? Colors.red
+                                      : const Color.fromRGBO(241, 247, 234, 1),
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    // Check if the product is favorited and set the icon color accordingly
+                                    widget.isfavorited
+                                        ? Icons.favorite
+                                        : Icons.favorite_border_outlined,
+                                    color: widget.isfavorited
+                                        ? Colors.white
+                                        : const Color.fromRGBO(142, 198, 65, 1),
                                   ),
                                 ),
-                              )),
+                              ),
+                            ),
+                          ),
                           Positioned(
                             bottom: 10,
                             child: Container(

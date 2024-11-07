@@ -25,8 +25,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> fetchSanPhams(String tenSanPham) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
     try {
-      final results = await searchSanPham(tenSanPham);
+      final results = await searchSanPham(tenSanPham, userId: userId!, yeuthichId: '67299b5b3318cd90d77a43b6');
       setState(() {
         // Convert each result to ProductModel
         sanphams = results
@@ -218,7 +221,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => DetailProductScreen(
                                         product:
-                                            product), // Pass the product instance
+                                            product, isfavorited: product.isFavorited,), // Pass the product instance
                                   ),
                                 );
                               },
