@@ -1,4 +1,5 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:don_ganh_app/screen/checkbot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -63,7 +64,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -94,6 +95,7 @@ class MyApp extends StatelessWidget {
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
         '/Resetpassword': (context) => const Resetpassword(),
+        // '/Checkbot': (context) => const Checkbot(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {
