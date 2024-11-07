@@ -55,7 +55,9 @@ class _PayScreen2State extends State<PayScreen2> {
           assetPath: assetPath,
           title: title,
           subtitle: subtitle,
-          payment_url: updatedOrder.payment_url);
+          payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam
+        );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
@@ -95,7 +97,9 @@ class _PayScreen2State extends State<PayScreen2> {
           assetPath: assetPath,
           title: title,
           subtitle: subtitle,
-          payment_url: updatedOrder.payment_url);
+          payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam
+        );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
@@ -214,31 +218,6 @@ class _PayScreen2State extends State<PayScreen2> {
                   ? buildPaymentMethodsList()
                   : buildSelectedMethodDetails(),
 
-              // Nút Tiếp tục
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-              //   child: SizedBox(
-              //     width: double.infinity,
-              //     height: 50,
-              //     child: ElevatedButton(
-              //       onPressed: widget.nextStep,
-              //       style: ElevatedButton.styleFrom(
-              //         backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
-              //         shape: RoundedRectangleBorder(
-              //           borderRadius: BorderRadius.circular(8),
-              //         ),
-              //       ),
-              //       child: const Text(
-              //         'Tiếp tục',
-              //         style: TextStyle(
-              //           color: Colors.white,
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -409,21 +388,37 @@ class _PayScreen2State extends State<PayScreen2> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Tổng giá trị thanh toán',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                currencyFormat
-                    .format(paymentInfo.totalPrice), // Format total price
-                style: const TextStyle(fontSize: 14),
-              ),
-              const Text(
                 'Giá trị đơn hàng',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 14),
+                  children: [
+                    TextSpan(
+                      text: currencyFormat.format(paymentInfo.totalPrice),
+                      style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                    ),
+                    const TextSpan(
+                      text: ' - ', // Add separator between the two values
+                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                    ),
+                    TextSpan(
+                      text: currencyFormat.format(giaTriGiam),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors
+                              .red), // Style the discount value differently
+                    ),
+                  ],
+                ),
+              ),
+              const Text(
+                'Giá trị khuyến mãi',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               Text(
-                currencyFormat
-                    .format(paymentInfo.totalPrice), // Format order value
+                currencyFormat.format(giaTriGiam), // Format order value
                 style: const TextStyle(fontSize: 14),
               ),
               const Text(
@@ -433,6 +428,15 @@ class _PayScreen2State extends State<PayScreen2> {
               Text(
                 currencyFormat
                     .format(paymentInfo.totalPrice), // Format service fee
+                style: const TextStyle(fontSize: 14),
+              ),
+              const Text(
+                'Tổng giá trị thanh toán',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                currencyFormat.format(
+                    paymentInfo.totalPrice - giaTriGiam), // Format total price
                 style: const TextStyle(fontSize: 14),
               ),
             ],

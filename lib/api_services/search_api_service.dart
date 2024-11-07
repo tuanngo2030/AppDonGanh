@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-Future<List<dynamic>> searchSanPham(String tenSanPham) async {
-  final uri = Uri.parse('${dotenv.env['API_URL']}/sanpham/searchSanPham?TenSanPham=$tenSanPham');
+Future<List<dynamic>> searchSanPham(String tenSanPham, {required String userId, required String yeuthichId}) async {
+  final uri = Uri.parse('${dotenv.env['API_URL']}/sanpham/searchSanPham?TenSanPham=$tenSanPham&userId=$userId&yeuThichId=$yeuthichId');
   try {
     final response = await http.get(uri);
 

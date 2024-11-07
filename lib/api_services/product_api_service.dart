@@ -30,13 +30,15 @@ class ProductApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getProducts(int page, {int limit = 6}) async {
-    final response = await http.get(Uri.parse('${dotenv.env['API_URL']}/sanpham/getlistPageSanPham/$page?limit=$limit'));
+  Future<Map<String, dynamic>> getProducts(int page, {int limit = 6, required String userId, required String yeuthichId}) async {
+  final response = await http.get(
+    Uri.parse('${dotenv.env['API_URL']}/sanpham/getlistPageSanPham/$page?limit=$limit?&userId=$userId&yeuThichId=$yeuthichId')
+  );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load products');
-    }
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load products');
   }
+}
 }

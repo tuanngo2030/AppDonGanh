@@ -18,6 +18,7 @@ class ProductModel {
   final String IDDanhMuc;
   final String IDDanhMucCon;
   final List<hinhBoSung> ImgBoSung;
+  bool isFavorited;
 
   ProductModel(
       {
@@ -37,7 +38,9 @@ class ProductModel {
       required this.listThuocTinh,
       required this.IDDanhMuc,
       required this.IDDanhMucCon,
-      required this.ImgBoSung});
+      required this.ImgBoSung,
+      required this.isFavorited,
+    });
 
        // Hàm kiểm tra URL hợp lệ
   static bool isValidUrl(String url) {
@@ -84,8 +87,31 @@ class ProductModel {
       IDDanhMuc: data['IDDanhMuc'],
       IDDanhMucCon: data['IDDanhMucCon'],
       ImgBoSung: ImgBoSung,
+      isFavorited: data['isFavorited'] ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() {
+  return {
+    '_id': id,
+    'IDSanPham': idProduct,
+    'TenSanPham': nameProduct,
+    'HinhSanPham': imageProduct,
+    'DonGiaNhap': donGiaNhap,
+    'DonGiaBan': donGiaBan,
+    'SoLuongNhap': soLuongNhap,
+    'SoLuongHienTai': soLuongHienTai,
+    'PhanTramGiamGia': phanTramGiamGia,
+    'NgayTao': ngayTao.toIso8601String(),
+    'TinhTrang': tinhTrang,
+    'MoTa': moTa,
+    'Unit': Unit,
+    'DanhSachThuocTinh': listThuocTinh.map((item) => item.toJson()).toList(),
+    'IDDanhMuc': IDDanhMuc,
+    'IDDanhMucCon': IDDanhMucCon,
+    'HinhBoSung': ImgBoSung.map((item) => item.toJson()).toList(),
+  };
+}
 
   
 }
@@ -99,6 +125,12 @@ class danhSachThuocTinh {
     return danhSachThuocTinh(
       id: data['_id'],
     );
+  }
+
+   Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+    };
   }
 }
 
@@ -115,5 +147,14 @@ class hinhBoSung {
       nameImg: data['TenAnh'],
       url: data['UrlAnh'],
     );
+  }
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'TenAnh': nameImg,
+      'UrlAnh': url,
+    };
   }
 }

@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   padding: const EdgeInsets.all(10),
                   elevation: 5,
@@ -254,38 +254,29 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      print("Login with facebook");
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Image.asset('lib/assets/fb_icon.png'),
-                    ),
+              padding: const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
+              child: InkWell(
+                onTap: () {
+                  signIn();
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    border: Border.fromBorderSide(BorderSide(width: 1, color: Colors.grey))
                   ),
-                  InkWell(
-                    onTap: () {
-                      signIn();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Image.asset('lib/assets/gg_icon.png'),
-                    ),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 70,
+                        width: 70,
+                        padding: const EdgeInsets.all(20),
+                        child: Image.asset('lib/assets/gg_icon.png')
+                      ),
+                  
+                      const Text("Đăng nhập với Google")
+                    ],
                   ),
-                  InkWell(
-                    onTap: () {
-                      print("Login with twitter");
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Image.asset('lib/assets/tw_icon.png'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 

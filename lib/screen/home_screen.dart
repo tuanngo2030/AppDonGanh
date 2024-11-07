@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:don_ganh_app/api_services/cart_api_service.dart';
+import 'package:don_ganh_app/api_services/favorite_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/product_model.dart';
@@ -15,6 +16,7 @@ import 'package:don_ganh_app/models/categories_model.dart';
 import 'package:don_ganh_app/api_services/banner_api_service.dart';
 import 'package:don_ganh_app/models/banner_model.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,6 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool hasMore = true;
   final ScrollController _scrollController = ScrollController();
   int productsPerPage = 10;
+  String? userId;
+  Map<String, bool> favorites = {};
+  List<String> favoriteIds = [];
   @override
   void initState() {
     super.initState();
@@ -41,20 +46,103 @@ class _HomeScreenState extends State<HomeScreen> {
     // productsModel = ProductApiService().getListProduct();
     // fetchPaginatedProducts();
     fetchProducts(currentPage);
+    // fetchFavoritesAndProducts();
     _scrollController.addListener(_scrollListener);
   }
 
+  Future<void> _addToFavorites(BuildContext context, String productId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
+    if (userId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User is not logged in.')),
+        );
+      }
+      return;
+    }
+
+    final favoriteService = FavoriteApiService();
+    bool isCurrentlyFavorite = favorites[productId] ?? false;
+
+    try {
+      if (!isCurrentlyFavorite) {
+        favoriteService.addToFavorites(userId, productId);
+        setState(() {
+          favorites[productId] = true;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Đã thêm sản phẩm vào yêu thích')),
+          );
+        }
+      } else {
+        favoriteService.addToFavorites(userId, productId);
+        setState(() {
+          favorites[productId] = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Đã xóa sản phẩm khỏi yêu thích')),
+          );
+        }
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
+    }
+  }
+
+  // void fetchFavoritesAndProducts() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   final userId = prefs.getString('userId');
+
+  //   if (userId != null) {
+  //     final favoriteList =
+  //         await FavoriteApiService().getFavoritesNoPopulate(userId);
+
+  //     if (favoriteList != null) {
+  //       setState(() {
+  //         // Cập nhật danh sách `favoriteIds` và đồng bộ `favorites`
+  //         favoriteIds =
+  //             favoriteList.sanPhams.map((item) => item.idSanPham).toList();
+  //         // Thiết lập `favorites` dựa trên `favoriteIds`
+  //         favorites = {for (var id in favoriteIds) id: true};
+  //       });
+  //     }
+  //   } else {
+  //     print("User ID is null");
+  //   }
+  // }
+
   Future<void> fetchProducts(int page) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
+    if (!mounted) return; // Check if the widget is still mounted
     setState(() {
       isLoading = true;
     });
+
     try {
-      final response = await ProductApiService().getProducts(page);
+      final response = await ProductApiService().getProducts(page,
+          userId: userId!, yeuthichId: '67299b5b3318cd90d77a43b6');
       List<ProductModel> products = response['sanphams']
           .map<ProductModel>((json) => ProductModel.fromJSON(json))
           .where((product) => product.tinhTrang != 'Đã xóa')
           .toList();
 
+      // Set `isFavorited` based on criteria
+      for (var product in products) {
+        product.isFavorited =
+            product.isFavorited ?? false; // Set default or based on criteria
+      }
+
+      if (!mounted) return;
       setState(() {
         if (page == 1) {
           productList = products; // Replace the list on the first page
@@ -67,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (error) {
       print("Error fetching products: $error");
     } finally {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -328,89 +417,107 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  DetailProductScreen(product: product),
+                                  DetailProductScreen(product: product, isfavorited: product.isFavorited),
                             ),
                           );
                         },
                         child: Column(
                           children: [
                             Flexible(
-                              child: Stack(children: [
-                                SizedBox(
-                                  height: 150,
-                                  width: 200,
-                                  child: ClipRRect(
+                              child: Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 150,
+                                    width: 200,
+                                    child: ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
                                       child: Image.network(
-                                        productList[index].imageProduct,
+                                        product.imageProduct,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (BuildContext context,
-                                            Object exception,
-                                            StackTrace? stackTrace) {
+                                        errorBuilder:
+                                            (context, exception, stackTrace) {
                                           return Image.asset(
-                                            'lib/assets/avt2.jpg', // Ensure this path is correct
+                                            'lib/assets/avt2.jpg',
                                             fit: BoxFit.cover,
                                           );
                                         },
-                                      )),
-                                ),
-
-                                Positioned(
+                                      ),
+                                    ),
+                                  ),
+                                  // Discount Badge
+                                  Positioned(
                                     top: 15,
                                     child: Container(
                                       width: 50,
                                       height: 25,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(5),
-                                            topRight: Radius.circular(10),
-                                            bottomRight: Radius.circular(10)),
+                                          topLeft: Radius.circular(5),
+                                          topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10),
+                                        ),
                                         color: Color.fromRGBO(142, 198, 65, 1),
                                       ),
                                       child: Center(
                                         child: Text(
-                                          "- ${productList[index].phanTramGiamGia}%",
+                                          "- ${product.phanTramGiamGia}%",
                                           style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500),
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
-                                    )),
-
-                                // Icon favorites
-                                Positioned(
+                                    ),
+                                  ),
+                                  // Favorite Icon
+                                  Positioned(
                                     top: 10,
                                     right: 5,
                                     child: GestureDetector(
                                       onTap: () {
-                                        print("Add to favorites");
+                                        setState(() {
+                                          product.isFavorited =
+                                              !product.isFavorited;
+                                        });
+                                        _addToFavorites(context, product.id);
                                       },
                                       child: Container(
                                         height: 35,
                                         width: 35,
                                         decoration: BoxDecoration(
-                                            color: Color.fromRGBO(
-                                                241, 247, 234, 1),
-                                            borderRadius:
-                                                BorderRadius.circular(50)),
+                                          color: product.isFavorited
+                                              ? Colors.red
+                                              : Color.fromRGBO(
+                                                  241, 247, 234, 1),
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
                                         child: Center(
                                           child: Icon(
-                                            Icons.favorite_border_outlined,
-                                            color:
-                                                Color.fromRGBO(142, 198, 65, 1),
+                                            product.isFavorited
+                                                ? Icons.favorite
+                                                : Icons
+                                                    .favorite_border_outlined,
+                                            color: product.isFavorited
+                                                ? Colors.white
+                                                : Color.fromRGBO(
+                                                    142, 198, 65, 1),
                                           ),
                                         ),
                                       ),
-                                    ))
-                              ]),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            // Product Name and Rating
                             Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      productList[index].nameProduct,
+                                      product.nameProduct,
                                       style: TextStyle(
                                         fontSize: 17,
                                         overflow: TextOverflow.ellipsis,
@@ -420,28 +527,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   SizedBox(width: 8),
-
-                                  //rate
-                                  Container(
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                        ),
-                                        Text("5")
-                                      ],
-                                    ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star, color: Colors.amber),
+                                      Text("5"),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
+                            // Price Display
                             Padding(
                               padding: const EdgeInsets.only(top: 7.0),
                               child: Row(
                                 children: [
                                   Text(
-                                    '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(productList[index].donGiaBan)} đ/kg',
+                                    '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
@@ -450,6 +551,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             ),
+                            // 'Mua Ngay' Button
                             Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: GestureDetector(
@@ -460,40 +562,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                   height: 35,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                      border: Border.fromBorderSide(BorderSide(
-                                          color: Colors.black, width: 1.5)),
-                                      color: Color.fromRGBO(41, 87, 35, 1),
-                                      borderRadius: BorderRadius.circular(20)),
+                                    border: Border.fromBorderSide(
+                                      BorderSide(
+                                          color: Colors.black, width: 1.5),
+                                    ),
+                                    color: Color.fromRGBO(41, 87, 35, 1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
                                         flex: 2,
-                                        child: SizedBox(
-                                            width: 60,
-                                            child: Icon(
-                                              Icons.shopping_cart_outlined,
-                                              color: Colors.white,
-                                            )),
+                                        child: Icon(
+                                          Icons.shopping_cart_outlined,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                       Container(
                                         height: double.infinity,
                                         width: 1,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                        ),
+                                        color: Colors.black,
                                       ),
                                       Expanded(
                                         flex: 3,
                                         child: Center(
-                                          child: SizedBox(
-                                            width: 100,
-                                            child: Text(
-                                              'Mua Ngay',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                              textAlign: TextAlign.center,
+                                          child: Text(
+                                            'Mua Ngay',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
@@ -509,11 +606,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                if (isLoading) // Check if loading
+                if (isLoading) // Loading Indicator
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16.0), // Add some vertical padding
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: CircularProgressIndicator(),
                     ),
                   ),

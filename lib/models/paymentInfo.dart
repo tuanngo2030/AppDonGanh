@@ -19,6 +19,7 @@ class PaymentInfo with ChangeNotifier {
   String title = '';
   String? subtitle;
   String payment_url = '';
+  int giaTriGiam = 0;
 
   void updateInfo({
     required String order_id,
@@ -58,11 +59,13 @@ class PaymentInfo with ChangeNotifier {
     required String title,
     required String? subtitle,
     required String payment_url,
+    required int giaTriGiam,
   }) {
     this.assetPath = assetPath;
     this.title = title;
     this.subtitle = subtitle;
     this.payment_url = payment_url;
+    this.giaTriGiam = giaTriGiam;
 
       // Call notifyListeners() safely
     WidgetsBinding.instance.addPostFrameCallback((_) {
