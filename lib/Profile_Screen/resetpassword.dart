@@ -11,13 +11,54 @@ class Resetpassword extends StatefulWidget {
 class _ResetpasswordState extends State<Resetpassword> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final ResetPasswordApi _resetPasswordApi = ResetPasswordApi(); // Khởi tạo API
+  final ResetPasswordApi _resetPasswordApi = ResetPasswordApi();
+
+  String? _emailError;
+  String? _passwordError;
+
+  bool validateEmail(String email) {
+    final emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegExp.hasMatch(email);
+  }
+
+  bool validatePassword(String password) {
+    final passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\W).{7,}$');
+    return passwordRegExp.hasMatch(password);
+  }
 
   Future<void> _resetPassword() async {
-    final String gmail = _emailController.text;
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    final String gmail = _emailController.text.trim();
     final String matKhauMoi = _passwordController.text;
 
-    // Gọi API để reset mật khẩu
+    if (gmail.isEmpty) {
+      setState(() {
+        _emailError = 'Vui lòng nhập email của bạn.';
+      });
+      return;
+    } else if (!validateEmail(gmail)) {
+      setState(() {
+        _emailError = 'Email không hợp lệ. Vui lòng kiểm tra lại.';
+      });
+      return;
+    }
+
+    if (matKhauMoi.isEmpty) {
+      setState(() {
+        _passwordError = 'Vui lòng nhập mật khẩu mới.';
+      });
+      return;
+    } else if (!validatePassword(matKhauMoi)) {
+      setState(() {
+        _passwordError = 'Mật khẩu phải có ít nhất 7 ký tự, bao gồm chữ hoa và ký tự đặc biệt.';
+      });
+      return;
+    }
+
     final success = await _resetPasswordApi.resetPassword(gmail, matKhauMoi);
 
     if (success) {
@@ -85,6 +126,17 @@ class _ResetpasswordState extends State<Resetpassword> {
                       borderRadius: BorderRadius.circular(30)),
                 ),
               ),
+              if (_emailError != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 5.0,left: 10.0),
+                    child: Text(
+                      _emailError!,
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                ),
               SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerLeft,
@@ -105,6 +157,17 @@ class _ResetpasswordState extends State<Resetpassword> {
                       borderRadius: BorderRadius.circular(30)),
                 ),
               ),
+              if (_passwordError != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 5.0,left: 10.0),
+                    child: Text(
+                      _passwordError!,
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                ),
               SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -112,7 +175,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                   onPressed: _resetPassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(
-                        255, 41, 87, 35), // Màu nền của nút
+                        255, 41, 87, 35),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   child: const Text('Xác nhận',
@@ -129,3 +192,4 @@ class _ResetpasswordState extends State<Resetpassword> {
     );
   }
 }
+
