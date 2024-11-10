@@ -7,6 +7,8 @@ class diaChiList {
   final String? phuongXa;
   final String? duongThon;
   final bool isDeleted;
+  final String? kinhdo;  // Thêm thuộc tính kinhdo
+  final String? vido;   // Thêm thuộc tính vido
 
   diaChiList({
     this.id,
@@ -16,7 +18,9 @@ class diaChiList {
     this.quanHuyen,
     this.phuongXa,
     this.duongThon,
-    this.isDeleted = false, // Gán mặc định cho isDeleted
+    this.isDeleted = false,
+    this.kinhdo,    // Thêm tham số vào constructor
+    this.vido,     // Thêm tham số vào constructor
   });
 
   // Convert JSON to DiaChi
@@ -30,6 +34,8 @@ class diaChiList {
       phuongXa: json['phuongXa'] as String? ?? '',
       duongThon: json['duongThon'] as String? ?? '',
       isDeleted: json['isDeleted'] as bool? ?? false,
+      kinhdo: json['kinhdo'] as String?,  // Thêm xử lý cho kinhdo
+      vido: json['vido'] as String?,    // Thêm xử lý cho vido
     );
   }
 
@@ -44,6 +50,8 @@ class diaChiList {
       'phuongXa': phuongXa,
       'duongThon': duongThon,
       'isDeleted': isDeleted,
+      'kinhdo': kinhdo,  // Thêm kinhdo vào JSON
+      'vido': vido,    // Thêm vido vào JSON
     };
   }
 }

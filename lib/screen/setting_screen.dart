@@ -60,7 +60,8 @@ class _SettingScreenState extends State<SettingScreen> {
           title: Text(
             'Cài đặt',
             style: TextStyle(
-                color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
+                color: Color.fromRGBO(41, 87, 35, 1),
+                fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
           backgroundColor: Colors.white,
@@ -105,7 +106,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 title: Text('Cho phép Đòn Gánh truy cập Micro'),
                 value: quyenMic,
                 onChanged: (bool value) async {
-                  PermissionStatus status = await Permission.microphone.request();
+                  PermissionStatus status =
+                      await Permission.microphone.request();
                   if (status == PermissionStatus.granted) {
                     setState(() {
                       quyenMic = value;
@@ -139,12 +141,14 @@ class _SettingScreenState extends State<SettingScreen> {
                 title: Text('Cho phép Đòn Gánh truy cập thư viện ảnh'),
                 value: quyenLibra,
                 onChanged: (bool value) async {
-                  PermissionStatus status = await Permission.photos.request();
-                  if (status == PermissionStatus.granted) {
+                  PermissionStatus status = await Permission.storage.request();
+                  if (status.isGranted) {
                     setState(() {
                       quyenLibra = value;
                     });
                     _savePermissionState('quyenLibra', value);
+                  } else if (status.isDenied) {
+                    // Hiển thị thông báo hoặc hành động khác nếu người dùng từ chối quyền
                   }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),

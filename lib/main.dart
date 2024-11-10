@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const BanLa(),
+      home:  gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
         '/SecurityScreen': (context) => SecurityScreen(),
         '/Sendotpgmail': (context) => Sendotpgmail(),
         '/Resetpassword': (context) => const Resetpassword(),
-        // '/Checkbot': (context) => const Checkbot(),
+
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

@@ -25,10 +25,77 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _emailError;
   String? _passwordError;
   bool _isLoading = false; // Biến trạng thái cho loading
+  bool _rememberMe = false; // Biến lưu trạng thái ghi nhớ mật khẩu
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLoginData(); // Gọi hàm để tải thông tin đăng nhập đã lưu
+  }
+
+  void _loadLoginData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _emailController.text = prefs.getString('email') ?? '';
+      _passwordController.text = prefs.getString('password') ?? '';
+      _rememberMe =
+          prefs.getBool('rememberMe') ?? false; // Tải trạng thái "Ghi nhớ"
+    });
+  }
+
+  // Future<void> _login() async {
+  //   final String gmail =
+  //       _emailController.text.trim(); // Loại bỏ khoảng trắng thừa
+  //   final String matKhau = _passwordController.text.trim();
+
+  //   setState(() {
+  //     _emailError = null;
+  //     _passwordError = null;
+  //   });
+
+  //   if (gmail.isEmpty || matKhau.isEmpty) {
+  //     setState(() {
+  //       if (gmail.isEmpty) _emailError = 'Vui lòng nhập email.';
+  //       if (matKhau.isEmpty) _passwordError = 'Vui lòng nhập mật khẩu.';
+  //     });
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     _isLoading = true; // Bắt đầu loading
+  //   });
+
+  //   try {
+  //     final NguoiDung? user = await _apiService.login(gmail, matKhau);
+  //     print('Response from API: $user');
+  //     if (user != null) {
+  //       // Lưu thông tin người dùng vào SharedPreferences
+  //       SharedPreferences prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
+  //       await prefs.setString('userId', user.id ?? '');
+
+  //       // Điều hướng đến màn hình khác sau khi đăng nhập thành công
+  //       Navigator.pushNamed(context, '/ban_la');
+  //     } else {
+  //       // Hiển thị lỗi khi đăng nhập không thành công
+  //       setState(() {
+  //         _emailError = 'Email hoặc mật khẩu không chính xác.';
+  //       });
+  //     }
+  //   } catch (e) {
+  //     // Xử lý lỗi
+  //     setState(() {
+  //       _emailError = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+  //     });
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false; // Kết thúc loading
+  //     });
+  //   }
+  // }
 
   Future<void> _login() async {
-    final String gmail =
-        _emailController.text.trim(); // Loại bỏ khoảng trắng thừa
+    final String gmail = _emailController.text.trim();
     final String matKhau = _passwordController.text.trim();
 
     setState(() {
@@ -56,6 +123,17 @@ class _LoginScreenState extends State<LoginScreen> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
         await prefs.setString('userId', user.id ?? '');
+
+        // Nếu người dùng chọn "Ghi nhớ mật khẩu", lưu email và mật khẩu
+        if (_rememberMe) {
+          await prefs.setString('email', gmail);
+          await prefs.setString('password', matKhau);
+          await prefs.setBool('rememberMe', true);
+        } else {
+          await prefs.remove('email');
+          await prefs.remove('password');
+          await prefs.setBool('rememberMe', false);
+        }
 
         // Điều hướng đến màn hình khác sau khi đăng nhập thành công
         Navigator.pushNamed(context, '/ban_la');
@@ -167,6 +245,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       errorText: _passwordError, // Hiển thị lỗi ở đây
                     ),
                   ),
+                  CheckboxListTile(
+                    title: const Text("Ghi nhớ mật khẩu"),
+                    value: _rememberMe,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _rememberMe = value!;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Align(
@@ -254,25 +342,24 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();
                 },
                 child: Container(
                   decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    border: Border.fromBorderSide(BorderSide(width: 1, color: Colors.grey))
-                  ),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      border: Border.fromBorderSide(
+                          BorderSide(width: 1, color: Colors.grey))),
                   child: Row(
                     children: [
                       Container(
-                        height: 70,
-                        width: 70,
-                        padding: const EdgeInsets.all(20),
-                        child: Image.asset('lib/assets/gg_icon.png')
-                      ),
-                  
+                          height: 70,
+                          width: 70,
+                          padding: const EdgeInsets.all(20),
+                          child: Image.asset('lib/assets/gg_icon.png')),
                       const Text("Đăng nhập với Google")
                     ],
                   ),
