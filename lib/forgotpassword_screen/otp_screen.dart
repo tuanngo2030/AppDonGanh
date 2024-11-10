@@ -1,10 +1,18 @@
+import 'dart:async';
 import 'package:don_ganh_app/api_services/forgotpassword_api.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OtpScreen extends StatelessWidget {
+class OtpScreen extends StatefulWidget {
   final String email;
 
+  OtpScreen({required this.email});
+
+  @override
+  _OtpScreenState createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
   final TextEditingController _controller1 = TextEditingController();
   final TextEditingController _controller2 = TextEditingController();
   final TextEditingController _controller3 = TextEditingController();
@@ -17,7 +25,39 @@ class OtpScreen extends StatelessWidget {
 
   final ForgotpasswordApi _ForgotpasswordApi = ForgotpasswordApi();
 
-  OtpScreen({required this.email});
+  late Timer _timer;
+  int _start = 180; // 3 minutes = 180 seconds
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_start == 0) {
+        _timer.cancel();
+      } else {
+        setState(() {
+          _start--;
+        });
+      }
+    });
+  }
+
+  String get timerText {
+    int minutes = _start ~/ 60;
+    int seconds = _start % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   Future<void> saveResetToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('resetToken', token);
@@ -40,7 +80,6 @@ class OtpScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Center(
           child: Column(
-            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Code xác minh',
@@ -57,7 +96,7 @@ class OtpScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               Text(
-                email, // Display the dynamic email
+                widget.email, // Display the dynamic email
                 style: TextStyle(
                     fontSize: 10, color: Color.fromARGB(255, 248, 159, 25)),
                 textAlign: TextAlign.center,
@@ -96,8 +135,9 @@ class OtpScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 11, color: Colors.black),
                 textAlign: TextAlign.center,
               ),
+              // Đặt đồng hồ đếm ngược vào đây
               Text(
-                'Gửi lại code ( 0:59 )',
+                'Gửi lại code ($timerText)',
                 style: TextStyle(
                     fontSize: 10, color: Color.fromARGB(255, 248, 159, 25)),
                 textAlign: TextAlign.center,
@@ -116,7 +156,7 @@ class OtpScreen extends StatelessWidget {
                       // Gọi API để kiểm tra OTP
                       bool isVerified =
                           await _ForgotpasswordApi.CheckOtpForgotPassword(
-                              otp, email);
+                              otp, widget.email);
 
                       if (isVerified) {
                         // OTP được kiểm tra thành công
@@ -127,7 +167,7 @@ class OtpScreen extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'OTP verification failed! Please try again.'),
+                                'OTP lỗi hoặc không hợp lệ vui lòng nhập lại!'),
                           ),
                         );
                       }

@@ -63,7 +63,46 @@ class _AddressScreenState extends State<AddressScreen> {
     });
   }
 
-  Future<void> _deleteAddress(String diaChiId) async {
+  // Future<void> _deleteAddress(String diaChiId) async {
+  //   bool success = await DiaChiApiService().deleteDiaChi(_userId, diaChiId);
+  //   if (success) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Địa chỉ đã được xóa thành công')),
+  //     );
+  //     _fetchAddresses();
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Xóa địa chỉ thất bại')),
+  //     );
+  //   }
+  // }
+Future<void> _deleteAddress(String diaChiId) async {
+  bool? confirmDelete = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: const Text('Bạn có chắc chắn muốn xóa địa chỉ này không?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // User cancels the delete
+            },
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // User confirms the delete
+            },
+            child: const Text('Xóa'),
+          ),
+        ],
+      );
+    },
+  );
+
+  // If user confirms, proceed with deletion
+  if (confirmDelete == true) {
     bool success = await DiaChiApiService().deleteDiaChi(_userId, diaChiId);
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,6 +115,7 @@ class _AddressScreenState extends State<AddressScreen> {
       );
     }
   }
+}
 
   @override
 Widget build(BuildContext context) {
