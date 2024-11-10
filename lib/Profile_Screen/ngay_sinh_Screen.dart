@@ -60,7 +60,7 @@ class _NgaySinh extends State<NgaySinh> {
     }
   }
 
-  Future<void> _updateNgaySinh() async {
+  Future<void> _updateNgaySinh(DateTime dateTime) async {
     if (_userId.isNotEmpty && _selectedDate != null) {
       setState(() {
         _isLoading = true; // Show loading indicator
@@ -109,7 +109,7 @@ class _NgaySinh extends State<NgaySinh> {
           ),
         ),
         title: const Text(
-          'Hồ sơ',
+          'Ngày sinh',
           style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -146,7 +146,9 @@ class _NgaySinh extends State<NgaySinh> {
                 width: double.infinity,  // Full width button
                 height: 50,  // Height of the button
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _updateNgaySinh,
+                      onPressed: _selectedDate != null && !_isLoading
+                    ? () => _updateNgaySinh(_selectedDate!)
+                    : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   ),

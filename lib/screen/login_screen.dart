@@ -343,27 +343,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
+                  const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();
                 },
                 child: Container(
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      border: Border.fromBorderSide(
-                          BorderSide(width: 1, color: Colors.grey))),
-                  child: Row(
-                    children: [
-                      Container(
-                          height: 70,
-                          width: 70,
-                          padding: const EdgeInsets.all(20),
-                          child: Image.asset('lib/assets/gg_icon.png')),
-                      const Text("Đăng nhập với Google")
-                    ],
-                  ),
-                ),
+                    width: double.infinity,  // Chiếm toàn bộ chiều rộng có sẵn
+      padding: const EdgeInsets.symmetric(vertical: 5), // Điều chỉnh padding để ô rộng hơn
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        border: Border.fromBorderSide(
+                            BorderSide(width: 1, color: Colors.grey))),
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.all(0),
+                          child: Image.asset('lib/assets/gg_icon.png'),
+                        ),
+                        const Expanded(
+                          child: Text("Đăng nhập với Google",
+                              textAlign: TextAlign.center),
+                        ),
+                      ],
+                    )),
               ),
             ),
 

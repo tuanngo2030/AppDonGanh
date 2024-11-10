@@ -58,7 +58,9 @@ class LoginWithApiGoogle {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static Future<GoogleSignInAccount?> login() async {
+    await _googleSignIn.signOut();
     return await _googleSignIn.signIn();
+    
   }
 
   static Future<void> logout() async {

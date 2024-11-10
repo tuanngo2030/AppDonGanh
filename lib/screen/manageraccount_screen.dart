@@ -37,13 +37,13 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
     if (storedUserId != null && storedUserId.isNotEmpty) {
       NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
       if (user != null) {
-              if (mounted) {
-        setState(() {
-          _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
-          _userId = storedUserId;
-          _profileImageUrl = user.anhDaiDien;
-        });
-      }
+        if (mounted) {
+          setState(() {
+            _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
+            _userId = storedUserId;
+            _profileImageUrl = user.anhDaiDien;
+          });
+        }
       } else {
         print('User details not found.');
       }
@@ -177,9 +177,9 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 await prefs.remove('userDisplayName');
                 await prefs.remove('userEmail');
                 await prefs.remove('userId');
-                  await prefs.remove('token');
+                await prefs.remove('token');
+                // Đăng xuất khỏi Google
                 await GoogleSignIn().signOut();
-                // Điều hướng về màn hình đăng nhập
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginScreen()),

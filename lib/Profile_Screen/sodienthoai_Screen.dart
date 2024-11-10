@@ -121,7 +121,7 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
           ),
         ),
         title: const Text(
-          'Hồ sơ',
+          'Số điện thoại',
           style: TextStyle(
               color: Color.fromRGBO(41, 87, 35, 1),
               fontWeight: FontWeight.bold),
@@ -148,10 +148,22 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
                 validator: _validateSoDienThoai,
                 decoration: InputDecoration(
                   labelText: 'Nhập số điện thoại mới',
+                  labelStyle: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
                   border: OutlineInputBorder(
                     borderRadius:
                         BorderRadius.circular(25.0), // Rounded corners
                     borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(
+                        color: Colors.grey), // Màu viền khi không được chọn
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(
+                        color: Color.fromRGBO(
+                            41, 87, 35, 1)), // Màu viền khi được chọn
                   ),
                   filled: true,
                   fillColor: Colors.white,
@@ -168,21 +180,27 @@ class _SodienthoaiScreen extends State<SodienthoaiScreen> {
                 width: double.infinity, // Full width button
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading // Disable button when loading
-                      ? null
-                      : () {
-                          if (_formKey.currentState?.validate() == true) {
-                            _updateSoDienThoai(_selectedSdt!);
-                          }
-                        },
+                  onPressed: _selectedSdt != null && !_isLoading
+                      ? () => _updateSoDienThoai(_selectedSdt!)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                  ),
+                  // onPressed: _isLoading // Disable button when loading
+                  //     ? null
+                  //     : () {
+                  //         if (_formKey.currentState?.validate() == true) {
+                  //           _updateSoDienThoai(_selectedSdt!);
+                  //         }
+                  //       },
                   child: _isLoading
                       ? const CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         )
                       : const Text('Cập nhật Số điện thoại',
-                          style:
-                              TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                          style: TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 1))),
                 ),
               ),
             ],

@@ -15,7 +15,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
   String _userId = '';
   String _gioiTinh = 'Chưa cập nhật'; // Giá trị mặc định
   String? _selectedGioiTinh; // Giá trị giới tính mới được chọn
-  bool _isUpdatingGender = false;
+  bool _isLoading  = false;
 
   @override
   void initState() {
@@ -43,17 +43,33 @@ class _GioitinhScreen extends State<GioitinhScreen> {
   }
 
   Future<void> _updateGioiTinh(String newGioiTinh) async {
-    if (_userId.isNotEmpty) {
-      bool success = await _apiService.updateUserInformation(
-          _userId, 'GioiTinh', newGioiTinh);
-      setState(() {
-        _gioiTinh = newGioiTinh;
-      });
+    // if (_userId.isNotEmpty) {
+    //   bool success = await _apiService.updateUserInformation(
+    //       _userId, 'GioiTinh', newGioiTinh);
+    //   setState(() {
+    //     _gioiTinh = newGioiTinh;
+    //   });
 
-      if (success) {
-        setState(() {
-          _gioiTinh = newGioiTinh;
-        });
+    //   if (success) {
+    //     setState(() {
+    //       _gioiTinh = newGioiTinh;
+    //     });
+      if (_userId.isNotEmpty && newGioiTinh != _gioiTinh) {
+    setState(() {
+      _isLoading = true; 
+    });
+
+    bool success = await _apiService.updateUserInformation(
+        _userId, 'GioiTinh', newGioiTinh);
+
+    setState(() {
+      _isLoading = false; 
+    });
+
+    if (success) {
+      setState(() {
+        _gioiTinh = newGioiTinh; 
+      });
         // Lưu giới tính mới vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('gioiTinh', newGioiTinh);
@@ -68,7 +84,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
       }
 
       setState(() {
-        _isUpdatingGender = false;
+        _isLoading  = false;
       });
     }
   }
@@ -92,7 +108,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
           ),
         ),
         title: const Text(
-          'Hồ sơ',
+          'Giới tính',
           style: TextStyle(
               color: Color.fromRGBO(41, 87, 35, 1),
               fontWeight: FontWeight.bold),
@@ -128,20 +144,19 @@ class _GioitinhScreen extends State<GioitinhScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
+           
+              SizedBox(
                 width: double.infinity, // Full-width button
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _selectedGioiTinh != null && !_isUpdatingGender
+                  onPressed: _selectedGioiTinh != null && !_isLoading 
                       ? () => _updateGioiTinh(_selectedGioiTinh!)
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                     foregroundColor: Colors.white,
                   ),
-                  child: _isUpdatingGender
+                  child: _isLoading 
                       ? const CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
@@ -152,7 +167,7 @@ class _GioitinhScreen extends State<GioitinhScreen> {
                         ),
                 ),
               ),
-            )
+            
           ],
         ),
       ),
