@@ -16,20 +16,6 @@ class _ProfileThumuaState extends State<ProfileThumua> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Container(
-              child: ImageIcon(
-                AssetImage('lib/assets/arrow_back.png'), // Hình ảnh logo
-                size: 49, // Kích thước hình ảnh
-              ),
-            ),
-          ),
-        ),
         title: Text('Trang cá nhân'),
       ),
       body: SingleChildScrollView(
@@ -48,7 +34,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(100.0),
                             border: Border.fromBorderSide(BorderSide(
-                                color: Color.fromRGBO(47, 88, 42, 1), width: 2))),
+                                color: Color.fromRGBO(47, 88, 42, 1),
+                                width: 2))),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100.0),
                           child: Image.asset(
@@ -65,7 +52,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
                               color: Color.fromRGBO(47, 88, 42, 1),
-                              border: Border.all(color: Colors.white, width: 1)),
+                              border:
+                                  Border.all(color: Colors.white, width: 1)),
                           child: Icon(
                             Icons.control_point_outlined,
                             color: Colors.white,
@@ -155,7 +143,6 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         ),
                       )),
                 ),
-          
                 Container(
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
@@ -171,7 +158,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
                               border: Border.fromBorderSide(BorderSide(
-                                  color: Color.fromRGBO(47, 88, 42, 1), width: 2))),
+                                  color: Color.fromRGBO(47, 88, 42, 1),
+                                  width: 2))),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(100),
                             child: Image.asset(
@@ -183,7 +171,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       ),
                       Text(
                         'Vợ 1',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(15),
@@ -193,39 +182,35 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                                 icon: Padding(
                                   padding: const EdgeInsets.only(right: 10),
                                   child: Container(
-                                    height: 23,
-                                    width: 23,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(100),
-                                      color: Colors.white,
-                                    ),
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 15,
-                                      color: Color.fromRGBO(41, 87, 35, 1),
-                                    )
-                                  ),
+                                      height: 23,
+                                      width: 23,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        color: Colors.white,
+                                      ),
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 15,
+                                        color: Color.fromRGBO(41, 87, 35, 1),
+                                      )),
                                 ),
                                 label: Text(
                                   'Theo dõi',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.w800),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
-                                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                                  backgroundColor:
+                                      Color.fromRGBO(41, 87, 35, 1),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),
-                                )
-                              )
-                            ),
+                                ))),
                       )
                     ],
                   ),
                 ),
-          
                 Padding(
                   padding: const EdgeInsets.only(top: 15, left: 15),
                   child: Align(
@@ -237,51 +222,74 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           fontWeight: FontWeight.w900,
                           color: Color.fromRGBO(41, 87, 35, 1),
                         ),
-                      )
-                    ),
+                      )),
                 ),
-          
-          
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15 , vertical: 10),
-                  child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: SizedBox(
                     height: 420,
                     width: double.infinity,
                     child: GridView.count(
                       physics: NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
                       children: [
-                        MainFuntion(icon: Icon(Icons.person), title: 'Thông tin tài khoản', subtitle: 'Bao gồm thông tin cá nhân:'),
-                        MainFuntion(icon: Icon(Icons.person), title: 'Thông tin tài khoản', subtitle: 'Bao gồm thông tin cá nhân:'),
-                         MainFuntion(icon: Icon(Icons.person), title: 'Thông tin tài khoản', subtitle: 'Bao gồm thông tin cá nhân:'),
-                        MainFuntion(icon: Icon(Icons.person), title: 'Thông tin tài khoản', subtitle: 'Bao gồm thông tin cá nhân:')
+                        MainFuntion(
+                            icon: Icon(Icons.person),
+                            title: 'Thông tin tài khoản',
+                            subtitle: 'Bao gồm thông tin cá nhân:',
+                             onTap: () {
+                              Navigator.pushNamed(context, '/your_blog_screen');
+                            },
+                          ),
+                        MainFuntion(
+                            icon: Icon(Icons.person),
+                            title: 'Thông tin tài khoản',
+                            subtitle: 'Bao gồm thông tin cá nhân:',
+                             onTap: () {
+                              Navigator.pushNamed(context, '/your_blog_screen');
+                            },
+                          ),
+                        MainFuntion(
+                            icon: Icon(Icons.person),
+                            title: 'Thông tin tài khoản',
+                            subtitle: 'Bao gồm thông tin cá nhân:',
+                             onTap: () {
+                              Navigator.pushNamed(context, '/your_blog_screen');
+                            },
+                          ),
+                        MainFuntion(
+                            icon: Icon(Icons.person),
+                            title: 'Thông tin tài khoản',
+                            subtitle: 'Bao gồm thông tin cá nhân:',
+                            onTap: () {
+                              Navigator.pushNamed(context, '/your_blog_screen');
+                            },
+                          )
                       ],
                     ),
                   ),
                 ),
-          
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: (){}, 
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        backgroundColor: Color.fromRGBO(217, 217, 217, 1),
+                        foregroundColor: Color.fromRGBO(41, 87, 35, 1),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(15),
                         child: Text(
                           'Đăng xuất',
                           style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600
-                          ),
+                              fontSize: 15, fontWeight: FontWeight.w600),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        backgroundColor: Color.fromRGBO(217,217,217,1),
-                        foregroundColor: Color.fromRGBO(41, 87, 35, 1),
                       ),
                     ),
                   ),
@@ -294,53 +302,48 @@ class _ProfileThumuaState extends State<ProfileThumua> {
     );
   }
 
-
- Widget MainFuntion({
+  Widget MainFuntion({
     required Icon icon,
     required String title,
     required String subtitle,
-  }){
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: Container(
-        alignment: Alignment.centerLeft,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Color.fromRGBO(217, 217, 217, 1)
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20, right: 15, left: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              icon,
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Container(
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Color.fromRGBO(217, 217, 217, 1)),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20, right: 15, left: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                icon,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Text(
-                  subtitle,
-                   style: TextStyle(
-                    fontSize: 11,
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                    ),
                   ),
-                ),
-              )
-                
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
 }
-
- 

@@ -2,7 +2,7 @@ class NguoiDung {
   final String? id;
   final String? anhDaiDien;
   final String? tenNguoiDung;
-  final String? soDienThoai; 
+  final String? soDienThoai;
   final String? gmail;
   final String? GioiTinh;
   final String? matKhau;
@@ -18,12 +18,13 @@ class NguoiDung {
   final String? googleId;
   final String? facebookId;
   final String? IDYeuThich;
+  final List<Permission>? permissions;
 
   NguoiDung({
     this.id,
     this.anhDaiDien,
     this.tenNguoiDung,
-    this.soDienThoai, 
+    this.soDienThoai,
     this.gmail,
     this.GioiTinh,
     this.matKhau,
@@ -39,6 +40,7 @@ class NguoiDung {
     this.googleId,
     this.facebookId,
     this.IDYeuThich,
+    this.permissions,
   });
 
   // Convert JSON to NguoiDung
@@ -60,11 +62,18 @@ class NguoiDung {
           : null,
       role: json['role'] as String? ?? 'user',
       otp: json['otp'] as String?,
-      otpExpiry: json['otpExpiry'] != null ? DateTime.parse(json['otpExpiry']) : null,
-      isVerified: json['isVerified'] != null ? json['isVerified'] as bool : false,
+      otpExpiry:
+          json['otpExpiry'] != null ? DateTime.parse(json['otpExpiry']) : null,
+      isVerified:
+          json['isVerified'] != null ? json['isVerified'] as bool : false,
       googleId: json['googleId'] as String?,
       facebookId: json['facebookId'] as String?,
-      IDYeuThich: json['IDYeuThich'] as String?
+      IDYeuThich: json['IDYeuThich'] as String?,
+      permissions: json['permissions'] != null
+          ? (json['permissions'] as List)
+              .map((permissionJson) => Permission.fromJson(permissionJson))
+              .toList()
+          : [],
     );
   }
 
@@ -89,7 +98,38 @@ class NguoiDung {
       'isVerified': isVerified,
       'googleId': googleId,
       'facebookId': facebookId,
-      'IDYeuThich' : IDYeuThich
+      'IDYeuThich': IDYeuThich
+    };
+  }
+}
+
+class Permission {
+  final String? entity;
+  final List<String>? actions;
+  final String? id;
+
+  Permission({
+    this.entity,
+    this.actions,
+    this.id,
+  });
+
+  // Convert JSON to Permission
+  factory Permission.fromJson(Map<String, dynamic> json) {
+    return Permission(
+      entity: json['entity'] as String?,
+      actions:
+          json['actions'] != null ? List<String>.from(json['actions']) : null,
+      id: json['_id'] as String?,
+    );
+  }
+
+  // Convert Permission to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'entity': entity,
+      'actions': actions,
+      '_id': id,
     };
   }
 }

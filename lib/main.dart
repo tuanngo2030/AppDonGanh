@@ -1,5 +1,6 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
+import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -72,9 +73,9 @@ class MyApp extends StatelessWidget {
         '/new_password': (context) => const NewPassword(),
         '/ban_la': (context) => const BanLa(),
         '/trang_xin_chao': (context_) => const TrangXinChao(),
-        '/bottom': (context_) => BottomnavigationMenu(),
-        '/manageraccount_screen': (context_) => ManageraccountScreen(),
-        '/bottomnavigation': (context_) => BottomnavigationMenu(),
+        '/bottom': (context_) => const BottomnavigationMenu(),
+        '/manageraccount_screen': (context_) => const ManageraccountScreen(),
+        '/bottomnavigation': (context_) => const BottomnavigationMenu(),
         '/cart_screen': (context_) => const CartScreen(),
         '/ProfileScreen': (context) => ProfileScreen(),
         '/ten': (context) => const Tenscreen(),
@@ -85,7 +86,7 @@ class MyApp extends StatelessWidget {
         '/gioitinh': (context) => const GioitinhScreen(),
         '/oder_screen': (context) => const OderScreen(),
         '/pay_screen': (context) => const PayProcessScreen(),
-        '/bottomThumuan': (context) => const BottomnavthumuaScreen(),
+        '/bottomThumua': (context) => const BottomnavthumuaScreen(),
         '/setting_screen': (context) => const SettingScreen(),
         '/search_screen': (context) => const SearchScreen(),
         '/creat_blog_screen': (context) => const CreatBlogScreen(),
@@ -96,6 +97,7 @@ class MyApp extends StatelessWidget {
         '/Sendotpgmail': (context) => Sendotpgmail(),
         '/Resetpassword': (context) => const Resetpassword(),
         // '/Checkbot': (context) => const Checkbot(),
+        '/your_blog_screen': (context) => const YourBlogScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

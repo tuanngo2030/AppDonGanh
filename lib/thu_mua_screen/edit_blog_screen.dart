@@ -3,16 +3,20 @@ import 'package:don_ganh_app/api_services/blog_api_service.dart';
 import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
-class CreatBlogScreen extends StatefulWidget {
-  const CreatBlogScreen({super.key});
+class EditBlogScreen extends StatefulWidget {
+  final BlogModel blog;
+
+  const EditBlogScreen({super.key, required this.blog});
 
   @override
-  State<CreatBlogScreen> createState() => _CreatBlogScreenState();
+  State<EditBlogScreen> createState() => _EditBlogScreenState();
 }
 
-class _CreatBlogScreenState extends State<CreatBlogScreen> {
+class _EditBlogScreenState extends State<EditBlogScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
@@ -21,6 +25,46 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
   String? userId;
 
   final BlogApiService _blogApiService = BlogApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with the existing data
+    _titleController.text = widget.blog.tieude;
+    _contentController.text = widget.blog.noidung;
+    _tagsController.text = widget.blog.tags.join(', ');
+
+    // Load existing images from the network
+    _loadImagesFromNetwork();
+  }
+
+  // Function to load images from network URLs
+  Future<void> _loadImagesFromNetwork() async {
+    List<File> downloadedImages = [];
+    for (String imageUrl in widget.blog.image) {
+      final File file = await _downloadImage(imageUrl);
+      downloadedImages.add(file);
+    }
+
+    setState(() {
+      _selectedImages = downloadedImages;
+    });
+  }
+
+  // Function to download an image from the network
+  Future<File> _downloadImage(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+      final tempDir = await getTemporaryDirectory();
+      final file =
+          File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await file.writeAsBytes(bytes);
+      return file;
+    } else {
+      throw Exception('Failed to load image');
+    }
+  }
 
   // Image picker
   Future<void> _pickImages() async {
@@ -38,7 +82,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     });
   }
 
-  // Submit blog post
+  // Submit blog post update
   Future<void> _submitPost() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
@@ -53,12 +97,14 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     });
 
     try {
-      await _blogApiService.createBaiViet(
+      // Ensure we're passing only the final list of images after removal
+      await _blogApiService.updateBaiViet(
+        baivietId: widget.blog.id,
         userId: userId,
         tieude: _titleController.text,
         noidung: _contentController.text,
-        tags: _tagsController.text.split(','),
-        imageFiles: _selectedImages,
+        tags: _tagsController.text,
+        files: _selectedImages, // This is the updated list after removal
       );
 
       // After successful submission, clear fields or navigate back
@@ -66,21 +112,20 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
         _titleController.clear();
         _contentController.clear();
         _tagsController.clear();
-        _selectedImages.clear();
+        _selectedImages.clear(); // Clear images after successful update
       });
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bài viết đã được đăng thành công!')),
+        const SnackBar(content: Text('Bài viết đã được cập nhật thành công!')),
       );
-      
+
       // Optionally, navigate back
       Navigator.pop(context);
-
     } catch (e) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đăng bài viết thất bại: $e')),
+        SnackBar(content: Text('Cập nhật bài viết thất bại: $e')),
       );
     } finally {
       setState(() {
@@ -132,7 +177,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                           child: Padding(
                             padding: EdgeInsets.only(left: 20),
                             child: Text(
-                              "Tạo bài viết",
+                              "Chỉnh sửa bài viết",
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -148,13 +193,14 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            foregroundColor: const Color.fromRGBO(59, 99, 53, 1),
+                            foregroundColor:
+                                const Color.fromRGBO(59, 99, 53, 1),
                             backgroundColor: Colors.white,
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator()
                               : const Text(
-                                  "Đăng",
+                                  "Cập nhật",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -163,26 +209,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-
-                // User information and image picker
-                Padding(
-                  padding: const EdgeInsets.all(25),
-                  child: Row(
-                    children: [
-                      Image.asset('lib/assets/logo_app.png'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('HiHi'),
-                            
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ),
 

@@ -339,7 +339,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: <Widget>[
             // Header với avatar và thông tin người nhận
             Container(
-              height: 150,
+              height: 120,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20),
@@ -354,8 +354,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        height: 40,
-                        width: 40,
+                        height: 35,
+                        width: 35,
                         decoration: const BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           color: Colors.white,
@@ -371,7 +371,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           widget.receiverData?['anhDaiDien'] != null
                               ? NetworkImage(widget.receiverData!['anhDaiDien'])
                               : null,
-                      radius: 25,
+                      radius: 20,
                       child: widget.receiverData?['anhDaiDien'] == null
                           ? const Icon(Icons.person, color: Colors.grey)
                           : null,
@@ -417,75 +417,122 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessage(Message message) {
-    String formattedTime = DateFormat('HH:mm').format(message.createdAt);
+ Widget _buildMessage(Message message) {
+  String formattedTime = DateFormat('HH:mm').format(message.createdAt);
 
-    return Padding(
-      // Sử dụng Padding để tạo khoảng cách
-      padding:
-          const EdgeInsets.symmetric(vertical: 8.0), // Khoảng cách trên và dưới
-      child: Column(
-        crossAxisAlignment: message.msgByUserId == widget.userId
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          if (message.text.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: message.msgByUserId == widget.userId
-                    ? Colors.green[200]
-                    : Colors.grey[300],
-                borderRadius: BorderRadius.circular(15),
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Column(
+      crossAxisAlignment: message.msgByUserId == widget.userId
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        if (message.text.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: message.msgByUserId == widget.userId
+                  ? Colors.green[200]
+                  : Colors.grey[300],
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              crossAxisAlignment: message.msgByUserId == widget.userId
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                Text(message.text, style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 4),
+                Text(
+                  formattedTime,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+        if (message.imageUrl != null)
+          GestureDetector(
+            onTap: () {
+              _showFullImage(message.imageUrl!);
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Image.network(
+                  message.imageUrl!,
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: message.msgByUserId == widget.userId
-                    ? CrossAxisAlignment.end // Căn phải cho người gửi
-                    : CrossAxisAlignment.start, // Căn trái cho người nhận
+            ),
+          ),
+        if (message.videoUrl != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: SizedBox(
+              height: 150,
+              width: 150,
+              child: VideoPlayerWidget(videoUrl: message.videoUrl!),
+            ),
+          ),
+        if (message.IDSanPham != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blueAccent),
+              ),
+              child: Row(
                 children: [
-                  Text(message.text, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(
-                      height: 4), // Khoảng cách giữa tin nhắn và thời gian
-                  Text(
-                    formattedTime, // Hiển thị thời gian
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  // Display product image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      message.IDSanPham!.imageProduct,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Display product name and a brief description
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.IDSanPham!.nameProduct,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          message.IDSanPham!.moTa,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          if (message.imageUrl != null)
-            GestureDetector(
-              onTap: () {
-                _showFullImage(message.imageUrl!); // Gọi hàm xem hình ảnh lớn
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Container(
-                  width: 150,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Image.network(
-                    (message.imageUrl!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          if (message.videoUrl != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: SizedBox(
-                height: 150,
-                width: 250,
-                child: VideoPlayerWidget(videoUrl: message.videoUrl!),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+          ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildInputArea() {
     return Padding(

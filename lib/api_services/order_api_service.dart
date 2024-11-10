@@ -93,7 +93,7 @@ class OrderApiService {
 
     final Map<String, dynamic> body = {
       'transactionId': transactionId,
-      'khuyeimaiId': khuyeimaiId,
+      'khuyenmaiId': khuyeimaiId,
       'giaTriGiam': giaTriGiam,
     };
 
