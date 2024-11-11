@@ -207,6 +207,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
+                       enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide(
+                          color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
                       hintText: "abc@gmail.com",
                       errorText: _emailError, // Hiển thị lỗi ở đây
                     ),
@@ -241,43 +251,66 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
+                         enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide(
+                          color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
                       hintText: "Nhập mật khẩu",
-                      errorText: _passwordError, // Hiển thị lỗi ở đây
+                      errorText: _passwordError,
                     ),
                   ),
-                  CheckboxListTile(
-                    title: const Text("Ghi nhớ mật khẩu"),
-                    value: _rememberMe,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _rememberMe = value!;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/Sendotpgmail');
-                            // TODO: Implement password reset logic here
-                          },
-                          child: const Text(
-                            "Quên mật khẩu ?",
-                            textAlign: TextAlign.end,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text(
+                            "Ghi nhớ mật khẩu",
                             style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromRGBO(248, 158, 25, 1),
+                                fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                          value: _rememberMe,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _rememberMe = value!;
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: Color.fromRGBO(41, 87, 35, 1),
+                          visualDensity: VisualDensity(horizontal: -4.0),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/Sendotpgmail');
+                              },
+                              child: const Text(
+                                "Quên mật khẩu ?",
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(248, 158, 25, 1),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -342,15 +375,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
 
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();
                 },
                 child: Container(
-                    width: double.infinity,  // Chiếm toàn bộ chiều rộng có sẵn
-      padding: const EdgeInsets.symmetric(vertical: 5), // Điều chỉnh padding để ô rộng hơn
+                    width: double.infinity, // Chiếm toàn bộ chiều rộng có sẵn
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 5), // Điều chỉnh padding để ô rộng hơn
                     decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         border: Border.fromBorderSide(

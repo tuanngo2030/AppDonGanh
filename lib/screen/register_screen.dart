@@ -19,13 +19,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _captchaController = TextEditingController();
-    final LoginWithApiGoogle _apiGoogle = LoginWithApiGoogle();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final _apiService = ApiService();
   bool _agreedToTerms = false;
   bool _isLoading = false;
-  String? _passwordError;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String _captcha = '';
+  final LoginWithApiGoogle _apiGoogle = LoginWithApiGoogle();
+  String? _usernameError;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmPasswordError;
+
   Future<void> signIn() async {
     final user = await LoginWithApiGoogle.login();
 
@@ -46,7 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await prefs.setString('userEmail', user.email);
       await prefs.setString('googleId', user.id);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập thành công')),
+        const SnackBar(content: Text('Đăng ký thành công')),
       );
       // Điều hướng đến màn hình BanLa
       Navigator.of(context).pushReplacement(
@@ -57,6 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .showSnackBar(SnackBar(content: Text('Lỗi: $error')));
     }
   }
+
 // Hàm kiểm tra độ mạnh của mật khẩu
   bool validatePassword(String password) {
     final passwordRegExp = RegExp(
@@ -75,36 +83,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-// Hàm xử lý đăng ký
-  void _register() async {
+  _confirmRegister() {
     setState(() {
+      _usernameError = null;
+      _emailError = null;
       _passwordError = null;
+      _confirmPasswordError = null;
     });
 
     // Kiểm tra các trường thông tin
-    if (_usernameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tên người dùng không được để trống')),
-      );
-      return;
-    }
-
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email không hợp lệ')),
-      );
-      return;
-    }
-
-    // Kiểm tra mật khẩu
-    if (!validatePassword(_passwordController.text)) {
+    if (_usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        !_emailController.text.contains('@') ||
+        !validatePassword(_passwordController.text)) {
       setState(() {
+        _usernameError = 'Tên người dùng không được để trống';
+        _emailError = 'Email không hợp lệ';
         _passwordError =
             'Mật khẩu phải có ít nhất 7 ký tự, 1 chữ cái viết hoa,\n1 ký tự đặc biệt';
       });
       return;
     }
-
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _confirmPasswordError = 'Mật khẩu nhập lại không khớp';
+      });
+      return;
+    }
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -113,6 +118,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    _showCaptchaDialog();
+  }
+
+// Hàm xử lý đăng ký
+  void _register() async {
     setState(() {
       _isLoading = true;
     });
@@ -131,59 +141,172 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (isSuccess) {
+      Navigator.pushNamed(
+        context,
+        '/xacminhtk',
+        arguments: _emailController.text,
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng ký thành công')),
       );
-      _showCaptchaDialog(); // Hiển thị CAPTCHA sau khi đăng ký thành công
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng ký thất bại')),
       );
     }
   }
+// void _register() async {
+//   setState(() {
+//     _isLoading = true;
+//   });
 
+//   // Tạo đối tượng người dùng với thông tin từ các trường nhập liệu
+//   NguoiDung newUser = NguoiDung(
+//     tenNguoiDung: _usernameController.text,
+//     gmail: _emailController.text,
+//     matKhau: _passwordController.text,
+//     ngayTao: DateTime.now(),
+//   );
+
+//   // Lưu thông tin người dùng vào SharedPreferences
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   prefs.setString('username', newUser.tenNguoiDung!);
+//   prefs.setString('email', newUser.gmail!);
+//   prefs.setString('password', newUser.matKhau!);
+//   prefs.setString('ngayTao', newUser.ngayTao!.toIso8601String());
+
+//   setState(() {
+//     _isLoading = false;
+//   });
+
+//   // Chuyển hướng đến màn hình xác minh tài khoản
+//   Navigator.pushNamed(
+//     context,
+//     '/xacminhtk',
+//     arguments: _emailController.text,
+//   );
+
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text('Đã lưu thông tin đăng ký')),
+//   );
+// }
 // Hiển thị hộp thoại CAPTCHA
+
   Future<void> _showCaptchaDialog() async {
-    _generateCaptcha(); // Tạo CAPTCHA mới
+    _generateCaptcha();
+    _captchaController.clear();
     return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Nhập mã CAPTCHA'),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Nhập mã CAPTCHA',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.blueGrey),
+            textAlign: TextAlign.center,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Hiển thị CAPTCHA trong một ô hình chữ nhật
+              // CAPTCHA container with gradient background
               Container(
-                padding: const EdgeInsets.all(15),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color.fromRGBO(228, 247, 207, 1),
+                      Color.fromRGBO(59, 99, 53, 1)
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: const Color.fromRGBO(59, 99, 53, 1), width: 1.5),
                 ),
-                child: Text(
-                  _captcha,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                child: Stack(
+                  children: [
+                    // Random lines for noise with enhanced animation
+                    for (int i = 0; i < 50; i++)
+                      Positioned(
+                        top: Random().nextDouble() * 60,
+                        left: Random().nextDouble() * 180,
+                        child: Transform.rotate(
+                          angle: Random().nextDouble() * pi / 2 - pi / 4,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            width: Random().nextDouble() * 50 + 20,
+                            height: 1.5,
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                        ),
+                      ),
+                    // Display CAPTCHA characters with custom rotation and offset
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _captcha.characters.map((char) {
+                        final rotation = Random().nextDouble() * 0.3 - 0.15;
+                        final verticalOffset = Random().nextDouble() * 6 - 3;
+                        final horizontalOffset = Random().nextDouble() * 6 - 3;
+
+                        return Transform.translate(
+                          offset: Offset(horizontalOffset, verticalOffset),
+                          child: Transform.rotate(
+                            angle: rotation,
+                            child: Text(
+                              char,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Colors
+                                    .primaries[Random()
+                                        .nextInt(Colors.primaries.length)]
+                                    .shade900,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
               TextField(
                 controller: _captchaController,
-                decoration: const InputDecoration(hintText: 'Nhập mã CAPTCHA'),
+                decoration: const InputDecoration(
+                  hintText: 'Nhập mã CAPTCHA',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                ),
               ),
             ],
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade600,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
               child: const Text('Hủy'),
             ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 if (_captchaController.text == _captcha) {
                   Navigator.of(context).pop();
-                  _register(); // Gọi hàm đăng ký nếu CAPTCHA đúng
+                  _register();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('CAPTCHA không đúng')),
@@ -245,10 +368,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(20.0),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                        hintText: "example"),
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "example",
+                      errorText: _usernameError,
+                    ),
                   ),
                 ],
               ),
@@ -271,10 +405,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(20.0),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                        hintText: "abc@gmail.com"),
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "abc@gmail.com",
+                      errorText: _emailError,
+                    ),
                   ),
                 ],
               ),
@@ -301,6 +446,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       contentPadding: const EdgeInsets.all(20.0),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
                       hintText: "********",
                       errorText: _passwordError, // Hiển thị lỗi nếu có
                       suffixIcon: IconButton(
@@ -320,63 +474,120 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText:
                         _obscurePassword, // Điều khiển việc ẩn/hiện mật khẩu
                   ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                              padding: const EdgeInsets.all(1.0),
-                              child: Row(
-                                children: [
-                                  Checkbox(
-                                    value: _agreedToTerms,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        _agreedToTerms = value ?? false;
-                                      });
-                                    },
-                                  ),
-                                  const Text(
-                                    "Tôi đồng ý với ",
-                                    textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.black),
-                                  ),
-                                  const Text(
-                                    "Điều khoản ",
-                                    textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromRGBO(248, 158, 25, 1)),
-                                  ),
-                                  const Text(
-                                    "& ",
-                                    textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.black),
-                                  ),
-                                  const Text(
-                                    "Chính sách bảo mật ",
-                                    textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromRGBO(248, 158, 25, 1)),
-                                  ),
-                                ],
-                              )))),
                 ],
               ),
             ),
             Padding(
+              padding: const EdgeInsets.only(top: 10, left: 15, right: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
+                    child: Text(
+                      "Mật khẩu nhập lại",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color.fromRGBO(41, 87, 35, 1),
+                      ),
+                    ),
+                  ),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "********",
+                      errorText: _confirmPasswordError, // Hiển thị lỗi nếu có
+                      // suffixIcon: IconButton(
+                      //   icon: Icon(
+                      //     _obscureConfirmPassword
+                      //         ? Icons.visibility_off
+                      //         : Icons.visibility,
+                      //     color: Colors.grey,
+                      //   ),
+                      //   onPressed: () {
+                      //     setState(() {
+                      //       _obscureConfirmPassword = !_obscureConfirmPassword;
+                      //     });
+                      //   },
+                      // ),
+                    ),
+                    obscureText:
+                        _obscureConfirmPassword, // Điều khiển việc ẩn/hiện mật khẩu
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 15),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _agreedToTerms,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _agreedToTerms = value ?? false;
+                                });
+                              },
+                              activeColor: Color.fromRGBO(41, 87, 35, 1),
+                              visualDensity: VisualDensity(horizontal: -4.0),
+                            ),
+                            const Text(
+                              "Tôi đồng ý với ",
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black),
+                            ),
+                            const Text(
+                              "Điều khoản ",
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color.fromRGBO(248, 158, 25, 1)),
+                            ),
+                            const Text(
+                              "& ",
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black),
+                            ),
+                            const Text(
+                              "Chính sách bảo mật ",
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color.fromRGBO(248, 158, 25, 1)),
+                            ),
+                          ],
+                        )))),
+            Padding(
               padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _showCaptchaDialog,
+                onPressed: () {
+                  _confirmRegister();
+                },
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(395, 55),
                   backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
@@ -430,16 +641,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ),
-          Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();
                 },
                 child: Container(
-                    width: double.infinity,  // Chiếm toàn bộ chiều rộng có sẵn
-      padding: const EdgeInsets.symmetric(vertical: 5), // Điều chỉnh padding để ô rộng hơn
+                    width: double.infinity, // Chiếm toàn bộ chiều rộng có sẵn
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 5), // Điều chỉnh padding để ô rộng hơn
                     decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         border: Border.fromBorderSide(
@@ -460,7 +671,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             Padding(
-                padding: const EdgeInsets.only(top: 10.0),
+                padding: const EdgeInsets.only(top: 7.0, bottom: 30),
                 child: Align(
                   alignment: Alignment.center,
                   child: Row(

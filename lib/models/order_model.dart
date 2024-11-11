@@ -21,6 +21,7 @@ class OrderModel {
   final DateTime expiresAt;
   final DateTime NgayTao;
   final String mrc_order_id;
+  final int SoTienKhuyenMai;
 
   OrderModel({
     required this.id,
@@ -41,6 +42,7 @@ class OrderModel {
     required this.order_id,
     required this.expiresAt,
     required this.mrc_order_id,
+    required this.SoTienKhuyenMai
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -85,6 +87,7 @@ class OrderModel {
       order_id: json['order_id'] ?? 0,
       expiresAt: DateTime.tryParse(json['expiresAt'] ?? '') ?? DateTime.now(),
       mrc_order_id: json['mrc_order_id'] ?? '',
+      SoTienKhuyenMai: json['SoTienKhuyenMai']?? 0,
     );
   }
 
@@ -106,6 +109,7 @@ class OrderModel {
       'redirect_url': redirect_url,
       'order_id': order_id,
       'expiresAt': expiresAt.toIso8601String(),
+      'SoTienKhuyenMai': SoTienKhuyenMai,
     };
   }
 }

@@ -331,7 +331,7 @@ class _ReviewItemState extends State<ReviewItem> {
         if (widget.review.HinhAnh.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 27),
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               child: Wrap(
                 spacing: 8.0, // Khoảng cách giữa các hình ảnh
@@ -428,4 +428,3 @@ class _ReviewItemState extends State<ReviewItem> {
     );
   }
 }
-

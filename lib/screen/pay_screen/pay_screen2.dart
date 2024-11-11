@@ -457,6 +457,7 @@ class _PayScreen2State extends State<PayScreen2> {
                       String transactionIdCod = '111';
 
                       if (selectedPaymentMethod == 'Qr') {
+                        print(selectedPromoId);
                         await _updateTransaction(
                           hoadonId,
                           transactionId,

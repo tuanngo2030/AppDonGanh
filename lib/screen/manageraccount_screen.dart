@@ -100,21 +100,33 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             const SizedBox(height: 90),
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-                backgroundImage: _image != null
-                    ? FileImage(_image!)
-                    : _profileImageUrl != null
-                        ? NetworkImage(_profileImageUrl!)
-                        : null,
-                child: _image == null && _profileImageUrl == null
-                    ? const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 50,
-                      )
-                    : null,
+              child: Container(
+                width: 110, 
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color.fromRGBO(41, 87, 35, 1),
+                       border: Border.all(
+                    color: const  Color.fromRGBO(41, 87, 35, 1), // Màu viền
+                    width: 1.5, // Độ dày viền
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                  backgroundImage: _image != null
+                      ? FileImage(_image!)
+                      : _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          : null,
+                  child: _image == null && _profileImageUrl == null
+                      ? const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 50,
+                        )
+                      : null,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -127,6 +139,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/hoso_icon.png"),
               title: const Text('Hồ sơ'),
@@ -134,6 +147,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/ProfileScreen');
               },
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/lienketthu_icon.png"),
               title: const Text('Liên kết thẻ'),
@@ -141,6 +155,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/CardLinkScreen');
               },
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),
               title: const Text('Đơn hàng'),
@@ -148,6 +163,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/oder_screen');
               },
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/caidat_icon.png"),
               title: const Text('Cài đặt'),
@@ -155,11 +171,13 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/setting_screen');
               },
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/trungtamhotro_icon.png"),
               title: const Text('Trung tâm hỗ trợ'),
               onTap: () {},
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/baomat_icon.png"),
               title: const Text('Bảo mật'),
@@ -167,6 +185,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/SecurityScreen');
               },
             ),
+            Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
               title: const Text('Đăng xuất'),

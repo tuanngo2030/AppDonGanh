@@ -75,34 +75,41 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 }
 
   Future<void> _fetchFavorites() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final userId = prefs.getString('userId');
 
-    if (userId == null) {
+  if (userId == null) {
+    if (mounted) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User ID not found. Please log in again.')),
-      );
-      return;
     }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User ID not found. Please log in again.')),
+    );
+    return;
+  }
 
-    try {
-      final favoriteList = await FavoriteApiService().getFavorites(userId);
+  try {
+    final favoriteList = await FavoriteApiService().getFavorites(userId);
+    if (mounted) {
       setState(() {
         favorites = favoriteList;
         isLoading = false;
       });
-    } catch (error) {
+    }
+  } catch (error) {
+    if (mounted) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading favorites: $error')),
-      );
     }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error loading favorites: $error')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

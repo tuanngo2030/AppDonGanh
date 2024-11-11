@@ -13,7 +13,8 @@ class OderScreen extends StatefulWidget {
 }
 
 class _OderScreenState extends State<OderScreen> {
-  late Future<List<OrderModel>> orderModel = Future.value([]); // Initialize with an empty Future
+  late Future<List<OrderModel>> orderModel =
+      Future.value([]); // Initialize with an empty Future
   String? userId;
 
   @override
@@ -27,11 +28,13 @@ class _OderScreenState extends State<OderScreen> {
     userId = prefs.getString('userId');
     if (userId != null) {
       setState(() {
-        orderModel = OrderApiService().fetchOrder(userId!); // Fetch orders when userId is available
+        orderModel = OrderApiService()
+            .fetchOrder(userId!); // Fetch orders when userId is available
       });
     } else {
       setState(() {
-        orderModel = Future.value([]); // Initialize with an empty list if no userId
+        orderModel =
+            Future.value([]); // Initialize with an empty list if no userId
       });
     }
   }
@@ -43,10 +46,34 @@ class _OderScreenState extends State<OderScreen> {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Đơn hàng'),
+//nút
+            leading: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Image.asset(
+                  'lib/assets/arrow_back.png',
+                  width: 30,
+                  height: 30,
+                  color: const Color.fromRGBO(41, 87, 35, 1),
+                ),
+              ),
+            ),
+//
+            title: const Text(
+              'Đơn hàng',
+              style: TextStyle(
+                color: Color.fromRGBO(41, 87, 35, 1), // Màu chữ của AppBar
+              ),
+            ),
             centerTitle: true,
             bottom: const TabBar(
               isScrollable: true,
+              indicatorColor: Color.fromARGB(255, 41, 87, 35),
+              labelColor: Color.fromARGB(255, 41, 87, 35),
+              unselectedLabelColor: Color.fromARGB(255, 0, 0, 0),
               tabs: [
                 Tab(text: 'Tất cả'),
                 Tab(text: 'Đặt hàng'),
@@ -160,29 +187,65 @@ class _OderScreenState extends State<OderScreen> {
                             const Text(
                               'Số lượng: ',
                               style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Color.fromARGB(255, 155, 154, 154)),
+                                fontWeight: FontWeight.w500,
+                                color: Color.fromARGB(255, 155, 154, 154),
+                              ),
                             ),
                             Text(
-                              '${orders[index].TongTien}',
+                              NumberFormat.currency(locale: 'vi', symbol: '₫')
+                                  .format(orders[index].TongTien),
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black),
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Tổng tiền: ',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 155, 154, 154)),
-                      ),
-                      Text(
-                        '${orders[index].TongTien}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, color: Colors.black),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Tổng tiền: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 155, 154, 154),
+                                ),
+                              ),
+                              Text(
+                                NumberFormat.currency(locale: 'vi', symbol: '₫')
+                                    .format(orders[index].TongTien),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Đã khuyến mãi: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 155, 154, 154),
+                                ),
+                              ),
+                              Text(
+                                NumberFormat.currency(locale: 'vi', symbol: '₫')
+                                    .format(orders[index].SoTienKhuyenMai),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -196,7 +259,8 @@ class _OderScreenState extends State<OderScreen> {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                            backgroundColor:
+                                const Color.fromRGBO(41, 87, 35, 1),
                             foregroundColor: Colors.white,
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(

@@ -15,7 +15,7 @@ class BanLa extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 // logo
-                SizedBox(height: 100),
+                const SizedBox(height: 100),
                 Image.asset("lib/assets/logo_xinchao.png"),
                 const Text(
                   'Đòn gánh xin chào!',
@@ -45,18 +45,18 @@ class BanLa extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
               UserOption(
                 text: 'Khách mua hàng',
                 onTap: () {
                   Navigator.pushNamed((context), "/bottom");
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               UserOption(
                 text: 'Hộ kinh doanh',
                 onTap: () {
-                  // Xử lý khi chọn "Hộ kinh doanh"
+                  Navigator.pushNamed((context), "/bottomThumua");
                 },
               ),
               ],
@@ -77,7 +77,7 @@ class UserOption extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const UserOption({required this.text, required this.onTap});
+  const UserOption({super.key, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +86,12 @@ class UserOption extends StatelessWidget {
       child: Container(
         height: 122,
         width: MediaQuery.of(context).size.width * 0.8,
-        padding: EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(17),
           boxShadow: [
-            BoxShadow(
+            const BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
               offset: Offset(0, 5),
@@ -101,10 +101,10 @@ class UserOption extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 41, 87, 35),
+              color: Color.fromARGB(255, 41, 87, 35),
             ),
           ),
         ),
