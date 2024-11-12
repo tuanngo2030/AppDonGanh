@@ -2,8 +2,9 @@ import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart';
 import 'package:flutter/material.dart';
 
 class XacMinhTkScreen extends StatefulWidget {
-    final String email;
-      const XacMinhTkScreen({super.key, required this.email});
+  final String email;
+  const XacMinhTkScreen({super.key, required this.email});
+
   @override
   _XacMinhTkScreen createState() => _XacMinhTkScreen();
 }
@@ -13,9 +14,16 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
   final TextEditingController _emailController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Set giá trị email đã được truyền vào từ màn hình trước
+    _emailController.text = widget.email;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-         appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
@@ -30,14 +38,14 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
             ),
           ),
         ),
-        title:const Text(
-                'Email',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(41, 87, 35, 1),
-                ),
-              ),
+        title: const Text(
+          'Email',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color.fromRGBO(41, 87, 35, 1),
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
@@ -52,12 +60,12 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-              icon: Image.asset(
-              'lib/assets/icongmail.png',
-              width: 30,
-              height: 30,
-              color: const Color.fromRGBO(41, 87, 35, 1),
-            ),
+                  icon: Image.asset(
+                    'lib/assets/icongmail.png',
+                    width: 30,
+                    height: 30,
+                    color: const Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   hintText: 'Nhập email của bạn',
                   filled: true,
                   fillColor: const Color(0xFFF5F5F5),
@@ -88,7 +96,7 @@ class _XacMinhTkScreen extends State<XacMinhTkScreen> {
                 ),
                 child: const Text(
                   'Tiếp theo',
-                  style: TextStyle(fontSize: 18,color: Color.fromRGBO(255, 255, 255, 1)),
+                  style: TextStyle(fontSize: 18, color: Color.fromRGBO(255, 255, 255, 1)),
                 ),
               ),
               const SizedBox(height: 20),

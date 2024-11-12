@@ -17,7 +17,7 @@ class _Tenscreen extends State<Tenscreen> {
   String _tenNguoiDung = 'Chưa cập nhật';
   final TextEditingController _tenNguoiDungController = TextEditingController();
   String? _selectedtenNguoiDung;
-  bool _isLoading = false;  // Loading state variable
+  bool _isLoading = false; // Loading state variable
 
   @override
   void initState() {
@@ -45,19 +45,22 @@ class _Tenscreen extends State<Tenscreen> {
     }
   }
 
-  Future<void> _updateName() async {
+  Future<void> _updateName(String newName) async {
     // Use the value from the controller or the existing name if not changed
-    String newName = _selectedtenNguoiDung?.isNotEmpty == true ? _selectedtenNguoiDung! : _tenNguoiDung;
+    String newName = _selectedtenNguoiDung?.isNotEmpty == true
+        ? _selectedtenNguoiDung!
+        : _tenNguoiDung;
 
     if (_userId.isNotEmpty && newName != _tenNguoiDung) {
       setState(() {
-        _isLoading = true;  // Set loading state to true
+        _isLoading = true; // Set loading state to true
       });
 
-      bool success = await _apiService.updateUserInformation(_userId, 'tenNguoiDung', newName);
+      bool success = await _apiService.updateUserInformation(
+          _userId, 'tenNguoiDung', newName);
 
       setState(() {
-        _isLoading = false;  // Reset loading state
+        _isLoading = false; // Reset loading state
       });
 
       if (success) {
@@ -67,16 +70,19 @@ class _Tenscreen extends State<Tenscreen> {
         // Save new name to SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('gmail', newName);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cập nhật họ và tên thành công')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cập nhật họ và tên thành công')));
         Future.delayed(const Duration(seconds: 1), () {
           Navigator.pop(context);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cập nhật họ và tên thất bại')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cập nhật họ và tên thất bại')));
       }
     } else {
       // If the name is the same or userId is empty, just show a message
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không có thay đổi nào để cập nhật')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không có thay đổi nào để cập nhật')));
     }
   }
 
@@ -99,8 +105,10 @@ class _Tenscreen extends State<Tenscreen> {
           ),
         ),
         title: const Text(
-          'Hồ sơ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
+          'Họ và tên',
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -122,15 +130,27 @@ class _Tenscreen extends State<Tenscreen> {
                   },
                   decoration: InputDecoration(
                     labelText: 'Nhập họ và tên',
+                    labelStyle: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                      borderSide: BorderSide(
+                          color: Colors.grey), // Màu viền khi không được chọn
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                      borderSide: BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)), // Màu viền khi được chọn
                     ),
                     filled: true,
                     fillColor: Colors.white,
                     hintText: _tenNguoiDung,
                     counterText: 'Tối đa 100 ký tự',
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 20),
                   ),
                   keyboardType: TextInputType.name,
                   maxLength: 100,
@@ -142,12 +162,21 @@ class _Tenscreen extends State<Tenscreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading 
-                    ? null  // Disable button if loading
-                    : _updateName,  // Call the updated method without parameters
+                onPressed: _selectedtenNguoiDung != null && !_isLoading
+                    ? () => _updateName(_selectedtenNguoiDung!)
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                ),
+                // onPressed: _isLoading
+                //     ? null // Disable button if loading
+                //     : _updateName, // Call the updated method without parameters
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)  // Show loading indicator
-                    : const Text('Cập nhật họ và tên', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                    ? const CircularProgressIndicator(
+                        color: Colors.white) // Show loading indicator
+                    : const Text('Cập nhật họ và tên',
+                        style:
+                            TextStyle(color: Color.fromRGBO(255, 255, 255, 1))),
               ),
             ),
           ],

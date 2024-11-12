@@ -46,10 +46,34 @@ class _OderScreenState extends State<OderScreen> {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Đơn hàng'),
+//nút
+            leading: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Image.asset(
+                  'lib/assets/arrow_back.png',
+                  width: 30,
+                  height: 30,
+                  color: const Color.fromRGBO(41, 87, 35, 1),
+                ),
+              ),
+            ),
+//
+            title: const Text(
+              'Đơn hàng',
+              style: TextStyle(
+                color: Color.fromRGBO(41, 87, 35, 1), // Màu chữ của AppBar
+              ),
+            ),
             centerTitle: true,
             bottom: const TabBar(
               isScrollable: true,
+              indicatorColor: Color.fromARGB(255, 41, 87, 35),
+              labelColor: Color.fromARGB(255, 41, 87, 35),
+              unselectedLabelColor: Color.fromARGB(255, 0, 0, 0),
               tabs: [
                 Tab(text: 'Tất cả'),
                 Tab(text: 'Đặt hàng'),

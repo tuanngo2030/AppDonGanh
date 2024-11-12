@@ -17,6 +17,7 @@ class _Gmailscreen extends State<Gmailscreen> {
   final TextEditingController _gmailController = TextEditingController();
   String? _selectedGmail;
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false; // Loading state variable
 
   @override
   void initState() {
@@ -34,7 +35,8 @@ class _Gmailscreen extends State<Gmailscreen> {
         setState(() {
           _userId = storedUserId;
           _gmail = user.gmail ?? 'Chưa cập nhật';
-          _gmailController.text = _gmail; // Prepopulate the text field with the existing Gmail
+          _gmailController.text =
+              _gmail; // Prepopulate the text field with the existing Gmail
         });
       } else {
         print('User details not found.');
@@ -46,6 +48,10 @@ class _Gmailscreen extends State<Gmailscreen> {
 
   Future<void> _updateGmail(String newGmail) async {
     if (_userId.isNotEmpty) {
+         setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+
       bool success =
           await _apiService.updateUserInformation(_userId, 'gmail', newGmail);
 
@@ -56,22 +62,24 @@ class _Gmailscreen extends State<Gmailscreen> {
         // Lưu gmail mới vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('gmail', newGmail);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật gmail thành công')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Cập nhật gmail thành công')));
         Future.delayed(const Duration(seconds: 1), () {
-         Navigator.pop(context);
+          Navigator.pop(context);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cập nhật gmail thất bại')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Cập nhật gmail thất bại')));
       }
+         setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
     }
   }
 
   String? _validateGmail(String? value) {
     // Regular expression to validate email format
-    const pattern =
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$';
+    const pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$';
     final regExp = RegExp(pattern);
 
     if (value == null || value.isEmpty) {
@@ -101,8 +109,10 @@ class _Gmailscreen extends State<Gmailscreen> {
           ),
         ),
         title: Text(
-          'Hồ sơ',
-                style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
+          'Email',
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -118,29 +128,48 @@ class _Gmailscreen extends State<Gmailscreen> {
               Column(
                 children: [
                   TextFormField(
-                    controller: _gmailController,  // Prepopulate with the existing email
+                    controller:
+                        _gmailController, // Prepopulate with the existing email
                     onChanged: (value) {
                       setState(() {
                         _selectedGmail = value;
                       });
                     },
                     validator: (value) {
-                      if (value != _gmail) {  // Only validate if the email has changed
+                      if (value != _gmail) {
+                        // Only validate if the email has changed
                         return _validateGmail(value);
                       }
                       return null;
                     },
                     decoration: InputDecoration(
                       labelText: 'Nhập email',
+                      labelStyle:
+                          TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                        borderRadius:
+                            BorderRadius.circular(25.0), // Rounded corners
                         borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: BorderSide(
+                            color: Colors.grey), // Màu viền khi không được chọn
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(
+                                41, 87, 35, 1)), // Màu viền khi được chọn
                       ),
                       filled: true,
                       fillColor: Colors.white,
                       hintText: 'Nhập email của bạn',
-                      counterText: 'Tối đa 100 ký tự', // Custom character limit hint
-                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding inside the field
+                      counterText:
+                          'Tối đa 100 ký tự', // Custom character limit hint
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 20), // Padding inside the field
                     ),
                     keyboardType: TextInputType.emailAddress,
                     maxLength: 100,
@@ -149,15 +178,25 @@ class _Gmailscreen extends State<Gmailscreen> {
               ),
               const SizedBox(height: 20),
               SizedBox(
-                     width: double.infinity,  
-                height: 50, 
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() == true) {
-                      _updateGmail(_selectedGmail!);
-                    }
-                  }, 
-                  child: const Text('Cập nhật Gmail', style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1))),
+                  onPressed: _selectedGmail != null && !_isLoading
+                      ? () => _updateGmail(_selectedGmail!)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                  ),
+                  // onPressed: () {
+                  //   if (_formKey.currentState?.validate() == true) {
+                  //     _updateGmail(_selectedGmail!);
+                  //   }
+                  // },
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Cập nhật Gmail',
+                          style: TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 1))),
                 ),
               ),
             ],

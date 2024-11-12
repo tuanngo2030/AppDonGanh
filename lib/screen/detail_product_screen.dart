@@ -128,10 +128,14 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     if (userId == null) {
       throw Exception('User ID not found in SharedPreferences');
     }
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => Center(child: CircularProgressIndicator(
+      valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+    )),
+  );
 
-    setState(() {
-      _isLoading = true;
-    });
     try {
       await CartApiService().addToCart(userId, variantId, quantity, donGia);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -144,12 +148,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
       );
 
       Navigator.of(context).pop();
-    } finally {
-      setState(() {
-        _isLoading = false; // Stop loading indicator
-        print("Loading stopped: $_isLoading");
-      });
-    }
+    }  finally {
+    Navigator.of(context).pop(); // Close the loading dialog
+  }
   }
 
   void _showFullImage(String imageUrl) {
@@ -725,13 +726,21 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                           child: Center(
                                             child: ElevatedButton(
                                               onPressed:
-                                                  selectedVariantId.isEmpty ||
-                                                          _isLoading
-                                                      ? null
-                                                      : () {
-                                                          addToCart(
+                                                  selectedVariantId.isEmpty && _isLoading? null
+                                                      : () async {
+                                                          setState(() {
+                                                            _isLoading =
+                                                                true; // Bắt đầu trạng thái loading khi bấm nút
+                                                          });
+
+                                                          await addToCart(
                                                               selectedVariantId,
                                                               donGia);
+
+                                                          setState(() {
+                                                            _isLoading =
+                                                                false; // Kết thúc trạng thái loading sau khi thêm vào giỏ hàng
+                                                          });
                                                         },
                                               style: ElevatedButton.styleFrom(
                                                 minimumSize:

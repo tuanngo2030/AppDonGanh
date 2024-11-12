@@ -19,13 +19,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _captchaController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final _apiService = ApiService();
   bool _agreedToTerms = false;
   bool _isLoading = false;
-  String? _passwordError;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String _captcha = '';
   final LoginWithApiGoogle _apiGoogle = LoginWithApiGoogle();
+  String? _usernameError;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmPasswordError;
 
   Future<void> signIn() async {
     final user = await LoginWithApiGoogle.login();
@@ -79,33 +85,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   _confirmRegister() {
     setState(() {
+      _usernameError = null;
+      _emailError = null;
       _passwordError = null;
+      _confirmPasswordError = null;
     });
 
     // Kiểm tra các trường thông tin
-    if (_usernameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tên người dùng không được để trống')),
-      );
-      return;
-    }
-
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email không hợp lệ')),
-      );
-      return;
-    }
-
-    // Kiểm tra mật khẩu
-    if (!validatePassword(_passwordController.text)) {
+    if (_usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        !_emailController.text.contains('@') ||
+        !validatePassword(_passwordController.text)) {
       setState(() {
+        _usernameError = 'Tên người dùng không được để trống';
+        _emailError = 'Email không hợp lệ';
         _passwordError =
             'Mật khẩu phải có ít nhất 7 ký tự, 1 chữ cái viết hoa,\n1 ký tự đặc biệt';
       });
       return;
     }
-
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _confirmPasswordError = 'Mật khẩu nhập lại không khớp';
+      });
+      return;
+    }
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -151,7 +155,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     }
   }
+// void _register() async {
+//   setState(() {
+//     _isLoading = true;
+//   });
 
+//   // Tạo đối tượng người dùng với thông tin từ các trường nhập liệu
+//   NguoiDung newUser = NguoiDung(
+//     tenNguoiDung: _usernameController.text,
+//     gmail: _emailController.text,
+//     matKhau: _passwordController.text,
+//     ngayTao: DateTime.now(),
+//   );
+
+//   // Lưu thông tin người dùng vào SharedPreferences
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   prefs.setString('username', newUser.tenNguoiDung!);
+//   prefs.setString('email', newUser.gmail!);
+//   prefs.setString('password', newUser.matKhau!);
+//   prefs.setString('ngayTao', newUser.ngayTao!.toIso8601String());
+
+//   setState(() {
+//     _isLoading = false;
+//   });
+
+//   // Chuyển hướng đến màn hình xác minh tài khoản
+//   Navigator.pushNamed(
+//     context,
+//     '/xacminhtk',
+//     arguments: _emailController.text,
+//   );
+
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text('Đã lưu thông tin đăng ký')),
+//   );
+// }
 // Hiển thị hộp thoại CAPTCHA
 
   Future<void> _showCaptchaDialog() async {
@@ -330,10 +368,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(20.0),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                        hintText: "example"),
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "example",
+                      errorText: _usernameError,
+                    ),
                   ),
                 ],
               ),
@@ -356,10 +405,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(20.0),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                        hintText: "abc@gmail.com"),
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "abc@gmail.com",
+                      errorText: _emailError,
+                    ),
                   ),
                 ],
               ),
@@ -386,6 +446,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       contentPadding: const EdgeInsets.all(20.0),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
                       hintText: "********",
                       errorText: _passwordError, // Hiển thị lỗi nếu có
                       suffixIcon: IconButton(
@@ -409,6 +478,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             Padding(
+              padding: const EdgeInsets.only(top: 10, left: 15, right: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(5.0),
+                    child: Text(
+                      "Mật khẩu nhập lại",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color.fromRGBO(41, 87, 35, 1),
+                      ),
+                    ),
+                  ),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      hintText: "********",
+                      errorText: _confirmPasswordError, // Hiển thị lỗi nếu có
+                      // suffixIcon: IconButton(
+                      //   icon: Icon(
+                      //     _obscureConfirmPassword
+                      //         ? Icons.visibility_off
+                      //         : Icons.visibility,
+                      //     color: Colors.grey,
+                      //   ),
+                      //   onPressed: () {
+                      //     setState(() {
+                      //       _obscureConfirmPassword = !_obscureConfirmPassword;
+                      //     });
+                      //   },
+                      // ),
+                    ),
+                    obscureText:
+                        _obscureConfirmPassword, // Điều khiển việc ẩn/hiện mật khẩu
+                  ),
+                ],
+              ),
+            ),
+            Padding(
                 padding: const EdgeInsets.only(top: 8.0, left: 15),
                 child: Align(
                     alignment: Alignment.centerLeft,
@@ -423,6 +545,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _agreedToTerms = value ?? false;
                                 });
                               },
+                              activeColor: Color.fromRGBO(41, 87, 35, 1),
+                              visualDensity: VisualDensity(horizontal: -4.0),
                             ),
                             const Text(
                               "Tôi đồng ý với ",
@@ -518,32 +642,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();
                 },
                 child: Container(
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      border: Border.fromBorderSide(
-                          BorderSide(width: 1, color: Colors.grey))),
-                  child: Row(
-                    children: [
-                      Container(
-                          height: 70,
-                          width: 70,
-                          padding: const EdgeInsets.all(20),
-                          child: Image.asset('lib/assets/gg_icon.png')),
-                      const Text("Đăng nhập với Google")
-                    ],
-                  ),
-                ),
+                    width: double.infinity, // Chiếm toàn bộ chiều rộng có sẵn
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 5), // Điều chỉnh padding để ô rộng hơn
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        border: Border.fromBorderSide(
+                            BorderSide(width: 1, color: Colors.grey))),
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.all(0),
+                          child: Image.asset('lib/assets/gg_icon.png'),
+                        ),
+                        const Expanded(
+                          child: Text("Đăng nhập với Google",
+                              textAlign: TextAlign.center),
+                        ),
+                      ],
+                    )),
               ),
             ),
             Padding(
-                padding: const EdgeInsets.only(top: 10.0),
+                padding: const EdgeInsets.only(top: 7.0, bottom: 30),
                 child: Align(
                   alignment: Alignment.center,
                   child: Row(

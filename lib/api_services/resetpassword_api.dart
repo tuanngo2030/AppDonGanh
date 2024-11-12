@@ -4,22 +4,32 @@ import 'dart:convert';
 
 class ResetPasswordApi {
   final String _resetPasswordUrl =
-      '${dotenv.env['API_URL']}/user/ResetPassword';
-
-  Future<bool> resetPassword(String email, String newPassword) async {
+      '${dotenv.env['API_URL']}/user/ResetPassword'; 
+  Future<bool> resetPassword(
+      String email, String matKhau, String newPassword) async {
     try {
       final response = await http.post(
         Uri.parse(_resetPasswordUrl),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'gmail': email,
+          'matKhau': matKhau,
           'matKhauMoi': newPassword,
         }),
       );
 
-      return response.statusCode == 200; // Trả về true nếu thành công
+      if (response.statusCode == 200) {
+        // If response is successful, return true
+        return true;
+      } else {
+        // Handle API errors
+        final Map<String, dynamic> errorResponse = json.decode(response.body);
+        print('Error: ${errorResponse['message']}'); // Log the error message
+        return false;
+      }
     } catch (e) {
-      return false; // Trả về false nếu có lỗi xảy ra
+      print('Error: $e');
+      return false; // Return false if an exception occurs
     }
   }
 }

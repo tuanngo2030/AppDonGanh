@@ -17,7 +17,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   File? _image;
   final UserImageUploadService _uploadService = UserImageUploadService();
   final UserApiService _apiService = UserApiService();
-  final DiaChiApiService _diaChiApiService = DiaChiApiService(); 
+  final DiaChiApiService _diaChiApiService = DiaChiApiService();
   String _tenNguoiDung = 'Người dùng';
   String _userId = '';
   String? _profileImageUrl;
@@ -39,7 +39,8 @@ class _ProfileScreen extends State<ProfileScreen> {
     if (storedUserId != null && storedUserId.isNotEmpty) {
       NguoiDung? user = await _apiService.fetchUserDetails(storedUserId);
       if (user != null) {
-        if (mounted) {  // Kiểm tra mounted trước khi gọi setState
+        if (mounted) {
+          // Kiểm tra mounted trước khi gọi setState
           setState(() {
             _tenNguoiDung = user.tenNguoiDung ?? 'Người dùng';
             _userId = storedUserId;
@@ -59,7 +60,8 @@ class _ProfileScreen extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
@@ -117,7 +119,9 @@ class _ProfileScreen extends State<ProfileScreen> {
         ),
         title: Text(
           'Hồ sơ',
-          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -129,21 +133,33 @@ class _ProfileScreen extends State<ProfileScreen> {
             SizedBox(height: 20),
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-                backgroundImage: _image != null
-                    ? FileImage(_image!)
-                    : _profileImageUrl != null
-                        ? NetworkImage(_profileImageUrl!)
-                        : null,
-                child: _image == null && _profileImageUrl == null
-                    ? Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 50,
-                      )
-                    : null,
+              child: Container(
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color.fromRGBO(41, 87, 35, 1),
+                  border: Border.all(
+                    color: const  Color.fromRGBO(41, 87, 35, 1), // Màu viền
+                    width: 1.5, // Độ dày viền
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                  backgroundImage: _image != null
+                      ? FileImage(_image!)
+                      : _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          : null,
+                  child: _image == null && _profileImageUrl == null
+                      ? Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 50,
+                        )
+                      : null,
+                ),
               ),
             ),
             SizedBox(height: 10),
@@ -155,13 +171,25 @@ class _ProfileScreen extends State<ProfileScreen> {
                 color: Color.fromRGBO(41, 87, 35, 1),
               ),
             ),
+            //         Divider(
+            //   color: Colors.grey,
+            //   height: 1,
+            //   thickness: 1,
+            // ),
             SizedBox(height: 20),
+            Divider(thickness: 1, height: 1),
             _buildProfileItem('Tên', _tenNguoiDung),
+            Divider(thickness: 1, height: 1),
             _buildProfileItem('Giới tính', _gioiTinh),
+            Divider(thickness: 1, height: 1),
             _buildProfileItem('Ngày sinh', _ngaySinh),
+            Divider(thickness: 1, height: 1),
             _buildProfileItem('Điện thoại', _soDienThoai),
+            Divider(thickness: 1, height: 1),
             _buildProfileItem('Email', _gmail),
-            _buildDiaChiItems(), // Hiển thị danh sách địa chỉ
+            Divider(thickness: 1, height: 1),
+            _buildDiaChiItems(),
+            Divider(thickness: 1, height: 1),
           ],
         ),
       ),
@@ -176,7 +204,7 @@ class _ProfileScreen extends State<ProfileScreen> {
     return ListTile(
       title: Text(title),
       trailing: SizedBox(
-        width: 150, // Đặt kích thước phù hợp với nhu cầu của bạn
+        width: 120, // Đặt kích thước phù hợp với nhu cầu của bạn
         child: Text(
           value,
           overflow: TextOverflow.ellipsis, // Để cắt bỏ văn bản nếu nó dài
@@ -201,13 +229,14 @@ class _ProfileScreen extends State<ProfileScreen> {
         if (title == 'Địa chỉ') {
           await Navigator.pushNamed(context, '/diachiScreen');
         }
-        if (mounted) { // Kiểm tra mounted trước khi gọi _loadUserDetails()
+        if (mounted) {
+          // Kiểm tra mounted trước khi gọi _loadUserDetails()
           _loadUserDetails();
         }
       },
     );
   }
-  
+
   @override
   void dispose() {
     // Hủy bỏ tất cả các tác vụ cần thiết ở đây nếu có
