@@ -17,7 +17,6 @@ class BlogApiService {
         List<dynamic> jsonData = json.decode(response.body);
         print('$jsonData');
         return jsonData.map((json) => BlogModel.fromJson(json)).toList();
-        
       } else {
         throw Exception('Failed to load blog posts');
       }
@@ -27,7 +26,7 @@ class BlogApiService {
     }
   }
 
-   Future<List<BlogModel>> getListBaiVietByUserId(String userId) async {
+  Future<List<BlogModel>> getListBaiVietByUserId(String userId) async {
     final url =
         Uri.parse('${dotenv.env['API_URL']}/baiviet/getBaiVietById/$userId');
     try {
@@ -49,7 +48,7 @@ class BlogApiService {
     required String userId,
     required String tieude,
     required String noidung,
-    List<String>? tags, 
+    List<String>? tags,
     List<File>? imageFiles,
   }) async {
     final url = Uri.parse('${dotenv.env['API_URL']}/baiviet/createBaiViet');
@@ -61,8 +60,7 @@ class BlogApiService {
     request.fields['noidung'] = noidung;
 
     if (tags != null && tags.isNotEmpty) {
-      request.fields['tags'] =
-          tags.join(','); 
+      request.fields['tags'] = tags.join(',');
     }
 
     // Adding image files if not null
@@ -124,38 +122,40 @@ class BlogApiService {
     }
   }
 
- Future<void> updateBaiViet({
-  required String baivietId,
-  required String tieude,
-  required String tags,
-  required String noidung,
-  required String userId,
-  List<File>? files, 
-}) async {
-  final url = Uri.parse('${dotenv.env['API_URL']}/baiviet/updateBaiViet/$baivietId');
-  var request = http.MultipartRequest('PUT', url);
+  Future<void> updateBaiViet({
+    required String baivietId,
+    required String tieude,
+    required String tags,
+    required String noidung,
+    required String userId,
+    List<File>? files,
+  }) async {
+    final url =
+        Uri.parse('${dotenv.env['API_URL']}/baiviet/updateBaiViet/$baivietId');
+    var request = http.MultipartRequest('PUT', url);
 
-  request.fields['tieude'] = tieude;
-  request.fields['tags'] = tags;
-  request.fields['noidung'] = noidung;
-  request.fields['userId'] = userId;
+    request.fields['tieude'] = tieude;
+    request.fields['tags'] = tags;
+    request.fields['noidung'] = noidung;
+    request.fields['userId'] = userId;
 
-  if (files != null) {
-    for (var file in files) {
-      request.files.add(await http.MultipartFile.fromPath('files', file.path));
+    if (files != null) {
+      for (var file in files) {
+        request.files
+            .add(await http.MultipartFile.fromPath('files', file.path));
+      }
+    }
+
+    try {
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Update successful');
+      } else {
+        print('Failed to update: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error updating post: $e');
     }
   }
-
-  try {
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      print('Update successful');
-    } else {
-      print('Failed to update: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error updating post: $e');
-  }
-}
 }

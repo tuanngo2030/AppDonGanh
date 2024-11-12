@@ -7,7 +7,7 @@ class BlogModel {
   final String tieude;
   final String noidung;
   final List<String> likes;
-  final List<PhanHoi> binhluan;
+  List<PhanHoi> binhluan;
   final List<String> tags;
   final bool trangthai;
   final bool isUpdate;
@@ -32,25 +32,25 @@ class BlogModel {
   });
 
   factory BlogModel.fromJson(Map<String, dynamic> json) {
-    var binhluanList = json['binhluan'] as List? ?? [];
-    List<PhanHoi> binhluanItems = binhluanList.map((i) => PhanHoi.fromJson(i)).toList();
+  var binhluanList = json['binhluan'] as List? ?? [];
+  List<PhanHoi> binhluanItems = binhluanList.map((i) => PhanHoi.fromJson(i)).toList();
 
-    return BlogModel(
-      id: json['_id'] ?? '',
-      userId: NguoiDung.fromJson(json['userId']),  
-      image: json['image'] != null ? List<String>.from(json['image']) : [],
-      tieude: json['tieude'] ?? '',
-      noidung: json['noidung'] ?? '',
-      likes: json['likes'] != null ? List<String>.from(json['likes']) : [],
-      binhluan: binhluanItems,
-      tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
-      trangthai: json['trangthai'] ?? false,
-      isUpdate: json['isUpdate'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
-      isLiked: json['isLiked'] ?? false,
-    );
-  }
+  return BlogModel(
+    id: json['_id'] ?? '',
+    userId: NguoiDung.fromJson(json['userId']),
+    image: json['image'] != null ? List<String>.from(json['image']) : [],
+    tieude: json['tieude'] ?? '',
+    noidung: json['noidung'] ?? '',
+    likes: json['likes'] != null ? List<String>.from(json['likes']) : [],
+    binhluan: binhluanItems,
+    tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
+    trangthai: json['trangthai'] ?? false,
+    isUpdate: json['isUpdate'] ?? false,
+    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+    isLiked: json['isLiked'] ?? false,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
@@ -74,7 +74,7 @@ class BlogModel {
 class PhanHoi {
   final String id;
   final NguoiDung userId;
-  final String binhLuan;
+  String binhLuan;
   final DateTime ngayTao;
 
   PhanHoi({

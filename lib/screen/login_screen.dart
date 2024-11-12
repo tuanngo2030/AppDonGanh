@@ -343,7 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 110, vertical: 20),
+                  const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
               child: InkWell(
                 onTap: () {
                   signIn();

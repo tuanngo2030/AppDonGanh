@@ -126,144 +126,339 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
     }
   }
 
- void _showComments(BuildContext context, BlogModel post) {
-  final TextEditingController commentController = TextEditingController();
-  final commentApiService = CommentApiService();
+  void _showComments(
+      BuildContext context, BlogModel post, Function() onCommentAdded) {
+    final TextEditingController commentController = TextEditingController();
+    final commentApiService = CommentApiService();
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) {
-      return StatefulBuilder( // Use StatefulBuilder to enable calling setState inside the modal
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Bình luận (${post.binhluan.length})",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                post.binhluan.isEmpty
-                    ? const Expanded(
-                        child: Center(
-                          child: Text(
-                            "Chưa có bình luận nào",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: post.binhluan.length,
-                          itemBuilder: (context, index) {
-                            final PhanHoi comment = post.binhluan[index];
-                            final user = comment.userId;
-                            final userName = user.tenNguoiDung ?? 'Unknown User';
-                            final userImage = user.anhDaiDien;
+    SharedPreferences.getInstance().then((prefs) {
+      final currentUserId = prefs.getString('userId');
 
-                            return ListTile(
-                              title: Row(
-                                children: [
-                                  userImage != null
-                                      ? Image.network(
-                                          userImage,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return const Icon(
-                                              Icons.account_circle,
-                                            );
-                                          },
-                                        )
-                                      : const Icon(Icons.account_circle),
-                                  const SizedBox(width: 8),
-                                  Text(userName),
-                                ],
-                              ),
-                              subtitle: Text(comment.binhLuan ?? ''),
-                              trailing: Text(
-                                "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
-                                style: const TextStyle(color: Colors.grey, fontSize: 12),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: commentController,
-                          decoration: const InputDecoration(
-                            hintText: "Viết bình luận...",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          final userId = prefs.getString('userId');
-                          final name = prefs.getString('tenNguoiDung');
-
-                          final newComment = commentController.text.trim();
-                          if (newComment.isNotEmpty && userId != null) {
-                            try {
-                              // Call API to add comment
-                              await commentApiService.addBinhLuan(
-                                baivietId: post.id,
-                                userId: userId,
-                                binhLuan: newComment,
-                              );
-
-                              // Clear the input field after sending
-                              commentController.clear();
-
-                              // Update the UI with the new comment
-                              setState(() {
-                                post.binhluan.add(PhanHoi(
-                                  id: '', // Assign an actual ID if needed
-                                  userId: NguoiDung(id: userId, tenNguoiDung: name), // Use actual user data if available
-                                  binhLuan: newComment,
-                                  ngayTao: DateTime.now(), // Set to the current date
-                                ));
-                              });
-                            } catch (e) {
-                              print('Failed to add comment: $e');
-                            }
-                          } else if (userId == null) {
-                            print('Error: User ID is null.');
-                          }
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 10.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.pop(context);
                         },
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Bình luận (${post.binhluan.length})",
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    post.binhluan.isEmpty
+                        ? const Expanded(
+                            child: Center(
+                              child: Text(
+                                "Chưa có bình luận nào",
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.grey),
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: ListView.builder(
+                              itemCount: post.binhluan.length,
+                              itemBuilder: (context, index) {
+                                final PhanHoi comment = post.binhluan[index];
+                                final user = comment.userId;
+                                final userName =
+                                    user.tenNguoiDung ?? 'Unknown User';
+                                final userImage = user.anhDaiDien;
+
+                                final isCurrentUser = user.id == currentUserId;
+                                final displayName = isCurrentUser
+                                    ? "$userName (bạn)"
+                                    : userName;
+
+                                return GestureDetector(
+                                  onLongPress: () {
+                                    _showCommentOptions(
+                                      context,
+                                      isCurrentUser,
+                                      comment,
+                                      post.id,
+                                      (updatedComment) {
+                                        setState(() {
+                                          post.binhluan[index].binhLuan =
+                                              updatedComment;
+                                        });
+                                      },
+                                      post,
+                                      setState, // Pass setState to update the parent widget
+                                    );
+                                  },
+                                  child: ListTile(
+                                    title: Row(
+                                      children: [
+                                        userImage != null
+                                            ? ClipOval(
+                                                child: Image.network(
+                                                  height: 30,
+                                                  width: 30,
+                                                  userImage,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return const Icon(
+                                                        Icons.account_circle,
+                                                        size: 30);
+                                                  },
+                                                ),
+                                              )
+                                            : const Icon(Icons.account_circle),
+                                        const SizedBox(width: 8),
+                                        Text(displayName),
+                                      ],
+                                    ),
+                                    subtitle: Text(comment.binhLuan ?? ''),
+                                    trailing: Text(
+                                      "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
+                                      style: const TextStyle(
+                                          color: Colors.grey, fontSize: 12),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: commentController,
+                              decoration: const InputDecoration(
+                                hintText: "Viết bình luận...",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () async {
+                              final userId = prefs.getString('userId');
+                              final name = prefs.getString('tenNguoiDung');
+
+                              final newComment = commentController.text.trim();
+                              if (newComment.isNotEmpty && userId != null) {
+                                try {
+                                  List<PhanHoi> updatedComments =
+                                      await commentApiService.addBinhLuan(
+                                    baivietId: post.id,
+                                    userId: userId,
+                                    binhLuan: newComment,
+                                  );
+
+                                  commentController.clear();
+
+                                  setState(() {
+                                    post.binhluan = updatedComments;
+                                  });
+
+                                  onCommentAdded();
+                                } catch (e) {
+                                  print('Failed to add comment: $e');
+                                }
+                              } else if (userId == null) {
+                                print('Error: User ID is null.');
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       );
-    },
-  );
-}
+    });
+  }
 
+  void _showCommentOptions(
+    BuildContext context,
+    bool isCurrentUser,
+    PhanHoi comment,
+    String baivietId,
+    Function(String) onCommentEdited,
+    BlogModel post,
+    Function setState, // Passing setState to parent widget
+  ) {
+    final commentApiService = CommentApiService();
 
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: [
+            if (isCurrentUser) ...[
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Sửa bình luận'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  // Show dialog to edit comment
+                  final updatedComment = await _showEditCommentDialog(
+                      context, comment.binhLuan ?? '');
+
+                  if (updatedComment != null) {
+                    // Call update API
+                    bool success = await commentApiService.updateComment(
+                      baivietId: baivietId,
+                      binhLuanId: comment.id,
+                      updatedComment: updatedComment,
+                    );
+
+                    // If update is successful, call the onCommentEdited callback
+                    if (success) {
+                      onCommentEdited(updatedComment);
+                    }
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Xóa bình luận'),
+                onTap: () {
+                  _showDeleteConfirmationDialog(
+                    context,
+                    context,
+                    comment,
+                    baivietId,
+                    post,
+                    () {
+                      setState(() {
+                        post.binhluan.removeWhere((c) =>
+                            c.id == comment.id); // Remove comment from list
+                      });
+                    },
+                  );
+                },
+              ),
+            ] else
+              ListTile(
+                leading: const Icon(Icons.report),
+                title: const Text('Báo cáo bình luận'),
+                onTap: () {
+                  // Add report logic here
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+// Helper function to show an edit dialog and get updated comment text
+  Future<String?> _showEditCommentDialog(
+      BuildContext context, String currentComment) async {
+    final TextEditingController editController =
+        TextEditingController(text: currentComment);
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sửa bình luận'),
+          content: TextField(
+            controller: editController,
+            decoration: const InputDecoration(hintText: "Nhập bình luận mới"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, editController.text);
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+    BuildContext rootContext,
+    BuildContext dialogContext,
+    PhanHoi comment,
+    String baivietId,
+    BlogModel post,
+    Function() onCommentDeleted,
+  ) {
+    showDialog(
+      context: dialogContext,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Xác nhận xóa"),
+          content: const Text("Bạn có chắc chắn muốn xóa bình luận này không?"),
+          actions: [
+            TextButton(
+              child: const Text("Hủy"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Xóa"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final commentApiService = CommentApiService();
+
+                bool isDeleted = await commentApiService.deleteBinhLuan(
+                  baivietId: baivietId,
+                  binhLuanId: comment.id,
+                );
+
+                // If deletion is successful, remove the comment from the list and update UI
+                if (isDeleted) {
+                  setState(() {
+                    post.binhluan.removeWhere((c) =>
+                        c.id == comment.id); // Remove comment from the list
+                  });
+
+                  onCommentDeleted(); // Trigger callback to update comment count in the parent widget
+
+                  ScaffoldMessenger.of(rootContext).showSnackBar(
+                    const SnackBar(
+                        content: Text('Bình luận đã được xóa thành công')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(rootContext).showSnackBar(
+                    const SnackBar(content: Text('Xóa bình luận thất bại')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +483,6 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
         title: const Text('Trang cá nhân'),
       ),
       body: SingleChildScrollView(
-        
         child: Padding(
           padding: const EdgeInsets.only(bottom: 30),
           child: Container(
@@ -435,17 +629,19 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
             // User info and post title
             ListTile(
               leading: post.userId.anhDaiDien != null
-                  ? Image.network(
-                      post.userId.anhDaiDien!,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.account_circle,
-                          size: 40,
-                        ); // Default icon if image fails to load
-                      },
+                  ? ClipOval(
+                      child: Image.network(
+                        post.userId.anhDaiDien!,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.account_circle,
+                            size: 40,
+                          ); // Default icon if image fails to load
+                        },
+                      ),
                     )
                   : const Icon(
                       Icons.account_circle,
@@ -548,7 +744,7 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                                   : Icons.thumb_up_outlined,
                               color: post.isLiked == true
                                   ? Colors.blue
-                                  : Colors.grey,
+                                  : Colors.black,
                             ),
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
@@ -564,14 +760,27 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                   ),
                   const SizedBox(width: 20),
                   GestureDetector(
-                    onTap: () => _showComments(context, post),
+                    onTap: () {
+                      _showComments(
+                        context,
+                        post,
+                        () {
+                          setState(() {
+                            // After updating comments (deleting or adding),
+                            // the comment count will automatically reflect the latest count
+                          });
+                        },
+                      );
+                    },
                     child: Row(
                       children: [
                         const Icon(size: 20, Icons.comment_outlined),
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
-                          child: Text("${post.binhluan.length ?? 0}",
-                              style: const TextStyle(fontSize: 12)),
+                          child: Text(
+                            "${post.binhluan.length}", // Make sure this reflects the latest comment count
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
                       ],
                     ),
