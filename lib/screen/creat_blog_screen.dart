@@ -18,9 +18,33 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
   final _tagsController = TextEditingController();
   List<File> _selectedImages = [];
   bool _isLoading = false;
+  bool _isFormValid = false;
   String? userId;
 
   final BlogApiService _blogApiService = BlogApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_validateForm);
+    _contentController.addListener(_validateForm);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _tagsController.dispose();
+    super.dispose();
+  }
+
+  // Check if the form is valid
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _titleController.text.isNotEmpty &&
+          _contentController.text.isNotEmpty;
+    });
+  }
 
   // Image picker
   Future<void> _pickImages() async {
@@ -67,16 +91,16 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
         _contentController.clear();
         _tagsController.clear();
         _selectedImages.clear();
+        _isFormValid = false;
       });
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bài viết đã được đăng thành công!')),
       );
-      
+
       // Optionally, navigate back
       Navigator.pop(context);
-
     } catch (e) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -143,13 +167,18 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          onPressed: _isLoading ? null : _submitPost,
+                          onPressed:
+                              _isFormValid && !_isLoading ? _submitPost : null,
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            foregroundColor: const Color.fromRGBO(59, 99, 53, 1),
-                            backgroundColor: Colors.white,
+                            foregroundColor: _isFormValid && !_isLoading
+                                ? const Color.fromRGBO(59, 99, 53, 1)
+                                : Colors.white,
+                            backgroundColor: _isFormValid && !_isLoading
+                                ? Colors.white
+                                : Colors.grey,
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator()
@@ -178,7 +207,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('HiHi'),
-                            
                           ],
                         ),
                       ),

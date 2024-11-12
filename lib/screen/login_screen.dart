@@ -209,12 +209,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                        enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Color.fromRGBO(41, 87, 35, 1)),
                     ),
                       hintText: "abc@gmail.com",
@@ -253,12 +253,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                          enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Color.fromRGBO(41, 87, 35, 1)),
                     ),
                       hintText: "Nhập mật khẩu",
@@ -283,8 +283,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
-                          activeColor: Color.fromRGBO(41, 87, 35, 1),
-                          visualDensity: VisualDensity(horizontal: -4.0),
+                          activeColor: const Color.fromRGBO(41, 87, 35, 1),
+                          visualDensity: const VisualDensity(horizontal: -4.0),
                         ),
                       ),
                       Padding(
