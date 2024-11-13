@@ -55,7 +55,7 @@ class ChatApiService{
     }
   }
 
-Future<String?> uploadFile(File file, String type) async {
+Future<String?> uploadFile(File file, String type, void Function(double) onProgress) async {
   try {
     String endpoint = '${dotenv.env['API_URL']}/user/upload_ImageOrVideo';
     var request = http.MultipartRequest('POST', Uri.parse(endpoint));
@@ -70,12 +70,16 @@ Future<String?> uploadFile(File file, String type) async {
 
     request.fields['type'] = type;
 
+    // Tính kích thước file để theo dõi tiến trình
+    final fileLength = await file.length();
+    int totalBytesSent = 0;
+
     // Gửi yêu cầu và nhận phản hồi
-    final response = await request.send();
-    
-    if (response.statusCode == 200) {
-      // Xử lý phản hồi từ server
-      final responseData = await http.Response.fromStream(response);
+    final streamResponse = await request.send();
+
+    if (streamResponse.statusCode == 200) {
+      // Đọc dữ liệu phản hồi từ server
+      final responseData = await http.Response.fromStream(streamResponse);
       print('Response data: ${responseData.body}');
 
       // Parse JSON từ phản hồi
@@ -83,14 +87,9 @@ Future<String?> uploadFile(File file, String type) async {
       print('JSON Response: $jsonResponse');
 
       // Truy xuất URL ảnh hoặc video từ phản hồi
-      String? url;
-      if (type == 'image') {
-        url = jsonResponse['imageUrl']; // Kiểm tra trường này
-      } else {
-        url = jsonResponse['videoUrl']; // Kiểm tra trường này
-      }
+      String? url = (type == 'image') ? jsonResponse['imageUrl'] : jsonResponse['videoUrl'];
 
-      // Kiểm tra nếu URL hợp lệ (URL phải bắt đầu bằng http hoặc https)
+      // Kiểm tra URL hợp lệ
       if (url != null && url.startsWith('http')) {
         return url; // Trả về URL hợp lệ
       } else {
@@ -98,8 +97,7 @@ Future<String?> uploadFile(File file, String type) async {
         return null;
       }
     } else {
-      print('Upload failed with status code: ${response.statusCode}');
-      // print('Response body: ${response.body}');
+      print('Upload failed with status code: ${streamResponse.statusCode}');
       return null;
     }
   } catch (e) {
@@ -107,6 +105,58 @@ Future<String?> uploadFile(File file, String type) async {
     return null;
   }
 }
+// Future<String?> uploadFile(File file, String type) async {
+//   try {
+//     String endpoint = '${dotenv.env['API_URL']}/user/upload_ImageOrVideo';
+//     var request = http.MultipartRequest('POST', Uri.parse(endpoint));
+
+//     // Thêm file vào request
+//     request.files.add(
+//       await http.MultipartFile.fromPath(
+//         type == 'image' ? 'image' : 'video', // Tên field tương ứng với loại file
+//         file.path, // Đường dẫn tới file cần upload
+//       ),
+//     );
+
+//     request.fields['type'] = type;
+
+//     // Gửi yêu cầu và nhận phản hồi
+//     final response = await request.send();
+    
+//     if (response.statusCode == 200) {
+//       // Xử lý phản hồi từ server
+//       final responseData = await http.Response.fromStream(response);
+//       print('Response data: ${responseData.body}');
+
+//       // Parse JSON từ phản hồi
+//       final jsonResponse = jsonDecode(responseData.body);
+//       print('JSON Response: $jsonResponse');
+
+//       // Truy xuất URL ảnh hoặc video từ phản hồi
+//       String? url;
+//       if (type == 'image') {
+//         url = jsonResponse['imageUrl']; // Kiểm tra trường này
+//       } else {
+//         url = jsonResponse['videoUrl']; // Kiểm tra trường này
+//       }
+
+//       // Kiểm tra nếu URL hợp lệ (URL phải bắt đầu bằng http hoặc https)
+//       if (url != null && url.startsWith('http')) {
+//         return url; // Trả về URL hợp lệ
+//       } else {
+//         print('Invalid URL received: $url');
+//         return null;
+//       }
+//     } else {
+//       print('Upload failed with status code: ${response.statusCode}');
+//       // print('Response body: ${response.body}');
+//       return null;
+//     }
+//   } catch (e) {
+//     print('Error uploading file: $e');
+//     return null;
+//   }
+// }
 
 
 }
