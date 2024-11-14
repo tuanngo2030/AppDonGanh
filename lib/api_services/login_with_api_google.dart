@@ -54,8 +54,13 @@ class LoginWithApiGoogle {
     throw Exception('Error occurred while registering user: $error');
   }
 }
+ static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: dotenv.env['WEB_CLIENT_ID'],  // Sử dụng Web Client ID ở đây
+    scopes: [
+      'email',
+    ],
+  );
 
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static Future<GoogleSignInAccount?> login() async {
     await _googleSignIn.signOut();

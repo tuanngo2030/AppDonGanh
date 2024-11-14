@@ -44,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   File? _video;
   VideoPlayerController? _videoController;
   bool _isLoading = false; // Biến để theo dõi trạng thái tải
-
+  double _uploadProgress = 0.0;
   @override
   void initState() {
     super.initState();
@@ -165,6 +165,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void connect() {
+      setState(() {
+    _isLoading = true; // Bắt đầu trạng thái loading
+  });
+    // Kiểm tra nếu socket đã tồn tại và đang kết nối thì không cần tạo kết nối mới
+    if (socket != null && socket!.connected) {
+      print("Socket is already connected.");
+      return;
+    }
     if (socket != null && socket!.connected) {
       // Hủy các sự kiện và ngắt kết nối socket
       socket!.off('Joined');
@@ -172,20 +180,19 @@ class _ChatScreenState extends State<ChatScreen> {
       socket!.off('error');
       socket!.off('disconnect');
       socket!.off('reconnect');
-      // socket!.disconnect();
-      socket = null; // Giải phóng socket để chuẩn bị tạo kết nối mới
       socket!.disconnect();
-      socket!.clearListeners(); // Clear all previous listeners
+      socket = null; // Giải phóng socket để chuẩn bị tạo kết nối mới
     }
 
-
-    // Tạo socket mới
+    // Tạo socket mới với các cấu hình kết nối ổn định hơn
     socket = IO.io(
       "${dotenv.env['API_SOCKET_URL']}",
       <String, dynamic>{
         "transports": ["websocket"],
         "autoConnect": true,
         "reconnection": true,
+        "reconnectionAttempts": 1, // Số lần thử kết nối lại tối đa
+        "reconnectionDelay": 5000, // Độ trễ giữa các lần thử kết nối lại
         'auth': {
           'token': token,
         }
@@ -215,19 +222,17 @@ class _ChatScreenState extends State<ChatScreen> {
     socket!.on('message', (data) {
       if (data != null && data['message'] != null) {
         final message = Message(
-          id: data['message']['_id'] ??
-              '', // Sử dụng giá trị mặc định nếu không có
+          id: data['message']['_id'] ?? '',
           text: data['message']['text'] ?? '',
           seen: false,
-          msgByUserId: data['message']['msgByUserId'] ?? '', // Kiểm tra giá trị
-          createdAt:
-              DateTime.now(), // Sử dụng thời gian hiện tại hoặc lấy từ server
-          updatedAt: DateTime.now(), // Tương tự
-          imageUrl: data['message']['imageUrl'], // Thêm imageUrl nếu có
-          videoUrl: data['message']['videoUrl'], // Thêm videoUrl nếu có
+          msgByUserId: data['message']['msgByUserId'] ?? '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          imageUrl: data['message']['imageUrl'],
+          videoUrl: data['message']['videoUrl'],
         );
 
-        // Thêm tin nhắn vào danh sách
+        // Thêm tin nhắn vào danh sách nếu nó chưa tồn tại
         if (!messages.any((msg) => msg.id == message.id)) {
           addMessage(message);
         }
@@ -242,7 +247,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     socket!.onDisconnect((_) {
       print("Disconnected from the server");
-      // Clear the token from the socket
     });
 
     socket!.onReconnect((_) {
@@ -252,7 +256,99 @@ class _ChatScreenState extends State<ChatScreen> {
         'conversationId': widget.conversationId,
       });
     });
+      setState(() {
+    _isLoading = false; // Kết thúc trạng thái loading
+  });
   }
+
+  // void connect() {
+  //   if (socket != null && socket!.connected) {
+  //     // Hủy các sự kiện và ngắt kết nối socket
+  //     socket!.off('Joined');
+  //     socket!.off('message');
+  //     socket!.off('error');
+  //     socket!.off('disconnect');
+  //     socket!.off('reconnect');
+  //     // socket!.disconnect();
+  //     socket = null; // Giải phóng socket để chuẩn bị tạo kết nối mới
+  //     socket!.disconnect();
+  //     socket!.clearListeners(); // Clear all previous listeners
+  //   }
+
+  //   // Tạo socket mới
+  //   socket = IO.io(
+  //     "${dotenv.env['API_SOCKET_URL']}",
+  //     <String, dynamic>{
+  //       "transports": ["websocket"],
+  //       "autoConnect": true,
+  //       "reconnection": true,
+  //       'auth': {
+  //         'token': token,
+  //       }
+  //     },
+  //   );
+
+  //   socket!.connect();
+
+  //   // Thêm các sự kiện sau khi socket được kết nối
+  //   socket!.onConnect((_) {
+  //     print("Connected to the server with token: $token");
+  //     socket!.emit("join", {
+  //       'token': token,
+  //       'conversationId': widget.conversationId,
+  //     });
+  //   });
+
+  //   socket!.on('Joined', (data) {
+  //     List<dynamic> previousMessages = data['messages'];
+  //     for (var msg in previousMessages) {
+  //       addMessage(Message.fromJson(msg));
+  //     }
+
+  //     print("Joined conversation with messages: $data");
+  //   });
+
+  //   socket!.on('message', (data) {
+  //     if (data != null && data['message'] != null) {
+  //       final message = Message(
+  //         id: data['message']['_id'] ??
+  //             '', // Sử dụng giá trị mặc định nếu không có
+  //         text: data['message']['text'] ?? '',
+  //         seen: false,
+  //         msgByUserId: data['message']['msgByUserId'] ?? '', // Kiểm tra giá trị
+  //         createdAt:
+  //             DateTime.now(), // Sử dụng thời gian hiện tại hoặc lấy từ server
+  //         updatedAt: DateTime.now(), // Tương tự
+  //         imageUrl: data['message']['imageUrl'], // Thêm imageUrl nếu có
+  //         videoUrl: data['message']['videoUrl'], // Thêm videoUrl nếu có
+  //       );
+
+  //       // Thêm tin nhắn vào danh sách
+  //       if (!messages.any((msg) => msg.id == message.id)) {
+  //         addMessage(message);
+  //       }
+  //     } else {
+  //       print('Received null data: $data');
+  //     }
+  //   });
+
+  //   socket!.on('error', (data) {
+  //     print('Error: ${data['message']}');
+  //   });
+
+  //   socket!.onDisconnect((_) {
+  //     print("Disconnected from the server");
+  //     // Clear the token from the socket
+  //   });
+
+  //   socket!.onReconnect((_) {
+  //     print("Reconnected to the server");
+  //     socket!.emit("join", {
+  //       'token': token,
+  //       'conversationId': widget.conversationId,
+  //     });
+  //   });
+  // }
 
   // Hàm để chuyển đổi tệp thành base64
   Future<String> _fileToBase64(File file) async {
@@ -261,43 +357,53 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) async {
+
+      setState(() {
+    _isLoading = true; // Bắt đầu trạng thái loading
+  });
     if (!mounted || text.isEmpty && _image == null && _video == null) return;
 
     if (socket != null && socket!.connected) {
       String? imageUrl;
       String? videoUrl;
 
-      // Nếu có hình ảnh, tải lên và lấy URL
+      setState(() => _isLoading = true);
+
       if (_image != null) {
-        imageUrl = await ChatApiService().uploadFile(_image!, 'image');
+        imageUrl =
+            await ChatApiService().uploadFile(_image!, 'image', (progress) {
+          // setState(() => _uploadProgress = progress); // Cập nhật tiến trình ảnh
+        });
         if (imageUrl == null) {
           print("Failed to upload image");
+          setState(() => _isLoading = false);
           return;
         }
       }
 
-      // Nếu có video, tải lên và lấy URL
       if (_video != null) {
-        videoUrl = await ChatApiService().uploadFile(_video!, 'video');
+        videoUrl =
+            await ChatApiService().uploadFile(_video!, 'video', (progress) {
+          // setState(
+          //     () => _uploadProgress = progress); // Cập nhật tiến trình video
+        });
         if (videoUrl == null) {
           print("Failed to upload video");
+          setState(() => _isLoading = false);
           return;
         }
       }
 
-      bool sendWithProductId = text == widget.productModel.nameProduct;
-
-      // Tạo tin nhắn mới và gửi tới server
       socket!.emit('sendMessage', {
         'conversationId': widget.conversationId,
         'text': text,
         'imageUrl': imageUrl,
         'videoUrl': videoUrl,
-        if (sendWithProductId) 'IDSanPham': widget.productModel.id,
+        if (text == widget.productModel.nameProduct)
+          'IDSanPham': widget.productModel.id,
         'token': token,
       });
 
-      // Xóa dữ liệu sau khi gửi tin nhắn
       _controller.clear();
       setState(() {
         _image = null;
@@ -305,11 +411,63 @@ class _ChatScreenState extends State<ChatScreen> {
         _videoController?.dispose();
         _videoController = null;
         _isLoading = false;
+        _uploadProgress = 0.0; // Đặt lại tiến trình tải
       });
     } else {
       print("Socket is not connected.");
     }
   }
+
+  // void sendMessage(String text) async {
+  //   if (!mounted || text.isEmpty && _image == null && _video == null) return;
+
+  //   if (socket != null && socket!.connected) {
+  //     String? imageUrl;
+  //     String? videoUrl;
+
+  //     // Nếu có hình ảnh, tải lên và lấy URL
+  //     if (_image != null) {
+  //       imageUrl = await ChatApiService().uploadFile(_image!, 'image');
+  //       if (imageUrl == null) {
+  //         print("Failed to upload image");
+  //         return;
+  //       }
+  //     }
+
+  //     // Nếu có video, tải lên và lấy URL
+  //     if (_video != null) {
+  //       videoUrl = await ChatApiService().uploadFile(_video!, 'video');
+  //       if (videoUrl == null) {
+  //         print("Failed to upload video");
+  //         return;
+  //       }
+  //     }
+
+  //     bool sendWithProductId = text == widget.productModel.nameProduct;
+
+  //     // Tạo tin nhắn mới và gửi tới server
+  //     socket!.emit('sendMessage', {
+  //       'conversationId': widget.conversationId,
+  //       'text': text,
+  //       'imageUrl': imageUrl,
+  //       'videoUrl': videoUrl,
+  //       if (sendWithProductId) 'IDSanPham': widget.productModel.id,
+  //       'token': token,
+  //     });
+
+  //     // Xóa dữ liệu sau khi gửi tin nhắn
+  //     _controller.clear();
+  //     setState(() {
+  //       _image = null;
+  //       _video = null;
+  //       _videoController?.dispose();
+  //       _videoController = null;
+  //       _isLoading = false;
+  //     });
+  //   } else {
+  //     print("Socket is not connected.");
+  //   }
+  // }
 
   void addMessage(Message message) {
     if (mounted) {
@@ -332,199 +490,99 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // Header với avatar và thông tin người nhận
-            Container(
-              height: 120,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                color: Color.fromRGBO(41, 87, 35, 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        height: 35,
-                        width: 35,
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(100)),
-                          color: Colors.white,
-                        ),
-                        child: const Icon(Icons.arrow_back,
-                            color: Color.fromRGBO(41, 87, 35, 1)),
-                      ),
-                    ),
-                    const SizedBox(width: 30),
-                    CircleAvatar(
-                      backgroundColor: Colors.grey[200],
-                      backgroundImage:
-                          widget.receiverData?['anhDaiDien'] != null
-                              ? NetworkImage(widget.receiverData!['anhDaiDien'])
-                              : null,
-                      radius: 20,
-                      child: widget.receiverData?['anhDaiDien'] == null
-                          ? const Icon(Icons.person, color: Colors.grey)
-                          : null,
-                    ),
-                    const SizedBox(width: 15),
-                    if (widget.receiverData != null)
-                      Text(
-                        widget.receiverData!['tenNguoiDung'] ?? 'Unknown User',
-                        style: const TextStyle(
-                            fontSize: 20, color: Colors.white70),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Danh sách sản phẩm và tin nhắn
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: messages.length + 1, // Sản phẩm + tin nhắn
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      // Hiển thị sản phẩm ở đầu danh sách
-                      return _buildProductWidget();
-                    } else {
-                      // Hiển thị tin nhắn
-                      final message = messages[index - 1];
-                      return _buildMessage(message);
-                    }
-                  },
-                ),
-              ),
-            ),
-
-            // Vùng nhập tin nhắn
-            _buildInputArea(),
-          ],
-        ),
-      ),
-    );
-  }
-
- Widget _buildMessage(Message message) {
-  String formattedTime = DateFormat('HH:mm').format(message.createdAt);
-
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Column(
-      crossAxisAlignment: message.msgByUserId == widget.userId
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
       children: [
-        if (message.text.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: message.msgByUserId == widget.userId
-                  ? Colors.green[200]
-                  : Colors.grey[300],
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: message.msgByUserId == widget.userId
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                Text(message.text, style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 4),
-                Text(
-                  formattedTime,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-              ],
-            ),
-          ),
-        if (message.imageUrl != null)
-          GestureDetector(
-            onTap: () {
-              _showFullImage(message.imageUrl!);
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Image.network(
-                  message.imageUrl!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-        if (message.videoUrl != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: SizedBox(
-              height: 150,
-              width: 150,
-              child: VideoPlayerWidget(videoUrl: message.videoUrl!),
-            ),
-          ),
-        if (message.IDSanPham != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blueAccent),
-              ),
-              child: Row(
-                children: [
-                  // Display product image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      message.IDSanPham!.imageProduct,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
+        SafeArea(
+          child: Column(
+            children: <Widget>[
+              // Header với avatar và thông tin người nhận
+              Container(
+                height: 120,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
                   ),
-                  const SizedBox(width: 10),
-                  // Display product name and a brief description
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message.IDSanPham!.nameProduct,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(41, 87, 35, 1),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          height: 35,
+                          width: 35,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                            color: Colors.white,
                           ),
+                          child: const Icon(Icons.arrow_back,
+                              color: Color.fromRGBO(41, 87, 35, 1)),
                         ),
-                        const SizedBox(height: 4),
+                      ),
+                      const SizedBox(width: 30),
+                      CircleAvatar(
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage:
+                            widget.receiverData?['anhDaiDien'] != null
+                                ? NetworkImage(widget.receiverData!['anhDaiDien'])
+                                : null,
+                        radius: 20,
+                        child: widget.receiverData?['anhDaiDien'] == null
+                            ? const Icon(Icons.person, color: Colors.grey)
+                            : null,
+                      ),
+                      const SizedBox(width: 15),
+                      if (widget.receiverData != null)
                         Text(
-                          message.IDSanPham!.moTa,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
+                          widget.receiverData!['tenNguoiDung'] ?? 'Unknown User',
+                          style: const TextStyle(
+                              fontSize: 20, color: Colors.white70),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
-                ],
+                ),
+              ),
+
+              // Danh sách sản phẩm và tin nhắn
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.length + 1, // Sản phẩm + tin nhắn
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        // Hiển thị sản phẩm ở đầu danh sách
+                        return _buildProductWidget();
+                      } else {
+                        // Hiển thị tin nhắn
+                        final message = messages[index - 1];
+                        return _buildMessage(message);
+                      }
+                    },
+                  ),
+                ),
+              ),
+
+              // Vùng nhập tin nhắn
+              _buildInputArea(),
+            ],
+          ),
+        ),
+
+        // Hiển thị hiệu ứng tải khi _isLoading là true
+        if (_isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(59, 99, 53, 1)),
               ),
             ),
           ),
@@ -533,6 +591,122 @@ class _ChatScreenState extends State<ChatScreen> {
   );
 }
 
+
+  Widget _buildMessage(Message message) {
+    String formattedTime = DateFormat('HH:mm').format(message.createdAt);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: message.msgByUserId == widget.userId
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          if (message.text.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: message.msgByUserId == widget.userId
+                    ? Colors.green[200]
+                    : Colors.grey[300],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                crossAxisAlignment: message.msgByUserId == widget.userId
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  Text(message.text, style: const TextStyle(fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Text(
+                    formattedTime,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          if (message.imageUrl != null)
+            GestureDetector(
+              onTap: () {
+                _showFullImage(message.imageUrl!);
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Image.network(
+                    message.imageUrl!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          if (message.videoUrl != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                height: 150,
+                width: 150,
+                child: VideoPlayerWidget(videoUrl: message.videoUrl!),
+              ),
+            ),
+          if (message.IDSanPham != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blueAccent),
+                ),
+                child: Row(
+                  children: [
+                    // Display product image
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        message.IDSanPham!.imageProduct,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Display product name and a brief description
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            message.IDSanPham!.nameProduct,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            message.IDSanPham!.moTa,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildInputArea() {
     return Padding(
@@ -901,6 +1075,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                           ),
                         ),
                       ),
+                      
                     ],
                   )
                 : const Center(child: Text("Video không thể phát!")),

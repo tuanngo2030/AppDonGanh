@@ -82,5 +82,10 @@
 
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>Location</key>
+		<string>Ứng dụng cần quyền vị trí để cung cấp các tính năng dựa trên vị trí.</string>
+	</dict>
 </dict>
 </plist>

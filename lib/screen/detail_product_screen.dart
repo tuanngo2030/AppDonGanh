@@ -198,55 +198,102 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     _startHideTimer(); // Khởi động lại bộ đếm
   }
 
-  void _onChat() async {
-    final ChatApiService apiService = ChatApiService();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('userId');
-    token = prefs.getString('token');
+  // void _onChat() async {
+  //   final ChatApiService apiService = ChatApiService();
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userId = prefs.getString('userId');
+  //   token = prefs.getString('token');
 
-    if (userId != null) {
-      try {
-        // Print user ID for debugging
-        print('User ID: $userId');
-        print(token);
+  //   if (userId != null) {
+  //     try {
+  //       // Print user ID for debugging
+  //       print('User ID: $userId');
+  //       print(token);
 
-        // Define the receiver ID for the conversation
-        String receiverId = '671fa0042871b08206a87749';
+  //       // Define the receiver ID for the conversation
+  //       String receiverId = '671fa0042871b08206a87749';
 
-        // Create a conversation and wait for the response
-        final response =
-            await apiService.createConversation(userId!, receiverId);
+  //       // Create a conversation and wait for the response
+  //       final response =
+  //           await apiService.createConversation(userId!, receiverId);
 
-        if (response != null && response['_id'] != null) {
-          String conversationId =
-              response['_id']; // Retrieve the conversation ID from response
+  //       if (response != null && response['_id'] != null) {
+  //         String conversationId =
+  //             response['_id']; // Retrieve the conversation ID from response
 
-          print('conversationId: $conversationId');
+  //         print('conversationId: $conversationId');
 
-          // Navigate to the ChatScreen with the new conversationId
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                token: token!,
-                title: conversationId,
-                userId: userId!, // Send userId to ChatScreen
-                conversationId: conversationId,
-                receiverData:
-                    response['receiver_id'], // Pass receiver data if needed
-                productModel: widget.product,
-              ),
+  //         // Navigate to the ChatScreen with the new conversationId
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => ChatScreen(
+  //               token: token!,
+  //               title: conversationId,
+  //               userId: userId!, // Send userId to ChatScreen
+  //               conversationId: conversationId,
+  //               receiverData:
+  //                   response['receiver_id'], // Pass receiver data if needed
+  //               productModel: widget.product,
+  //             ),
+  //           ),
+  //         );
+  //       } else {
+  //         _showSnackBar('Không thể tạo cuộc trò chuyện.');
+  //       }
+  //     } catch (e) {
+  //       _showSnackBar('Đã xảy ra lỗi: $e');
+  //     }
+  //   }
+  // }
+void _onChat() async {
+  setState(() {
+    _isLoading = true; // Bắt đầu trạng thái loading
+  });
+
+  final ChatApiService apiService = ChatApiService();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  userId = prefs.getString('userId');
+  token = prefs.getString('token');
+
+  if (userId != null) {
+    try {
+      print('User ID: $userId');
+      print(token);
+
+      String receiverId = '671fa0042871b08206a87749';
+      final response = await apiService.createConversation(userId!, receiverId);
+
+      if (response != null && response['_id'] != null) {
+        String conversationId = response['_id'];
+
+        print('conversationId: $conversationId');
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              token: token!,
+              title: conversationId,
+              userId: userId!,
+              conversationId: conversationId,
+              receiverData: response['receiver_id'],
+              productModel: widget.product,
             ),
-          );
-        } else {
-          _showSnackBar('Không thể tạo cuộc trò chuyện.');
-        }
-      } catch (e) {
-        _showSnackBar('Đã xảy ra lỗi: $e');
+          ),
+        );
+      } else {
+        _showSnackBar('Không thể tạo cuộc trò chuyện.');
       }
+    } catch (e) {
+      _showSnackBar('Đã xảy ra lỗi: $e');
     }
   }
 
+  setState(() {
+    _isLoading = false; // Kết thúc trạng thái loading
+  });
+}
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
@@ -296,9 +343,10 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         ],
       ),
       body: Stack(
-        children: [
+        children: [ 
           SingleChildScrollView(
             child: SafeArea(
+              
               child: Column(
                 children: [
                   GestureDetector(
@@ -1045,44 +1093,62 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
             ),
           ),
           // Nút cố định với vị trí thu gọn và mở rộng
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 500),
-            bottom: 20.0,
-            right: isButtonHidden
-                ? -30.0
-                : 20.0, // Di chuyển nửa nút ra ngoài màn hình
-            child: GestureDetector(
-              onTap: () {
+         AnimatedPositioned(
+        duration: Duration(milliseconds: 500),
+        bottom: 20.0,
+        right: isButtonHidden ? -30.0 : 20.0,
+        child: GestureDetector(
+          onTap: () {
+            if (isButtonHidden) {
+              setState(() {
+                isButtonHidden = false;
+              });
+              _startHideTimer();
+            } else {
+              _onChat();
+            }
+          },
+          child: Opacity(
+            opacity: isButtonHidden ? 0.5 : 1.0,
+            child: FloatingActionButton(
+              backgroundColor: Color.fromRGBO(59, 99, 53, 1),
+              onPressed: () {
                 if (isButtonHidden) {
                   setState(() {
-                    isButtonHidden = false; // Hiện nút nếu đang ẩn
+                    isButtonHidden = false;
                   });
-                  _startHideTimer(); // Bắt đầu bộ đếm 5 giây
+                  _startHideTimer();
                 } else {
-                  _onChat(); // Gọi _onChat nếu nút đã hiển thị đầy đủ
+                  _onChat();
                 }
               },
-              child: Opacity(
-                opacity: isButtonHidden
-                    ? 0.5
-                    : 1.0, // Giảm độ trong suốt khi nút bị thu gọn
-                child: FloatingActionButton(
-                  backgroundColor: Color.fromRGBO(59, 99, 53, 1),
-                  onPressed: () {
-                    if (isButtonHidden) {
-                      setState(() {
-                        isButtonHidden = false; // Hiện nút nếu đang ẩn
-                      });
-                      _startHideTimer(); // Bắt đầu bộ đếm 5 giây
-                    } else {
-                      _onChat(); // Gọi _onChat nếu nút đã hiển thị đầy đủ
-                    }
-                  },
-                  child: Icon(Icons.message_outlined, color: Colors.white),
-                ),
-              ),
+              child: Icon(Icons.message_outlined, color: Colors.white),
             ),
-          )
+          ),
+        ),
+       ),
+
+       // Overlay loading
+            if (_isLoading)
+        Container(
+          color: Colors.black.withOpacity(0.5),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ),
+        // if (_isLoading)
+        //   Positioned.fill(
+        //     child: Container(
+        //       color: Colors.black.withOpacity(0.5), // Tạo màu mờ cho toàn bộ màn hình
+        //       child: const Center(
+        //         child: CircularProgressIndicator(
+        //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
         ],
       ),
     );

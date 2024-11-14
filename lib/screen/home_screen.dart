@@ -421,8 +421,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailProductScreen(product: product, isfavorited: product.isFavorited),
+                              builder: (context) => DetailProductScreen(
+                                  product: product,
+                                  isfavorited: product.isFavorited),
                             ),
                           );
                         },
@@ -561,7 +562,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: GestureDetector(
                                 onTap: () {
-                                  print('add to cart');
+                                  // print('add to cart');
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailProductScreen(
+                                          product: product,
+                                          isfavorited: product.isFavorited),
+                                    ),
+                                  );
+
+                                  
                                 },
                                 child: Container(
                                   height: 35,
@@ -575,24 +587,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Row(
+                                    // children: [
+                                    //   Expanded(
+                                    //     flex: 2,
+                                    //     child: Icon(
+                                    //       Icons.shopping_cart_outlined,
+                                    //       color: Colors.white,
+                                    //     ),
+                                    //   ),
+                                    //   Container(
+                                    //     height: double.infinity,
+                                    //     width: 1,
+                                    //     color: Colors.black,
+                                    //   ),
+                                    //   Expanded(
+                                    //     flex: 3,
+                                    //     child: Center(
+                                    //       child: Text(
+                                    //         'Mua Ngay',
+                                    //         style: TextStyle(
+                                    //           color: Colors.white,
+                                    //           fontWeight: FontWeight.w700,
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ],
                                     children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Icon(
-                                          Icons.shopping_cart_outlined,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Container(
-                                        height: double.infinity,
-                                        width: 1,
-                                        color: Colors.black,
-                                      ),
+                                      Container(),
                                       Expanded(
                                         flex: 3,
                                         child: Center(
                                           child: Text(
-                                            'Mua Ngay',
+                                            'Xem sản phẩm',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.w700,

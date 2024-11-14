@@ -51,6 +51,7 @@ import 'package:don_ganh_app/screen/trang_xin_chao.dart';
 void main() async {
   await dotenv.load(fileName: "lib/.env");
   runApp(
+    // const MyApp(),
     DevicePreview(
       enabled: !kReleaseMode,
       builder: (context) => ChangeNotifierProvider(

@@ -454,17 +454,15 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_currentLocation == widget.initialLocation) {
-            // If the current location is the initial location, get the current location
             _getCurrentLocation();
           } else {
-            // Show confirmation dialog before returning the selected location
             _showConfirmationDialog();
           }
         },
         child: Icon(
           _currentLocation == widget.initialLocation
-              ? Icons.my_location // Show location icon when fetching location
-              : Icons.check, // Show check icon when ready
+              ? Icons.my_location 
+              : Icons.check, 
         ),
       ),
     );
