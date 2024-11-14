@@ -550,14 +550,16 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    tenNguoiDung! ?? 'Unknow',
+                    tenNguoiDung ??
+                        'Unknown', // Remove the null check operator `!`
                     style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: Color.fromRGBO(47, 88, 42, 1)),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: Color.fromRGBO(47, 88, 42, 1),
+                    ),
                   ),
                 ),
-                 Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -596,7 +598,7 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                           ],
                         ),
                       ),
-                       Expanded(
+                      Expanded(
                         flex: 1,
                         child: Column(
                           children: [

@@ -41,21 +41,14 @@ class TrangXinChao extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                       var connectivityResult = await Connectivity().checkConnectivity();
-                    if (connectivityResult != ConnectivityResult.none) {
-                      // If there is an internet connection, navigate to the registration screen
                     Navigator.pushNamed(context, '/loginscreen');
-                    } else {
-                      // If there is no internet, show a dialog to inform the user
-                      checkInternetConnection(context);
-                    }
                   },
                   
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white, // Màu nền của nút
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  child: const Text('Đăng nhập',style: TextStyle(color:const Color.fromARGB(255, 41, 87, 35),fontSize: 15 )),
+                  child: const Text('Đăng nhập',style: TextStyle(color:Color.fromARGB(255, 41, 87, 35),fontSize: 15 )),
                 ),
               ),
               const SizedBox(height: 10), // Add space between buttons
@@ -84,7 +77,7 @@ class TrangXinChao extends StatelessWidget {
                   child: const Text('Bạn là người mới? Đăng ký ngay!',style: TextStyle(fontSize: 15,color: Colors.white),),
                 ),
               ),
-              SizedBox(height: 120), // Add space between buttons and social media icons
+              const SizedBox(height: 120), // Add space between buttons and social media icons
               const SizedBox(
                 width: double.infinity,
                 child: Row(
