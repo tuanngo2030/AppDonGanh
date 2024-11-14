@@ -3,6 +3,7 @@ import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:don_ganh_app/screen/ban_la.dart';
 import 'package:don_ganh_app/screen/manageraccount_screen.dart';
+import 'package:don_ganh_app/widget/tb_connetInternet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -443,7 +444,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> signIn() async {
     final user = await LoginWithApiGoogle.login();
-
     if (user == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));

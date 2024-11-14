@@ -171,11 +171,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                 color: Color.fromRGBO(41, 87, 35, 1),
               ),
             ),
-            //         Divider(
-            //   color: Colors.grey,
-            //   height: 1,
-            //   thickness: 1,
-            // ),
             SizedBox(height: 20),
             Divider(thickness: 1, height: 1),
             _buildProfileItem('Tên', _tenNguoiDung),

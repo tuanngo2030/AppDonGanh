@@ -1,3 +1,5 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:don_ganh_app/widget/tb_connetInternet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,10 +40,17 @@ class TrangXinChao extends StatelessWidget {
              SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Xử lý khi nhấn nút đăng nhập
-                     Navigator.pushNamed(context, '/loginscreen');
+                  onPressed: () async {
+                       var connectivityResult = await Connectivity().checkConnectivity();
+                    if (connectivityResult != ConnectivityResult.none) {
+                      // If there is an internet connection, navigate to the registration screen
+                    Navigator.pushNamed(context, '/loginscreen');
+                    } else {
+                      // If there is no internet, show a dialog to inform the user
+                      checkInternetConnection(context);
+                    }
                   },
+                  
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white, // Màu nền của nút
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -53,9 +62,16 @@ class TrangXinChao extends StatelessWidget {
              SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () {
-                    // Xử lý khi nhấn nút đăng ký
-                  Navigator.pushNamed(context, '/registerscreen');
+                         onPressed: () async {
+                    // Check for internet connection before navigating
+                    var connectivityResult = await Connectivity().checkConnectivity();
+                    if (connectivityResult != ConnectivityResult.none) {
+                      // If there is an internet connection, navigate to the registration screen
+                      Navigator.pushNamed(context, '/registerscreen');
+                    } else {
+                      // If there is no internet, show a dialog to inform the user
+                      checkInternetConnection(context);
+                    }
                   },
                   style: OutlinedButton.styleFrom(
                     overlayColor: Colors.white, // Màu chữ của nút

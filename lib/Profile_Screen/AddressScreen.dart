@@ -374,6 +374,7 @@ class _MapScreenState extends State<MapScreen> {
 
     // Lấy vị trí hiện tại
     Position position = await Geolocator.getCurrentPosition(
+        // ignore: deprecated_member_use
         desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
@@ -468,3 +469,173 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
+// class MapScreen extends StatefulWidget {
+//   final LatLng initialLocation;
+
+//   const MapScreen({Key? key, required this.initialLocation}) : super(key: key);
+
+//   @override
+//   _MapScreenState createState() => _MapScreenState();
+// }
+
+// class _MapScreenState extends State<MapScreen> {
+//   late LatLng _currentLocation;
+//   late MapController _mapController;
+//   TextEditingController _viDoController = TextEditingController();
+//   TextEditingController _kinhDoController = TextEditingController();
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _currentLocation = widget.initialLocation;
+//     _mapController = MapController();
+//   }
+
+//   void calculateAndShowDistance() {
+//     double startLat = _currentLocation.latitude;
+//     double startLng = _currentLocation.longitude;
+//     double endLat = 12.676605;
+//     double endLng = 108.037106;
+
+//     double distance = Geolocator.distanceBetween(startLat, startLng, endLat, endLng);
+
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text('Khoảng cách là: ${distance.toStringAsFixed(2)} mét')),
+//     );
+//   }
+
+//   Future<void> _getCurrentLocation() async {
+//     bool serviceEnabled;
+//     LocationPermission permission;
+
+//     serviceEnabled = await Geolocator.isLocationServiceEnabled();
+//     if (!serviceEnabled) return;
+
+//     permission = await Geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) {
+//       permission = await Geolocator.requestPermission();
+//       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
+//         return;
+//       }
+//     }
+
+//     // ignore: deprecated_member_use
+//     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+//     setState(() {
+//       _currentLocation = LatLng(position.latitude, position.longitude);
+//       _mapController.move(_currentLocation, 13.0);
+//     });
+//   }
+
+//   Future<void> _showConfirmationDialog() async {
+//     return showDialog<void>(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: Text('Xác nhận vị trí'),
+//           content: Text('Bạn có chắc chắn muốn chọn vị trí này?'),
+//           actions: <Widget>[
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Text('Hủy'),
+//             ),
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context);
+//                 Navigator.pop(context, _currentLocation);
+//               },
+//               child: Text('Xác nhận'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Chọn vị trí'),
+//         backgroundColor: Colors.green,
+//       ),
+//       body: SingleChildScrollView(  // Wrap everything in SingleChildScrollView
+//         child: Column(
+//           children: [
+//             Container(
+//               height: MediaQuery.of(context).size.height * 0.6,  // Adjust the size
+//               child: FlutterMap(
+//                 mapController: _mapController,
+//                 options: MapOptions(
+//                   initialCenter: _currentLocation,
+//                   initialZoom: 13.0,
+//                   onTap: (tapPosition, point) {
+//                     setState(() {
+//                       _currentLocation = point;
+//                     });
+//                   },
+//                 ),
+//                 children: [
+//                   TileLayer(
+//                     urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+//                   ),
+//                   MarkerLayer(
+//                     markers: [
+//                       Marker(
+//                         point: _currentLocation,
+//                         width: 80.0,
+//                         height: 80.0,
+//                         child: Icon(
+//                           Icons.location_on,
+//                           size: 40.0,
+//                           color: Colors.red,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             Padding(
+//               padding: const EdgeInsets.all(16.0),
+//               child: Column(
+//                 children: [
+//                   TextField(
+//                     controller: _viDoController,
+//                     decoration: InputDecoration(labelText: 'Nhập vĩ độ điểm đến'),
+//                     keyboardType: TextInputType.numberWithOptions(decimal: true),
+//                   ),
+//                   TextField(
+//                     controller: _kinhDoController,
+//                     decoration: InputDecoration(labelText: 'Nhập kinh độ điểm đến'),
+//                     keyboardType: TextInputType.numberWithOptions(decimal: true),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             ElevatedButton(
+//               onPressed: calculateAndShowDistance,
+//               child: Text('Tính Khoảng Cách'),
+//             ),
+//           ],
+//         ),
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {
+//           if (_currentLocation == widget.initialLocation) {
+//             _getCurrentLocation();
+//           } else {
+//             _showConfirmationDialog();
+//           }
+//         },
+//         child: Icon(
+//           _currentLocation == widget.initialLocation ? Icons.my_location : Icons.check,
+//         ),
+//       ),
+//     );
+//   }
+// }

@@ -68,7 +68,9 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
+              
             );
+                   _loadUserDetails();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Lỗi khi tải ảnh lên.')),

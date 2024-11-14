@@ -58,7 +58,7 @@ void main() async {
     ),
   );
 }
-
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+       navigatorObservers: [routeObserver], // Register the RouteObserver here
       home:  const gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
