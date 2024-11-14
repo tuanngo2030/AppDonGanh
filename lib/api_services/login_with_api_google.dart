@@ -42,10 +42,9 @@ class LoginWithApiGoogle {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
           await prefs.setString('token', token);
-          
-          // Lưu các thông tin khác của người dùng từ API vào SharedPreferences
           await prefs.setString('tenNguoiDung', displayName);
           await prefs.setString('gmail', email);
+          
 
           print("User information saved to SharedPreferences successfully.");
         }
@@ -84,7 +83,7 @@ class LoginWithApiGoogle {
         await prefs.setString('userId', data['_id']);
         await prefs.setString('tenNguoiDung', data['tenNguoiDung']);
         await prefs.setString('gmail', data['gmail']);
-        await prefs.setString('token', data['token']); // Giả sử có token trong response
+        await prefs.setString('token', data['token']); 
         
         // Bạn có thể thêm các dữ liệu khác nếu cần
         return NguoiDung.fromJson(data);
