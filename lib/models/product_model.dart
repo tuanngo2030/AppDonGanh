@@ -1,3 +1,5 @@
+import 'package:don_ganh_app/models/user_model.dart';
+
 class ProductModel {
    static const String defaultImageUrl = 'https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg'; // Thay bằng URL hình mặc định của bạn
 
@@ -19,6 +21,7 @@ class ProductModel {
   final String IDDanhMucCon;
   final List<hinhBoSung> ImgBoSung;
   bool isFavorited;
+  final NguoiDung userId;
 
   ProductModel(
       {
@@ -40,6 +43,7 @@ class ProductModel {
       required this.IDDanhMucCon,
       required this.ImgBoSung,
       required this.isFavorited,
+      required this.userId,
     });
 
        // Hàm kiểm tra URL hợp lệ
@@ -88,6 +92,7 @@ class ProductModel {
       IDDanhMucCon: data['IDDanhMucCon'],
       ImgBoSung: ImgBoSung,
       isFavorited: data['isFavorited'] ?? false,
+      userId: NguoiDung.fromJson(data['userId']),
     );
   }
 
@@ -110,6 +115,7 @@ class ProductModel {
     'IDDanhMuc': IDDanhMuc,
     'IDDanhMucCon': IDDanhMucCon,
     'HinhBoSung': ImgBoSung.map((item) => item.toJson()).toList(),
+    'userId' : userId.toJson(),
   };
 }
 

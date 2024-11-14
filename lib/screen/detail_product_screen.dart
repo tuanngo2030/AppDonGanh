@@ -128,13 +128,15 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     if (userId == null) {
       throw Exception('User ID not found in SharedPreferences');
     }
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) => Center(child: CircularProgressIndicator(
-      valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
-    )),
-  );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+          child: CircularProgressIndicator(
+        valueColor:
+            AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+      )),
+    );
 
     try {
       await CartApiService().addToCart(userId, variantId, quantity, donGia);
@@ -148,9 +150,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
       );
 
       Navigator.of(context).pop();
-    }  finally {
-    Navigator.of(context).pop(); // Close the loading dialog
-  }
+    } finally {
+      Navigator.of(context).pop(); // Close the loading dialog
+    }
   }
 
   void _showFullImage(String imageUrl) {
@@ -422,6 +424,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       ),
                     ),
                   ),
+
+                  
+
                   Padding(
                     padding: const EdgeInsets.all(27),
                     child: Row(
@@ -726,7 +731,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                           child: Center(
                                             child: ElevatedButton(
                                               onPressed:
-                                                  selectedVariantId.isEmpty && _isLoading? null
+                                                  selectedVariantId.isEmpty &&
+                                                          _isLoading
+                                                      ? null
                                                       : () async {
                                                           setState(() {
                                                             _isLoading =
@@ -836,6 +843,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       ),
                     ),
                   ),
+                  
 
                   Align(
                     alignment: Alignment.centerLeft,
@@ -863,6 +871,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       ),
                     ),
                   ),
+
+                  
 
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 27),
@@ -992,6 +1002,44 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       ),
                     ),
                   ),
+                  Card(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 100,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 27),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: NetworkImage(
+                                      widget.product.userId.anhDaiDien!),
+                                ),
+                                SizedBox(width: 8),
+                                Text(widget.product.userId.tenNguoiDung!),
+                              ],
+                            ),
+                            Align(
+                              child: Container(
+                                alignment: Alignment.center,
+                                height: 30,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.fromBorderSide(
+                                        BorderSide(width: 1, color: Colors.black))),
+                                child: Text('Xem shop'),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                 ],
               ),
             ),
