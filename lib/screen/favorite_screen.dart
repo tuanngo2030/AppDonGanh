@@ -77,18 +77,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   Future<void> _fetchFavorites() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final userId = prefs.getString('userId');
-
-  if (userId == null) {
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User ID not found. Please log in again.')),
-    );
-    return;
-  }
+  print(userId!);
 
   try {
     final favoriteList = await FavoriteApiService().getFavorites(userId);

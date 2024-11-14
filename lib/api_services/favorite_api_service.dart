@@ -51,7 +51,15 @@ Future<List<ProductModel>> getFavorites(String userId) async {
         final sanphams = jsonResponse['IDYeuThich']['sanphams'] as List<dynamic>;
         
         // Map the products to ProductModel
-        return sanphams.map((item) => ProductModel.fromJSON(item['IDSanPham'] as Map<String, dynamic>)).toList();
+        return sanphams.map((item) {
+          // Ensure 'IDSanPham' is properly parsed as a Map
+          var productData = item['IDSanPham'];
+          if (productData is Map<String, dynamic>) {
+            return ProductModel.fromJSON(productData);
+          } else {
+            throw Exception('Product data is not in the expected format');
+          }
+        }).toList();
       } else {
         throw Exception('IDYeuThich not found in response.');
       }

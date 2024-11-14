@@ -55,10 +55,7 @@ class LoginWithApiGoogle {
   }
 }
  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: dotenv.env['WEB_CLIENT_ID'],  // Sử dụng Web Client ID ở đây
-    scopes: [
-      'email',
-    ],
+   
   );
 
 
