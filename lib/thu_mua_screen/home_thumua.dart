@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:don_ganh_app/api_services/blog_api_service.dart';
 import 'package:don_ganh_app/api_services/comment_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
@@ -5,6 +6,8 @@ import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeThumua extends StatefulWidget {
@@ -24,6 +27,49 @@ class _HomeThumuaState extends State<HomeThumua> {
   void initState() {
     super.initState();
     _fetchBlogPosts();
+  }
+
+  void showFullScreenImages(
+      BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: images.length,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider: NetworkImage(images[index]),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                scrollPhysics: BouncingScrollPhysics(),
+                backgroundDecoration: BoxDecoration(color: Colors.black),
+                pageController: PageController(initialPage: initialIndex),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _fetchBlogPosts() async {
@@ -555,13 +601,14 @@ class _HomeThumuaState extends State<HomeThumua> {
                 final userId = prefs.getString('userId');
                 userId == post.userId.id
                     ? Navigator.pushNamed(context, '/your_blog_screen')
-                    :  Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  O(nguoiDung: post.userId,),
-                            ),
-                          );
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => O(
+                            nguoiDung: post.userId,
+                          ),
+                        ),
+                      );
               },
               child: ListTile(
                 leading: post.userId.anhDaiDien != null
@@ -619,39 +666,53 @@ class _HomeThumuaState extends State<HomeThumua> {
             // Post image (only if it exists)
             if (post.image.isNotEmpty)
               SizedBox(
-                height: 200, // Adjust height as needed
-                child: post.image.length == 1
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(
-                            post.image[0],
-                            // Make image full height
-                            width: double.infinity, // Make image full width
-                            fit: BoxFit.contain,
+                width: double
+                    .infinity, // Ensure the container takes the full width
+                child: GestureDetector(
+                  onTap: () {
+                    showFullScreenImages(context, post.image, 0);
+                  },
+                  child: post.image.length == 1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.network(
+                              post.image[0],
+                              width: double.infinity, // Full width
+                              fit: BoxFit
+                                  .contain, // Ensures the image maintains its aspect ratio
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height:
+                              200, // You can set height here, or adjust based on your UI
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: post.image.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  showFullScreenImages(
+                                      context, post.image, index);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.network(
+                                      post.image[index],
+                                      width: 220,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      )
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: post.image.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 20),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                post.image[index],
-                                height:
-                                    100, // Regular height for multiple images
-                                width: 220, // Regular width for multiple images
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                ),
               ),
 
             // Likes and comments section

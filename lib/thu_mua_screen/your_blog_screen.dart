@@ -18,11 +18,27 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
   final BlogApiService _blogApiService = BlogApiService();
   List<BlogModel> _blogPosts = [];
   String? userId;
+  String? tenNguoiDung;
+  String? anhDaiDien;
+  int followerCount = 0;
+  int followingCount = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchBlogPosts();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tenNguoiDung = prefs.getString('tenNguoiDung');
+      anhDaiDien = prefs.getString('anhDaiDien');
+      // Load follower and following lists and get counts
+      followerCount = prefs.getStringList('follower')?.length ?? 0;
+      followingCount = prefs.getStringList('following')?.length ?? 0;
+    });
   }
 
   String _formatDate(DateTime? date) {
@@ -493,20 +509,25 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                   alignment: Alignment.center,
                   children: [
                     Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100.0),
-                            border: const Border.fromBorderSide(BorderSide(
-                                color: Color.fromRGBO(47, 88, 42, 1),
-                                width: 2))),
-                        child: ClipRRect(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100.0),
-                          child: Image.asset(
-                            'lib/assets/avt2.jpg',
-                            fit: BoxFit.cover,
-                          ),
-                        )),
+                          border: const Border.fromBorderSide(BorderSide(
+                              color: Color.fromRGBO(47, 88, 42, 1), width: 2))),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100.0),
+                        child: anhDaiDien != null && anhDaiDien!.isNotEmpty
+                            ? Image.network(
+                                anhDaiDien!, // Load avatar from network if available
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                'lib/assets/avt2.jpg', // Placeholder image if null
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
                     Positioned(
                         right: 0,
                         bottom: 0,
@@ -526,22 +547,22 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                         ))
                   ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'Nguyen Thi A',
-                    style: TextStyle(
+                    tenNguoiDung! ?? 'Unknow',
+                    style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         color: Color.fromRGBO(47, 88, 42, 1)),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30),
+                 Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
+                      const Expanded(
                         flex: 1,
                         child: Column(
                           children: [
@@ -563,11 +584,11 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                         child: Column(
                           children: [
                             Text(
-                              '4589',
-                              style: TextStyle(
+                              '$followerCount',
+                              style: const TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
                             ),
-                            Text(
+                            const Text(
                               'Người theo dõi',
                               style: TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
@@ -575,16 +596,16 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                           ],
                         ),
                       ),
-                      Expanded(
+                       Expanded(
                         flex: 1,
                         child: Column(
                           children: [
                             Text(
-                              '150',
-                              style: TextStyle(
+                              '$followingCount',
+                              style: const TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
                             ),
-                            Text(
+                            const Text(
                               'Đang theo dõi',
                               style: TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
