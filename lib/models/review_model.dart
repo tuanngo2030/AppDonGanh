@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:don_ganh_app/models/user_model.dart';
 
 class PhanHoi {
-  String userId;
+  NguoiDung userId;
   String binhLuan;
   DateTime ngayTao;
 
@@ -15,7 +15,7 @@ class PhanHoi {
 
   factory PhanHoi.fromJson(Map<String, dynamic> json) {
     return PhanHoi(
-      userId: json['userId'],
+      userId: NguoiDung.fromJson(json['userId']),
       binhLuan: json['BinhLuan'],
       ngayTao: DateTime.parse(json['NgayTao']),
     );
@@ -23,7 +23,7 @@ class PhanHoi {
 
   Map<String, dynamic> toJson() {
     return {
-      'userId': userId,
+      'userId': userId.toJson(),
       'BinhLuan': binhLuan,
       'NgayTao': ngayTao.toIso8601String(),
     };

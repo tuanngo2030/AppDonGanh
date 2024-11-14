@@ -19,6 +19,8 @@ class NguoiDung {
   final String? facebookId;
   final String? IDYeuThich;
   final List<Permission>? permissions;
+  final List<String>? follower;
+  final List<String>? following;
 
   NguoiDung({
     this.id,
@@ -41,6 +43,8 @@ class NguoiDung {
     this.facebookId,
     this.IDYeuThich,
     this.permissions,
+    this.follower,
+    this.following,
   });
 
   // Convert JSON to NguoiDung
@@ -74,6 +78,12 @@ class NguoiDung {
               .map((permissionJson) => Permission.fromJson(permissionJson))
               .toList()
           : [],
+      follower: json['followers'] != null
+          ? List<String>.from(json['followers'])
+          : null,
+      following: json['following'] != null
+          ? List<String>.from(json['following'])
+          : null,
     );
   }
 
@@ -98,7 +108,9 @@ class NguoiDung {
       'isVerified': isVerified,
       'googleId': googleId,
       'facebookId': facebookId,
-      'IDYeuThich': IDYeuThich
+      'IDYeuThich': IDYeuThich,
+      'followers' : follower,
+      'following' : following,
     };
   }
 }

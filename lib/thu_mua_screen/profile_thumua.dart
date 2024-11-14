@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileThumua extends StatefulWidget {
   const ProfileThumua({super.key});
@@ -10,6 +11,27 @@ class ProfileThumua extends StatefulWidget {
 }
 
 class _ProfileThumuaState extends State<ProfileThumua> {
+  String? tenNguoiDung;
+  String? anhDaiDien;
+  int followerCount = 0;
+  int followingCount = 0;
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tenNguoiDung = prefs.getString('tenNguoiDung');
+      anhDaiDien = prefs.getString('anhDaiDien');
+         // Load follower and following lists and get counts
+      followerCount = prefs.getStringList('follower')?.length ?? 0;
+      followingCount = prefs.getStringList('following')?.length ?? 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,32 +51,47 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   alignment: Alignment.center,
                   children: [
                     Container(
-                        height: 150,
-                        width: 150,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100.0),
-                            border: Border.fromBorderSide(BorderSide(
-                                color: Color.fromRGBO(47, 88, 42, 1),
-                                width: 2))),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100.0),
-                          child: Image.asset(
-                            'lib/assets/avt2.jpg',
-                            fit: BoxFit.cover,
-                          ),
-                        )),
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100.0),
+                        border: const Border.fromBorderSide(
+                          BorderSide(
+                              color: Color.fromRGBO(47, 88, 42, 1), width: 2),
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100.0),
+                        child: anhDaiDien != null && anhDaiDien!.isNotEmpty
+                            ? Image.network(
+                                anhDaiDien!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                     'lib/assets/avt2.jpg', // Path to a local default avatar
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              )
+                            : Image.asset(
+                                  'lib/assets/avt2.jpg', // Path to a local default avatar
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
                     Positioned(
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          height: 50,
-                          width: 50,
+                          height: 35,
+                          width: 35,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
-                              color: Color.fromRGBO(47, 88, 42, 1),
+                              color: const Color.fromRGBO(47, 88, 42, 1),
                               border:
                                   Border.all(color: Colors.white, width: 1)),
-                          child: Icon(
+                          child: const Icon(
+                            size: 20,
                             Icons.control_point_outlined,
                             color: Colors.white,
                           ),
@@ -64,11 +101,13 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'Nguyen Thi A',
+                    tenNguoiDung ??
+                        'Tên người dùng', // Use 'Tên người dùng' if tenNguoiDung is null
                     style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: Color.fromRGBO(47, 88, 42, 1)),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: Color.fromRGBO(47, 88, 42, 1),
+                    ),
                   ),
                 ),
                 Padding(
@@ -98,7 +137,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         child: Column(
                           children: [
                             Text(
-                              '4589',
+                              '$followerCount',
                               style: TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
                             ),
@@ -115,7 +154,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         child: Column(
                           children: [
                             Text(
-                              '150',
+                              '$followingCount',
                               style: TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w700),
                             ),
@@ -235,37 +274,37 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       crossAxisCount: 2,
                       children: [
                         MainFuntion(
-                            icon: Icon(Icons.person),
-                            title: 'Thông tin tài khoản',
-                            subtitle: 'Bao gồm thông tin cá nhân:',
-                             onTap: () {
-                              Navigator.pushNamed(context, '/your_blog_screen');
-                            },
-                          ),
+                          icon: Icon(Icons.person),
+                          title: 'Thông tin tài khoản',
+                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          onTap: () {
+                            Navigator.pushNamed(context, '/your_blog_screen');
+                          },
+                        ),
                         MainFuntion(
-                            icon: Icon(Icons.person),
-                            title: 'Thông tin tài khoản',
-                            subtitle: 'Bao gồm thông tin cá nhân:',
-                             onTap: () {
-                              Navigator.pushNamed(context, '/your_blog_screen');
-                            },
-                          ),
+                          icon: Icon(Icons.person),
+                          title: 'Thông tin tài khoản',
+                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          onTap: () {
+                            Navigator.pushNamed(context, '/your_blog_screen');
+                          },
+                        ),
                         MainFuntion(
-                            icon: Icon(Icons.person),
-                            title: 'Thông tin tài khoản',
-                            subtitle: 'Bao gồm thông tin cá nhân:',
-                             onTap: () {
-                              Navigator.pushNamed(context, '/your_blog_screen');
-                            },
-                          ),
+                          icon: Icon(Icons.person),
+                          title: 'Thông tin tài khoản',
+                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          onTap: () {
+                            Navigator.pushNamed(context, '/your_blog_screen');
+                          },
+                        ),
                         MainFuntion(
-                            icon: Icon(Icons.person),
-                            title: 'Thông tin tài khoản',
-                            subtitle: 'Bao gồm thông tin cá nhân:',
-                            onTap: () {
-                              Navigator.pushNamed(context, '/your_blog_screen');
-                            },
-                          )
+                          icon: Icon(Icons.person),
+                          title: 'Thông tin tài khoản',
+                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          onTap: () {
+                            Navigator.pushNamed(context, '/your_blog_screen');
+                          },
+                        )
                       ],
                     ),
                   ),

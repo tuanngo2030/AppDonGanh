@@ -64,7 +64,9 @@ class UserApiService {
               await prefs.setString('googleId', user.googleId ?? '');
               await prefs.setString('facebookId', user.facebookId ?? '');
               await prefs.setString('userId', user.id ?? '');
-              await prefs.setString('token', token);
+              await prefs.setString('IDYeuThich', user.IDYeuThich ?? '');
+              await prefs.setStringList('follower', user.follower ?? []);
+              await prefs.setStringList('following', user.following ?? []);
               return user;
             }
           }
@@ -162,4 +164,16 @@ class UserApiService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>> fetchUserData(String userId, String me) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/user/findUserById/$userId/$me');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    // Parse the JSON response directly without using a model
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load user data');
+  }
+}
 }

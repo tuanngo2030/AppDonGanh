@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   int productsPerPage = 10;
   String? userId;
+   String? IDYeuThich;
   Map<String, bool> favorites = {};
   List<String> favoriteIds = [];
   @override
@@ -69,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       if (!isCurrentlyFavorite) {
         favoriteService.addToFavorites(userId, productId);
+        
         setState(() {
           favorites[productId] = true;
         });
@@ -122,6 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchProducts(int page) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
+    final IDYeuThich = prefs.getString('IDYeuThich');
+   
 
     if (!mounted) return; // Check if the widget is still mounted
     setState(() {
@@ -129,8 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
+       print(IDYeuThich);
       final response = await ProductApiService().getProducts(page,
-          userId: userId!, yeuthichId: '67299b5b3318cd90d77a43b6');
+          userId: userId!, yeuthichId: IDYeuThich!);
       List<ProductModel> products = response['sanphams']
           .map<ProductModel>((json) => ProductModel.fromJSON(json))
           .where((product) => product.tinhTrang != 'Đã xóa')

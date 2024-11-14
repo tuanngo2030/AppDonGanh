@@ -1,58 +1,52 @@
 import 'package:don_ganh_app/api_services/blog_api_service.dart';
 import 'package:don_ganh_app/api_services/comment_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
-import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeThumua extends StatefulWidget {
-  const HomeThumua({super.key});
+class PostItem extends StatefulWidget {
+  final BlogModel post;
+
+  const PostItem({super.key, required this.post});
 
   @override
-  State<HomeThumua> createState() => _HomeThumuaState();
+  _PostItemState createState() => _PostItemState();
 }
 
-class _HomeThumuaState extends State<HomeThumua> {
+class _PostItemState extends State<PostItem> {
   final BlogApiService _blogApiService = BlogApiService();
-  List<BlogModel> _blogPosts = [];
-  String? userId;
-  bool isLoading = true; // Track loading state
+    String? userId;
+
+  Future<List<BlogModel>>? _userBlogs;
+  Future<List<Map<String, dynamic>>>? _userProducts;
+
 
   @override
   void initState() {
     super.initState();
-    _fetchBlogPosts();
-  }
+    // _fetchBlogPosts;
+    _loadUserProducts;
+  } 
 
-  Future<void> _fetchBlogPosts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
+  Future<void> _loadUserProducts() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  userId = prefs.getString('userId');
+  String SetuserId = '67054001d6a6039bcca389fa';
+  final response = await UserApiService().fetchUserData(SetuserId, userId!);
 
-    setState(() {
-      isLoading = true; // Show loading indicator
-    });
-
-    try {
-      List<BlogModel> blogPosts = await _blogApiService
-          .getListBaiViet(userId!); // Replace with actual user ID
-      setState(() {
-        _blogPosts = blogPosts;
-      });
-    } catch (e) {
-      print('Error fetching blog posts: $e');
-    } finally {
-      setState(() {
-        isLoading = false; // Hide loading indicator
-      });
+  setState(() {
+    final blogData = response['baiViet']['list']; // Adjust based on actual JSON key
+    if (blogData is List) {
+      _userBlogs = Future(() => blogData.map((json) => BlogModel.fromJson(json)).toList());
+    } else {
+      _userBlogs = Future.value([]);
     }
-  }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Unknown date';
-    return DateFormat('dd-MM-yyyy').format(date); // Adjust the format as needed
-  }
+  });
+}
+
 
   Future<void> _toggleLike(String baivietId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -63,19 +57,15 @@ class _HomeThumuaState extends State<HomeThumua> {
       return;
     }
 
-    // Find the index of the post in the list
-    final postIndex = _blogPosts.indexWhere((post) => post.id == baivietId);
-    if (postIndex == -1) return;
-
-    // Toggle like status immediately on the UI
+    // Optimistic UI update: update the UI immediately
+    bool isLiked = widget.post.likes.contains(userId);
     setState(() {
-      final post = _blogPosts[postIndex];
-      if (post.likes.contains(userId)) {
-        post.likes.remove(userId); // Unlike
-        post.isLiked = false;
+      if (isLiked) {
+        widget.post.likes.remove(userId); // Unlike
+        widget.post.isLiked = false;
       } else {
-        post.likes.add(userId); // Like
-        post.isLiked = true;
+        widget.post.likes.add(userId); // Like
+        widget.post.isLiked = true;
       }
     });
 
@@ -83,23 +73,31 @@ class _HomeThumuaState extends State<HomeThumua> {
       // Call API to update like status
       await _blogApiService.updateLike(baivietId, userId);
     } catch (error) {
-      // If there's an error, revert the like status
+      // If the API call fails, revert the like status
       setState(() {
-        final post = _blogPosts[postIndex];
-        if (post.likes.contains(userId)) {
-          post.likes.remove(userId); // Revert to unlike
-          post.isLiked = false;
+        if (isLiked) {
+          widget.post.likes.add(userId); // Revert to like
+          widget.post.isLiked = true;
         } else {
-          post.likes.add(userId); // Revert to like
-          post.isLiked = true;
+          widget.post.likes.remove(userId); // Revert to unlike
+          widget.post.isLiked = false;
         }
       });
 
-      // Show an error message
+      // Show an error message to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating like status: $error')),
       );
     }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown date';
+    return DateFormat('dd-MM-yyyy').format(date); // Adjust the format as needed
+  }
+
+  void _handleMenuSelection(String value, String postId, BlogModel post) {
+    // Handle menu options (edit/delete)
   }
 
   void _showComments(
@@ -346,7 +344,7 @@ class _HomeThumuaState extends State<HomeThumua> {
     );
   }
 
-// Helper function to show an edit dialog and get updated comment text
+  // Helper function to show an edit dialog and get updated comment text
   Future<String?> _showEditCommentDialog(
       BuildContext context, String currentComment) async {
     final TextEditingController editController =
@@ -438,214 +436,100 @@ class _HomeThumuaState extends State<HomeThumua> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header and input fields as in your original code...
-              Container(
-                color: const Color.fromRGBO(59, 99, 53, 1),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                          height: 100,
-                          width: 200,
-                          child: Image.asset(
-                            'lib/assets/logo_xinchao.png',
-                            fit: BoxFit.contain,
-                          )),
-                      GestureDetector(
-                        onTap: () {
-                          print('Setting');
-                        },
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: Colors.white,
-                          ),
-                          child: Image.asset('lib/assets/caidat_icon.png'),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/creat_blog_screen');
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 35,
-                        width: 35,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50)),
-                        child: Image.asset('lib/assets/fb_icon.png',
-                            fit: BoxFit.cover),
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      Container(
-                        height: 40,
-                        width: 300,
-                        decoration: BoxDecoration(
-                            border: const Border.fromBorderSide(BorderSide(
-                                color: Color.fromARGB(255, 184, 182, 182))),
-                            borderRadius: BorderRadius.circular(50)),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Đăng bài viết của bạn.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color.fromARGB(255, 158, 156, 156),
-                                ),
-                              ),
-                              Icon(Icons.camera_alt_outlined),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              isLoading
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: CircularProgressIndicator(), // Loading indicator
-                    )
-                  : Column(
-                      children: _blogPosts
-                          .map((post) => _buildPostItem(post))
-                          .toList(),
-                    ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPostItem(BlogModel post) {
+      // print("isLiked value: ${post.isLiked}");
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
         child: Column(
           children: [
-            // User info and post title
-            GestureDetector(
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                final userId = prefs.getString('userId');
-                userId == post.userId.id
-                    ? Navigator.pushNamed(context, '/your_blog_screen')
-                    :  Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  O(nguoiDung: post.userId,),
-                            ),
-                          );
-              },
-              child: ListTile(
-                leading: post.userId.anhDaiDien != null
-                    ? ClipOval(
-                        child: Image.network(
-                          post.userId.anhDaiDien!,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.account_circle,
-                              size: 40,
-                            ); // Default icon if image fails to load
-                          },
-                        ),
-                      )
-                    : const Icon(
-                        Icons.account_circle,
-                        size: 40,
-                      ), //
-                title: Text(
-                  userId == post.userId.id
-                      ? '${post.userId.tenNguoiDung} (bạn)'
-                      : '${post.userId.tenNguoiDung}',
-                  style: const TextStyle(fontSize: 13),
-                ),
-                subtitle: Row(
-                  children: [
-                    Text(
-                      _formatDate(post.createdAt),
-                      style: const TextStyle(fontSize: 10),
-                    ),
-                    if (post.isUpdate == true)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          '(Đã chỉnh sửa)',
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
+            ListTile(
+              leading: widget.post.userId.anhDaiDien != null
+                  ? ClipOval(
+                      child: Image.network(
+                        widget.post.userId.anhDaiDien!,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.account_circle,
+                            size: 40,
+                          ); // Default icon if image fails to load
+                        },
                       ),
-                  ],
-                ),
+                    )
+                  : const Icon(
+                      Icons.account_circle,
+                      size: 40,
+                    ),
+              title: Text(
+                widget.post.userId.tenNguoiDung ?? 'Unknown User',
+                style: const TextStyle(fontSize: 13),
+              ),
+              subtitle: Row(
+                children: [
+                  Text(
+                    _formatDate(widget.post.createdAt),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                  if (widget.post.isUpdate == true)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        '(Đã chỉnh sửa)',
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ),
+                ],
+              ),
+              trailing: PopupMenuButton<String>(
+                onSelected: (value) =>
+                    _handleMenuSelection(value, widget.post.id, widget.post),
+                itemBuilder: (context) {
+                  return [
+                    const PopupMenuItem(
+                        value: 'report', child: Text('Báo cáo')),
+                  ];
+                },
+                icon: const Icon(Icons.more_horiz),
               ),
             ),
-
             // Post content
             Padding(
               padding: const EdgeInsets.only(top: 10, left: 20, bottom: 20),
               child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(post.noidung ?? '')),
+                alignment: Alignment.centerLeft,
+                child: Text(widget.post.noidung ?? ''),
+              ),
             ),
-
             // Post image (only if it exists)
-            if (post.image.isNotEmpty)
+            if (widget.post.image.isNotEmpty)
               SizedBox(
-                height: 200, // Adjust height as needed
-                child: post.image.length == 1
+                height: 200,
+                child: widget.post.image.length == 1
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10.0),
                           child: Image.network(
-                            post.image[0],
-                            // Make image full height
-                            width: double.infinity, // Make image full width
-                            fit: BoxFit.contain,
+                            widget.post.image[0],
+                            width: double.infinity,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       )
                     : ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: post.image.length,
+                        itemCount: widget.post.image.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(left: 20),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
                               child: Image.network(
-                                post.image[index],
-                                height:
-                                    100, // Regular height for multiple images
-                                width: 220, // Regular width for multiple images
+                                widget.post.image[index],
+                                height: 100,
+                                width: 220,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -653,52 +537,39 @@ class _HomeThumuaState extends State<HomeThumua> {
                         },
                       ),
               ),
-
             // Likes and comments section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: Row(
                 children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => _toggleLike(post.id),
-                        child: Row(
-                          children: [
-                            Icon(
-                              size: 20,
-                              post.isLiked == true
-                                  ? Icons.thumb_up
-                                  : Icons.thumb_up_outlined,
-                              color: post.isLiked == true
-                                  ? Colors.blue
-                                  : Colors.black,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
-                                "${post.likes.length}",
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
+                  GestureDetector(
+                    onTap: () => _toggleLike(widget.post.id),
+                    child: Row(
+                      children: [
+                        Icon(
+                          size: 20,
+                          widget.post.isLiked == true
+                              ? Icons.thumb_up
+                              : Icons.thumb_up_outlined,
+                          color:
+                              widget.post.isLiked == true ? Colors.blue : Colors.black,
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            "${widget.post.likes.length}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
-                      _showComments(
-                        context,
-                        post,
-                        () {
-                          setState(() {
-                            // After updating comments (deleting or adding),
-                            // the comment count will automatically reflect the latest count
-                          });
-                        },
-                      );
+                      _showComments(context, widget.post, () {
+                        setState(() {});
+                      });
                     },
                     child: Row(
                       children: [
@@ -706,7 +577,7 @@ class _HomeThumuaState extends State<HomeThumua> {
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text(
-                            "${post.binhluan.length}", // Make sure this reflects the latest comment count
+                            "${widget.post.binhluan.length}",
                             style: const TextStyle(fontSize: 12),
                           ),
                         ),
@@ -716,8 +587,6 @@ class _HomeThumuaState extends State<HomeThumua> {
                 ],
               ),
             ),
-
-            const Divider(thickness: 1),
           ],
         ),
       ),

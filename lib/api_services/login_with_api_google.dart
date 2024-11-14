@@ -8,59 +8,60 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginWithApiGoogle {
-  Future<void> registerUserGoogle(
-    String displayName, String email, String googleId) async {
-  final url =
-      '${dotenv.env['API_URL']}/user/RegisterUserGG';
+  Future<void> registerUserGoogle(String displayName, String email, String googleId) async {
+    final url = '${dotenv.env['API_URL']}/user/RegisterUserGG';
 
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'tenNguoiDung': displayName,
-        'gmail': email,
-        'googleId': googleId,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'tenNguoiDung': displayName,
+          'gmail': email,
+          'googleId': googleId,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      print('User registered successfully: $data');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('User registered successfully: $data');
 
-      // Giả sử token có trong phần dữ liệu trả về
-      String? token = data['token']; // Thay đổi key nếu khác
-      print('Token: $token'); // In ra token
+        // Giả sử token có trong phần dữ liệu trả về
+        String? token = data['token']; // Thay đổi key nếu khác
+        print('Token: $token'); // In ra token
 
-      // Giải mã token để lấy thông tin người dùng
-      if (token != null) {
-        Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
-        String userId = decodedToken['data']['_id']; // Lấy _id từ decodedToken
-        print('User ID: $userId'); // In ra userId
+        // Giải mã token để lấy thông tin người dùng
+        if (token != null) {
+          Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
+          String userId = decodedToken['data']['_id']; // Lấy _id từ decodedToken
+          print('User ID: $userId'); // In ra userId
 
-        // Lưu userId vào SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', userId);
-        await prefs.setString('token', token);
+          // Lưu tất cả thông tin vào SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', userId);
+          await prefs.setString('token', token);
+          
+          // Lưu các thông tin khác của người dùng từ API vào SharedPreferences
+          await prefs.setString('tenNguoiDung', displayName);
+          await prefs.setString('gmail', email);
 
-        print("User ID saved to SharedPreferences successfully.");
+          print("User information saved to SharedPreferences successfully.");
+        }
+      } else {
+        throw Exception('Failed to register user');
       }
-    } else {
-      throw Exception('Failed to register user');
+    } catch (error) {
+      throw Exception('Error occurred while registering user: $error');
     }
-  } catch (error) {
-    throw Exception('Error occurred while registering user: $error');
   }
-}
 
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static Future<GoogleSignInAccount?> login() async {
     await _googleSignIn.signOut();
     return await _googleSignIn.signIn();
-    
   }
 
   static Future<void> logout() async {
@@ -77,6 +78,15 @@ class LoginWithApiGoogle {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         print('User details: $data');
+        
+        // Lưu toàn bộ dữ liệu người dùng vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', data['_id']);
+        await prefs.setString('tenNguoiDung', data['tenNguoiDung']);
+        await prefs.setString('gmail', data['gmail']);
+        await prefs.setString('token', data['token']); // Giả sử có token trong response
+        
+        // Bạn có thể thêm các dữ liệu khác nếu cần
         return NguoiDung.fromJson(data);
       } else {
         print('Failed to fetch user details: ${response.statusCode}');

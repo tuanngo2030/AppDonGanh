@@ -2,6 +2,7 @@ import 'package:don_ganh_app/api_services/review_api_service.dart';
 import 'package:don_ganh_app/models/review_model.dart';
 import 'package:don_ganh_app/widget/FullImageDialog.dart';
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewItem extends StatefulWidget {
@@ -299,23 +300,6 @@ class _ReviewItemState extends State<ReviewItem> {
             ],
           ),
         ),
-        if (_showResponses) ...[
-          for (var response in widget.review.phanHoi.take(2)) ...[
-            Padding(
-              padding: const EdgeInsets.only(left: 54, bottom: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Người dùng: ${response.userId}'),
-                  Text('Nội dung: ${response.binhLuan}'),
-                  Text(
-                      'Ngày: ${response.ngayTao.toLocal().toString().split(' ')[0]}'),
-                  const Divider(),
-                ],
-              ),
-            ),
-          ],
-        ],
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 27),
           child: Container(
@@ -405,6 +389,65 @@ class _ReviewItemState extends State<ReviewItem> {
               ),
             ),
           ),
+        ],
+        if (_showResponses) ...[
+          for (var response in widget.review.phanHoi.take(2)) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 50, bottom: 10, top: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: response.userId.anhDaiDien != null
+                            ? NetworkImage(response.userId.anhDaiDien!)
+                            : const AssetImage('assets/default_avatar.png')
+                                as ImageProvider,
+                        radius: 15,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text('${response.userId.tenNguoiDung}'),
+                    ],
+                  ),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: ReadMoreText(
+                        response.binhLuan,
+                        trimLines: 3,
+                        trimMode: TrimMode.Line,
+                        trimCollapsedText: "Xem Thêm",
+                        trimExpandedText: "Ẩn",
+                        moreStyle: const TextStyle(
+                            decoration: TextDecoration.underline,
+                            decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Color.fromRGBO(248, 158, 25, 1)),
+                        lessStyle: const TextStyle(
+                            decoration: TextDecoration.underline,
+                            decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Color.fromRGBO(248, 158, 25, 1)),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ),
+
+                  // Text(response.binhLuan),
+                  Text(
+                      'Ngày: ${response.ngayTao.toLocal().toString().split(' ')[0]}'),
+                ],
+              ),
+            ),
+            const Divider(),
+          ],
         ],
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 27, vertical: 20),
