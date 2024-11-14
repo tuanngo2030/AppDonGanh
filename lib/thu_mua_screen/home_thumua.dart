@@ -495,7 +495,7 @@ class _HomeThumuaState extends State<HomeThumua> {
                             fit: BoxFit.cover),
                       ),
                       const SizedBox(
-                        width: 20,
+                        width: 10,
                       ),
                       Container(
                         height: 40,

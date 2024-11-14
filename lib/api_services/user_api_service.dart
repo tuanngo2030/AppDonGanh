@@ -49,6 +49,7 @@ class UserApiService {
               // Save user information and token in SharedPreferences
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.setString('id', user.id ?? '');
+                await prefs.setString('token', token ?? '');
               await prefs.setString('anhDaiDien', user.anhDaiDien ?? '');
               await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
               await prefs.setString('soDienThoai', user.soDienThoai ?? '');
