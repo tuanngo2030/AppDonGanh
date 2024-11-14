@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginWithApiGoogle {
-  Future<void> registerUserGoogle(String displayName, String email, String googleId) async {
+  Future<void> registerUserGoogle(
+      String displayName, String email, String googleId) async {
     final url = '${dotenv.env['API_URL']}/user/RegisterUserGG';
 
     try {
@@ -35,17 +36,27 @@ class LoginWithApiGoogle {
         // Giải mã token để lấy thông tin người dùng
         if (token != null) {
           Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
-          String userId = decodedToken['data']['_id']; // Lấy _id từ decodedToken
+          String userId =
+              decodedToken['data']['_id']; // Lấy _id từ decodedToken
           print('User ID: $userId'); // In ra userId
 
           // Lưu tất cả thông tin vào SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
           await prefs.setString('token', token);
-          
+
           // Lưu các thông tin khác của người dùng từ API vào SharedPreferences
           await prefs.setString('tenNguoiDung', displayName);
           await prefs.setString('gmail', email);
+          await prefs.setString( 'anhDaiDien', decodedToken['data']['anhDaiDien'] ?? '');
+          await prefs.setString( 'IDYeuThich', decodedToken['data']['IDYeuThich'] ?? '');
+          List<String> followers = List<String>.from(decodedToken['data']['follower'] ?? []);
+        List<String> following = List<String>.from(decodedToken['data']['following'] ?? []);
+
+        await prefs.setStringList('follower', followers);
+        await prefs.setStringList('following', following);
+
+             
 
           print("User information saved to SharedPreferences successfully.");
         }
@@ -53,6 +64,7 @@ class LoginWithApiGoogle {
         throw Exception('Failed to register user');
       }
     } catch (error) {
+      print(error);
       throw Exception('Error occurred while registering user: $error');
     }
   }
@@ -78,14 +90,14 @@ class LoginWithApiGoogle {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         print('User details: $data');
-        
+
         // Lưu toàn bộ dữ liệu người dùng vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', data['_id']);
         await prefs.setString('tenNguoiDung', data['tenNguoiDung']);
         await prefs.setString('gmail', data['gmail']);
-        await prefs.setString('token', data['token']); // Giả sử có token trong response
-        
+        await prefs.setString('token', data['token']);
+
         // Bạn có thể thêm các dữ liệu khác nếu cần
         return NguoiDung.fromJson(data);
       } else {
