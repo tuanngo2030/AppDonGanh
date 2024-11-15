@@ -1,4 +1,7 @@
+import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/api_services/user_api_service.dart';
+import 'package:don_ganh_app/screen/chat_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/chat_screen_thuMua.dart';
 import 'package:don_ganh_app/widget/postItem.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +26,10 @@ class _OState extends State<O> {
   int _currentPage = 0;
   bool _isFollowing = false;
   String? userId;
+  
+  bool _isLoading = false;
+  String? token;
+
 
   Future<List<BlogModel>>? _userBlogs;
   Future<List<Map<String, dynamic>>>? _userProducts;
@@ -37,6 +44,65 @@ class _OState extends State<O> {
         _currentPage = _pageController.page?.round() ?? 0;
       });
     });
+  }
+
+   void _onChat() async {
+    setState(() {
+      _isLoading = true; // Start loading state
+    });
+
+    final ChatApiService apiService = ChatApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    token = prefs.getString('token');
+
+    if (userId != null && token != null) {
+      // Ensure userId and token are not null
+      try {
+        print('User ID: $userId');
+        print('Token: $token');
+
+        String receiverId = widget.nguoiDung.id!;
+        final response =
+            await apiService.createConversation(userId!, receiverId);
+
+        if (response != null && response['_id'] != null) {
+          String conversationId = response['_id'];
+
+          print('conversationId: $conversationId');
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreenThumua(
+                token: token!,
+                title: conversationId,
+                userId: userId!,
+                conversationId: conversationId,
+                receiverData:
+                    response['receiver_id'] ?? {},
+               
+              ),
+            ),
+          );
+        } else {
+          _showSnackBar('Không thể tạo cuộc trò chuyện.');
+        }
+      } catch (e) {
+        _showSnackBar('Đã xảy ra lỗi: $e');
+      }
+    } else {
+      _showSnackBar('User ID hoặc token không có sẵn.');
+    }
+
+    setState(() {
+      _isLoading = false; // End loading state
+    });
+  }
+
+    void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _loadUserProducts() async {
@@ -216,7 +282,7 @@ class _OState extends State<O> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () => _onChat(),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             foregroundColor: Colors.white,

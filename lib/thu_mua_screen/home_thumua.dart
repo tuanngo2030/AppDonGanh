@@ -555,13 +555,14 @@ class _HomeThumuaState extends State<HomeThumua> {
                 final userId = prefs.getString('userId');
                 userId == post.userId.id
                     ? Navigator.pushNamed(context, '/your_blog_screen')
-                    :  Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  O(nguoiDung: post.userId,),
-                            ),
-                          );
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => O(
+                            nguoiDung: post.userId,
+                          ),
+                        ),
+                      );
               },
               child: ListTile(
                 leading: post.userId.anhDaiDien != null
@@ -627,9 +628,15 @@ class _HomeThumuaState extends State<HomeThumua> {
                           borderRadius: BorderRadius.circular(10.0),
                           child: Image.network(
                             post.image[0],
-                            // Make image full height
                             width: double.infinity, // Make image full width
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'lib/assets/avt2.jpg', // Path to your fallback image
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              );
+                            },
                           ),
                         ),
                       )
@@ -647,6 +654,14 @@ class _HomeThumuaState extends State<HomeThumua> {
                                     100, // Regular height for multiple images
                                 width: 220, // Regular width for multiple images
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'lib/assets/avt2.jpg', // Path to your fallback image
+                                    height: 100,
+                                    width: 220,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
                               ),
                             ),
                           );

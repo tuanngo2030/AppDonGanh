@@ -17,36 +17,35 @@ class PostItem extends StatefulWidget {
 
 class _PostItemState extends State<PostItem> {
   final BlogApiService _blogApiService = BlogApiService();
-    String? userId;
+  String? userId;
 
   Future<List<BlogModel>>? _userBlogs;
   Future<List<Map<String, dynamic>>>? _userProducts;
-
 
   @override
   void initState() {
     super.initState();
     // _fetchBlogPosts;
     _loadUserProducts;
-  } 
+  }
 
   Future<void> _loadUserProducts() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  userId = prefs.getString('userId');
-  String SetuserId = '67054001d6a6039bcca389fa';
-  final response = await UserApiService().fetchUserData(SetuserId, userId!);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    String SetuserId = '67054001d6a6039bcca389fa';
+    final response = await UserApiService().fetchUserData(SetuserId, userId!);
 
-  setState(() {
-    final blogData = response['baiViet']['list']; // Adjust based on actual JSON key
-    if (blogData is List) {
-      _userBlogs = Future(() => blogData.map((json) => BlogModel.fromJson(json)).toList());
-    } else {
-      _userBlogs = Future.value([]);
-    }
-
-  });
-}
-
+    setState(() {
+      final blogData =
+          response['baiViet']['list']; // Adjust based on actual JSON key
+      if (blogData is List) {
+        _userBlogs = Future(
+            () => blogData.map((json) => BlogModel.fromJson(json)).toList());
+      } else {
+        _userBlogs = Future.value([]);
+      }
+    });
+  }
 
   Future<void> _toggleLike(String baivietId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -436,7 +435,7 @@ class _PostItemState extends State<PostItem> {
 
   @override
   Widget build(BuildContext context) {
-      // print("isLiked value: ${post.isLiked}");
+    // print("isLiked value: ${post.isLiked}");
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
@@ -531,6 +530,13 @@ class _PostItemState extends State<PostItem> {
                                 height: 100,
                                 width: 220,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'lib/assets/avt2.jpg', // Path to your fallback image
+                                    width: double.infinity,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
                               ),
                             ),
                           );
@@ -551,8 +557,9 @@ class _PostItemState extends State<PostItem> {
                           widget.post.isLiked == true
                               ? Icons.thumb_up
                               : Icons.thumb_up_outlined,
-                          color:
-                              widget.post.isLiked == true ? Colors.blue : Colors.black,
+                          color: widget.post.isLiked == true
+                              ? Colors.blue
+                              : Colors.black,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 8),

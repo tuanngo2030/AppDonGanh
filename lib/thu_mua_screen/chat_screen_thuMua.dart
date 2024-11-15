@@ -1,39 +1,36 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
-import 'package:don_ganh_app/models/chat_model.dart';
-import 'package:don_ganh_app/models/product_model.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:don_ganh_app/models/chat_model.dart';
+import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreenThumua extends StatefulWidget {
   final String title;
   final String userId; // ID của người dùng hiện tại
   final String conversationId;
   final Map<String, dynamic>? receiverData; // Thêm receiverData
-  final ProductModel productModel;
   final String token;
 
-  const ChatScreen({
+  const ChatScreenThumua({
     super.key,
     required this.title,
     required this.userId,
     required this.conversationId,
     this.receiverData, // Nhận dữ liệu receiver
-    required this.productModel,
     required this.token,
   });
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreenThumua> createState() => _ChatScreenThumuaState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenThumuaState extends State<ChatScreenThumua> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -49,10 +46,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadTokenAndConnect();
-    _controller.text = widget.productModel.nameProduct;
   }
 
-  @override
+    @override
   void dispose() {
     _scrollController.dispose();
     _controller.dispose();
@@ -62,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  // Function to clear selected image
+    // Function to clear selected image
   void _clearImage() {
     setState(() {
       _image = null;
@@ -310,8 +306,6 @@ class _ChatScreenState extends State<ChatScreen> {
         'text': text,
         'imageUrl': imageUrl,
         'videoUrl': videoUrl,
-        if (text == widget.productModel.nameProduct)
-          'IDSanPham': widget.productModel.id,
         'token': token,
       });
 
@@ -349,6 +343,8 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
   }
+
+
 
   @override
 Widget build(BuildContext context) {
@@ -419,12 +415,12 @@ Widget build(BuildContext context) {
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         // Hiển thị sản phẩm ở đầu danh sách
-                        return _buildProductWidget();
                       } else {
                         // Hiển thị tin nhắn
                         final message = messages[index - 1];
                         return _buildMessage(message);
                       }
+                      return null;
                     },
                   ),
                 ),
@@ -688,49 +684,6 @@ Widget build(BuildContext context) {
             color: const Color.fromARGB(255, 220, 218, 218)),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                children: [
-                  Container(
-                      height: 80,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            widget.productModel.imageProduct,
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      )),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.productModel.nameProduct ?? 'Unknown Product',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(41, 87, 35, 1),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          '\$${widget.productModel.donGiaBan ?? '0.00'}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             GestureDetector(
               onTap: () {
                 Navigator.pop(context);
