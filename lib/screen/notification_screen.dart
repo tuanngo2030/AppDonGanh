@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:don_ganh_app/api_services/notification_api.dart';
 import 'package:don_ganh_app/models/notification_model.dart';
 import 'package:flutter/material.dart';
@@ -237,10 +238,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> _removeNotification(NotificationModel notification) async {
     try {
-      setState(() {
-        isDeleting[notification.id] = true; // Mark this notification as being deleted
-      });
-
       // Remove notification locally
       setState(() {
         notifications.removeWhere((notif) => notif.id == notification.id);
@@ -248,33 +245,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       // Call API to delete notification (optional)
       await NotificationApi.deleteThongBao(notification.id);
-
-      // If successful, you can optionally show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Đã xóa thông báo"),
-        ),
-      );
     } catch (e) {
       // Handle the error (e.g., show an alert, log, etc.)
       print("Error removing notification: $e");
-      // Re-add the notification to the list in case of failure
+      // You can also re-add the notification to the list in case of failure
       setState(() {
         notifications.add(notification);
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lỗi khi xóa thông báo"),
-        ),
-      );
-    } finally {
-      // Regardless of success or failure, mark the notification as no longer being deleted
-      setState(() {
-        isDeleting[notification.id] = false;
-      });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     // Group notifications by date
