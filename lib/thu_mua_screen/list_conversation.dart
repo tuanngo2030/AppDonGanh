@@ -129,12 +129,15 @@ class _ListConversationState extends State<ListConversation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(),
+        ),
         title: const Text(
           'Danh sách cuộc trò chuyện',
           style: TextStyle(
-            color: Color.fromRGBO(41, 87, 35, 1),
-            fontWeight: FontWeight.bold,
-          ),
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -157,14 +160,22 @@ class _ListConversationState extends State<ListConversation> {
 
                 return ListTile(
                   leading: CircleAvatar(
-                    // Use null-aware operator to safely access properties
-                    backgroundImage: receiver?.anhDaiDien != null
-                        ? NetworkImage(receiver!
-                            .anhDaiDien!) // null check for non-null receiver
-                        : null,
-                    child: receiver?.anhDaiDien == null
-                        ? const Icon(Icons.person, color: Colors.grey)
-                        : null,
+                    // Use the Image widget to handle errors
+                    child: receiver?.anhDaiDien != null
+                        ? Image.network(
+                            receiver!.anhDaiDien!,
+                            width: 40, // Adjust the size as needed
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person,
+                                  color: Colors
+                                      .grey); // Fallback icon if image fails
+                            },
+                          )
+                        : const Icon(Icons.person,
+                            color: Colors
+                                .grey), // Default icon if no image is available
                   ),
                   title: Text(
                     receiver?.tenNguoiDung ??

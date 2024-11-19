@@ -14,6 +14,7 @@ class ProfileThumua extends StatefulWidget {
 class _ProfileThumuaState extends State<ProfileThumua> {
   String? tenNguoiDung;
   String? anhDaiDien;
+   String? userId;
   int followerCount = 0;
   int followingCount = 0;
   @override
@@ -27,6 +28,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
     setState(() {
       tenNguoiDung = prefs.getString('tenNguoiDung');
       anhDaiDien = prefs.getString('anhDaiDien');
+      userId = prefs.getString('userId');
       // Load follower and following lists and get counts
       followerCount = prefs.getStringList('follower')?.length ?? 0;
       followingCount = prefs.getStringList('following')?.length ?? 0;
@@ -36,14 +38,24 @@ class _ProfileThumuaState extends State<ProfileThumua> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+     appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(),
+        ),
+        title: const Text(
+          'Trang cá nhân',
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('Trang cá nhân'),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 30),
+          padding: const EdgeInsets.only(bottom: 30, top: 20),
           child: Container(
             alignment: Alignment.center,
             child: Column(
@@ -149,19 +161,25 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       ),
                       Expanded(
                         flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '$followerCount',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              'Người theo dõi',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                          ],
+                        child: GestureDetector(
+                          onTap: (){
+                             print('following');
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowersScreen(title: tenNguoiDung!, userId: userId!, chucNang: 'followers',)));
+                          },
+                          child: Column(
+                            children: [
+                              Text(
+                                '$followerCount',
+                                style: TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
+                              Text(
+                                'Người theo dõi',
+                                style: TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       Expanded(
@@ -169,7 +187,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         child: GestureDetector(
                           onTap: (){
                             print('following');
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowingScreen(title: tenNguoiDung)));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowersScreen(title: tenNguoiDung!, userId: userId!, chucNang: 'followings',)));
                           },
                           child: Column(
                             children: [
@@ -336,7 +354,9 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/loginscreen');
+                      },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
