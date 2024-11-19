@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:don_ganh_app/thu_mua_screen/following_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,7 +27,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
     setState(() {
       tenNguoiDung = prefs.getString('tenNguoiDung');
       anhDaiDien = prefs.getString('anhDaiDien');
-         // Load follower and following lists and get counts
+      // Load follower and following lists and get counts
       followerCount = prefs.getStringList('follower')?.length ?? 0;
       followingCount = prefs.getStringList('following')?.length ?? 0;
     });
@@ -68,14 +69,28 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Image.asset(
-                                     'lib/assets/avt2.jpg', // Path to a local default avatar
+                                    'lib/assets/avt2.jpg', // Path to a local default avatar
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        'lib/assets/avt2.jpg', // Path to your fallback image
+                                        width: double.infinity,
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
                                   );
                                 },
                               )
                             : Image.asset(
-                                  'lib/assets/avt2.jpg', // Path to a local default avatar
+                                'lib/assets/avt2.jpg', // Path to a local default avatar
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'lib/assets/avt2.jpg', // Path to your fallback image
+                                    width: double.infinity,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
                               ),
                       ),
                     ),
@@ -151,105 +166,111 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       ),
                       Expanded(
                         flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '$followingCount',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              'Đang theo dõi',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15, left: 15),
-                  child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Bạn bè',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: Color.fromRGBO(41, 87, 35, 1),
-                        ),
-                      )),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.fromBorderSide(
-                          BorderSide(color: Colors.grey, width: 1))),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.fromBorderSide(BorderSide(
-                                  color: Color.fromRGBO(47, 88, 42, 1),
-                                  width: 2))),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.asset(
-                              'lib/assets/avt1.jpg',
-                              fit: BoxFit.cover,
-                            ),
+                        child: GestureDetector(
+                          onTap: (){
+                            print('following');
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowingScreen(title: tenNguoiDung)));
+                          },
+                          child: Column(
+                            children: [
+                              Text(
+                                '$followingCount',
+                                style: TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
+                              Text(
+                                'Đang theo dõi',
+                                style: TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Text(
-                        'Vợ 1',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w700),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Container(
-                            child: ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: Container(
-                                      height: 23,
-                                      width: 23,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        color: Colors.white,
-                                      ),
-                                      child: Icon(
-                                        Icons.add,
-                                        size: 15,
-                                        color: Color.fromRGBO(41, 87, 35, 1),
-                                      )),
-                                ),
-                                label: Text(
-                                  'Theo dõi',
-                                  style: TextStyle(fontWeight: FontWeight.w800),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  backgroundColor:
-                                      Color.fromRGBO(41, 87, 35, 1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                ))),
-                      )
                     ],
                   ),
                 ),
+                // Padding(
+                //   padding: const EdgeInsets.only(top: 15, left: 15),
+                //   child: Align(
+                //       alignment: Alignment.centerLeft,
+                //       child: Text(
+                //         'Bạn bè',
+                //         style: TextStyle(
+                //           fontSize: 20,
+                //           fontWeight: FontWeight.w900,
+                //           color: Color.fromRGBO(41, 87, 35, 1),
+                //         ),
+                //       )),
+                // ),
+                // Container(
+                //   decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(10),
+                //       border: Border.fromBorderSide(
+                //           BorderSide(color: Colors.grey, width: 1))),
+                //   child: Column(
+                //     children: [
+                //       Padding(
+                //         padding: const EdgeInsets.all(10.0),
+                //         child: Container(
+                //           height: 100,
+                //           width: 100,
+                //           decoration: BoxDecoration(
+                //               borderRadius: BorderRadius.circular(100),
+                //               border: Border.fromBorderSide(BorderSide(
+                //                   color: Color.fromRGBO(47, 88, 42, 1),
+                //                   width: 2))),
+                //           child: ClipRRect(
+                //             borderRadius: BorderRadius.circular(100),
+                //             child: Image.asset(
+                //               'lib/assets/avt1.jpg',
+                //               fit: BoxFit.cover,
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //       Text(
+                //         'Vợ 1',
+                //         style: TextStyle(
+                //             fontSize: 15, fontWeight: FontWeight.w700),
+                //       ),
+                //       Padding(
+                //         padding: const EdgeInsets.all(15),
+                //         child: Container(
+                //             child: ElevatedButton.icon(
+                //                 onPressed: () {},
+                //                 icon: Padding(
+                //                   padding: const EdgeInsets.only(right: 10),
+                //                   child: Container(
+                //                       height: 23,
+                //                       width: 23,
+                //                       decoration: BoxDecoration(
+                //                         borderRadius:
+                //                             BorderRadius.circular(100),
+                //                         color: Colors.white,
+                //                       ),
+                //                       child: Icon(
+                //                         Icons.add,
+                //                         size: 15,
+                //                         color: Color.fromRGBO(41, 87, 35, 1),
+                //                       )),
+                //                 ),
+                //                 label: Text(
+                //                   'Theo dõi',
+                //                   style: TextStyle(fontWeight: FontWeight.w800),
+                //                 ),
+                //                 style: ElevatedButton.styleFrom(
+                //                   foregroundColor: Colors.white,
+                //                   backgroundColor:
+                //                       Color.fromRGBO(41, 87, 35, 1),
+                //                   shape: RoundedRectangleBorder(
+                //                     borderRadius: BorderRadius.circular(10.0),
+                //                   ),
+                //                 ))),
+                //       )
+                //     ],
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(top: 15, left: 15),
                   child: Align(
@@ -283,10 +304,11 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         ),
                         MainFuntion(
                           icon: Icon(Icons.person),
-                          title: 'Thông tin tài khoản',
-                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          title: 'Đăng ký thu mua',
+                          subtitle: 'Đăng ký bán nông sản:',
                           onTap: () {
-                            Navigator.pushNamed(context, '/your_blog_screen');
+                            Navigator.pushNamed(
+                                context, '/dang_ky_thu_mua_screen');
                           },
                         ),
                         MainFuntion(
@@ -299,8 +321,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         ),
                         MainFuntion(
                           icon: Icon(Icons.person),
-                          title: 'Thông tin tài khoản',
-                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          title: 'Bài viết',
+                          subtitle: 'Bao gồm các bài viết của bạn:',
                           onTap: () {
                             Navigator.pushNamed(context, '/your_blog_screen');
                           },

@@ -411,16 +411,10 @@ Widget build(BuildContext context) {
                   padding: const EdgeInsets.all(10),
                   child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: messages.length + 1, // Sản phẩm + tin nhắn
+                    itemCount: messages.length, // Sản phẩm + tin nhắn
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        // Hiển thị sản phẩm ở đầu danh sách
-                      } else {
-                        // Hiển thị tin nhắn
-                        final message = messages[index - 1];
+                        final message = messages[index];
                         return _buildMessage(message);
-                      }
-                      return null;
                     },
                   ),
                 ),
@@ -450,120 +444,91 @@ Widget build(BuildContext context) {
 
 
   Widget _buildMessage(Message message) {
-    String formattedTime = DateFormat('HH:mm').format(message.createdAt);
+  String formattedTime = DateFormat('HH:mm').format(message.createdAt);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: message.msgByUserId == widget.userId
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          if (message.text.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: message.msgByUserId == widget.userId
-                    ? Colors.green[200]
-                    : Colors.grey[300],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                crossAxisAlignment: message.msgByUserId == widget.userId
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-                children: [
-                  Text(message.text, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text(
-                    formattedTime,
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                  ),
-                ],
-              ),
-            ),
-          if (message.imageUrl != null)
-            GestureDetector(
-              onTap: () {
-                _showFullImage(message.imageUrl!);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Image.network(
-                    message.imageUrl!,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          if (message.videoUrl != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: SizedBox(
-                height: 150,
-                width: 150,
-                child: VideoPlayerWidget(videoUrl: message.videoUrl!),
-              ),
-            ),
-          if (message.IDSanPham != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Row(
+      mainAxisAlignment: message.msgByUserId == widget.userId
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: message.msgByUserId == widget.userId
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            // Hiển thị tin nhắn văn bản
+            if (message.text.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueAccent),
+                  color: message.msgByUserId == widget.userId
+                      ? Colors.green[200]
+                      : Colors.grey[300],
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(12),
+                    topRight: const Radius.circular(12),
+                    bottomLeft: message.msgByUserId == widget.userId
+                        ? const Radius.circular(12)
+                        : const Radius.circular(0),
+                    bottomRight: message.msgByUserId == widget.userId
+                        ? const Radius.circular(0)
+                        : const Radius.circular(12),
+                  ),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Display product image
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.network(
-                        message.IDSanPham!.imageProduct,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
+                    Text(
+                      message.text,
+                      style: const TextStyle(fontSize: 16),
                     ),
-                    const SizedBox(width: 10),
-                    // Display product name and a brief description
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            message.IDSanPham!.nameProduct,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            message.IDSanPham!.moTa,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formattedTime,
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],
                 ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
+            // Hiển thị ảnh nếu có
+            if (message.imageUrl != null)
+              GestureDetector(
+                onTap: () {
+                  _showFullImage(message.imageUrl!);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.network(
+                      message.imageUrl!,
+                      fit: BoxFit.cover,
+                      width: 150,
+                      height: 150,
+                    ),
+                  ),
+                ),
+              ),
+            // Hiển thị video nếu có
+            if (message.videoUrl != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: SizedBox(
+                  height: 150,
+                  width: 150,
+                  child: VideoPlayerWidget(videoUrl: message.videoUrl!),
+                ),
+              ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildInputArea() {
     return Padding(
@@ -672,48 +637,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildProductWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
-      child: Container(
-        // padding: const EdgeInsets.all(10),
-        // margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(10),
-            color: const Color.fromARGB(255, 220, 218, 218)),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Colors.grey, // Màu của viền
-                      width: 1.0, // Độ dày của viền
-                    ),
-                  ),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Chi tiết',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Color.fromRGBO(41, 87, 35, 1), fontSize: 15),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class VideoPlayerWidget extends StatefulWidget {

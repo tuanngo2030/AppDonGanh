@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
+import 'package:don_ganh_app/thu_mua_screen/dang_ky_thu_mua_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
 import 'package:flutter/material.dart';
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
         '/Resetpassword': (context) => const Resetpassword(),
         // '/Checkbot': (context) => const Checkbot(),
         '/your_blog_screen': (context) => const YourBlogScreen(),
+         '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
         // '/other_profile_screen': (context) => const O(),
       },
       onGenerateRoute: (settings) {

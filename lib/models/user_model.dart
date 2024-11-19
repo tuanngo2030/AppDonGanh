@@ -144,4 +144,5 @@ class Permission {
       '_id': id,
     };
   }
+  
 }
