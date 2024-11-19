@@ -11,19 +11,18 @@ class AddressFormScreen extends StatefulWidget {
   final diaChiList? address;
   final String userId;
 
-  const AddressFormScreen({Key? key, this.address, required this.userId})
-      : super(key: key);
+  const AddressFormScreen({super.key, this.address, required this.userId});
 
   @override
   _AddressFormScreenState createState() => _AddressFormScreenState();
 }
 
 class _AddressFormScreenState extends State<AddressFormScreen> {
-  TextEditingController _duongThonController = TextEditingController();
-  TextEditingController _tenController = TextEditingController();
-  TextEditingController _soDienThoaiController = TextEditingController();
-  TextEditingController _kinhDoController = TextEditingController(); // Kinh độ
-  TextEditingController _viDoController = TextEditingController(); // Vĩ độ
+  final TextEditingController _duongThonController = TextEditingController();
+  final TextEditingController _tenController = TextEditingController();
+  final TextEditingController _soDienThoaiController = TextEditingController();
+  final TextEditingController _kinhDoController = TextEditingController(); // Kinh độ
+  final TextEditingController _viDoController = TextEditingController(); // Vĩ độ
 
   String? _selectedTinhThanhPho; // Tỉnh/Thành phố
   String? _selectedQuanHuyen; // Quận/Huyện
@@ -33,10 +32,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   List<String> _quanHuyenList = [];
   List<String> _phuongXaList = [];
 
-  DcApiService _dcApiService = DcApiService();
+  final DcApiService _dcApiService = DcApiService();
   LatLng _currentLocation =
-      LatLng(21.035965, 105.834747); // Default location: Hanoi
-  MapController _mapController = MapController();
+      const LatLng(21.035965, 105.834747); // Default location: Hanoi
+  final MapController _mapController = MapController();
   @override
   void initState() {
     super.initState();
@@ -124,13 +123,13 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
         title: Text(
           widget.address == null ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ',
-          style: TextStyle(
+          style: const TextStyle(
               color: Color.fromRGBO(41, 87, 35, 1),
               fontWeight: FontWeight.bold),
         ),
@@ -232,31 +231,31 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
             // Hiển thị Kinh độ và Vĩ độ
             TextField(
               controller: _kinhDoController,
-              decoration: InputDecoration(labelText: 'Kinh độ'),
+              decoration: const InputDecoration(labelText: 'Kinh độ'),
             ),
             const SizedBox(height: 20),
             TextField(
               controller: _viDoController,
-              decoration: InputDecoration(labelText: 'Vĩ độ'),
+              decoration: const InputDecoration(labelText: 'Vĩ độ'),
             ),
             const SizedBox(height: 10),
 
             // Nút mở bản đồ
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-                minimumSize: Size(double.infinity, 50),
-                foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                minimumSize: const Size(double.infinity, 50),
+                foregroundColor: const Color.fromRGBO(255, 255, 255, 1),
               ),
               onPressed: _openMap,
-              child: Text('Chọn vị trí từ bản đồ'),
+              child: const Text('Chọn vị trí từ bản đồ'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(41, 87, 35, 1),
-                minimumSize: Size(double.infinity, 50),
-                foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                minimumSize: const Size(double.infinity, 50),
+                foregroundColor: const Color.fromRGBO(255, 255, 255, 1),
               ),
               onPressed: () async {
                 // Kiểm tra tất cả các trường có giá trị hay chưa
@@ -333,7 +332,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
 class MapScreen extends StatefulWidget {
   final LatLng initialLocation;
 
-  const MapScreen({Key? key, required this.initialLocation}) : super(key: key);
+  const MapScreen({super.key, required this.initialLocation});
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -391,22 +390,22 @@ class _MapScreenState extends State<MapScreen> {
       barrierDismissible: false, // User must tap button to dismiss dialog
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Xác nhận vị trí'),
+          title: const Text('Xác nhận vị trí'),
           content: Text(
-              'Bạn có chắc chắn muốn chọn vị trí này?\kinh độ: ${_currentLocation.latitude}, vĩ độ: ${_currentLocation.longitude}'),
+              'Bạn có chắc chắn muốn chọn vị trí này?kinh độ: ${_currentLocation.latitude}, vĩ độ: ${_currentLocation.longitude}'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close the dialog without doing anything
               },
-              child: Text('Hủy'),
+              child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
                 Navigator.pop(context, _currentLocation); // Return the selected location
               },
-              child: Text('Xác nhận'),
+              child: const Text('Xác nhận'),
             ),
           ],
         );
@@ -418,7 +417,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chọn vị trí'),
+        title: const Text('Chọn vị trí'),
         backgroundColor: Colors.green,
       ),
       body: FlutterMap(
@@ -442,7 +441,7 @@ class _MapScreenState extends State<MapScreen> {
                 point: _currentLocation,
                 width: 80.0,
                 height: 80.0,
-                child: Icon(
+                child: const Icon(
                   Icons.location_on,
                   size: 40.0,
                   color: Colors.red,

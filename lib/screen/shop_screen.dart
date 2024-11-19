@@ -20,7 +20,7 @@ class _ShopScreenState extends State<ShopScreen> {
           child: GestureDetector(
           ),
         ),
-        title: Text(
+        title: const Text(
           'Giỏ hàng',
          style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1),fontWeight: FontWeight.bold),
         ),

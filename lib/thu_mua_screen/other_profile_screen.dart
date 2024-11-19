@@ -45,6 +45,7 @@ class _OState extends State<O> {
       });
     });
   }
+  
 
    void _onChat() async {
     setState(() {
@@ -136,30 +137,38 @@ class _OState extends State<O> {
     }
   }
 
-  Future<void> _loadUserBlogs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('userId');
-    String SetuserId = widget.nguoiDung.id!;
+ Future<void> _loadUserBlogs() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  userId = prefs.getString('userId');
+  String SetuserId = widget.nguoiDung.id!;
+
+  try {
     final response = await UserApiService().fetchUserData(SetuserId, userId!);
 
-    setState(() {
-      final blogData =
-          response['baiViet']['list']; // Adjust based on actual JSON key
-      if (blogData is List) {
-        _userBlogs = Future(
-            () => blogData.map((json) => BlogModel.fromJson(json)).toList());
-      } else {
-        _userBlogs = Future.value([]);
-      }
-    });
+    // Check if the widget is still mounted before calling setState
+    if (mounted) {
+      setState(() {
+        final blogData = response['baiViet']['list']; // Adjust based on actual JSON key
+        if (blogData is List) {
+          _userBlogs = Future(() => blogData.map((json) => BlogModel.fromJson(json)).toList());
+        } else {
+          _userBlogs = Future.value([]);
+        }
+      });
+    }
+  } catch (e) {
+    // Handle any exceptions, such as network errors
+    print('Error loading user blogs: $e');
   }
+}
+
 
   Future<void> _toggleFollow() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? followingList = prefs.getStringList('following') ?? [];
 
     String action = _isFollowing ? 'unfollow' : 'follow';
-    await _followApiService.toggleFollowUser(
+     _followApiService.toggleFollowUser(
       userId: userId!,
       targetId: widget.nguoiDung.id!,
       action: action,

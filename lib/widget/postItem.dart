@@ -4,6 +4,8 @@ import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostItem extends StatefulWidget {
@@ -27,6 +29,58 @@ class _PostItemState extends State<PostItem> {
     super.initState();
     // _fetchBlogPosts;
     _loadUserProducts;
+  }
+
+  void showFullScreenImages(
+      BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: images.length,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions.customChild(
+                    child: Image.network(
+                      images[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                          fit: BoxFit.contain,
+                        );
+                      },
+                    ),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(color: Colors.black),
+                pageController: PageController(initialPage: initialIndex),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _loadUserProducts() async {
@@ -504,44 +558,68 @@ class _PostItemState extends State<PostItem> {
             // Post image (only if it exists)
             if (widget.post.image.isNotEmpty)
               SizedBox(
-                height: 200,
-                child: widget.post.image.length == 1
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(
-                            widget.post.image[0],
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                width: double
+                    .infinity, // Ensure the container takes the full width
+                child: GestureDetector(
+                  onTap: () {
+                    showFullScreenImages(context, widget.post.image, 0);
+                  },
+                  child: widget.post.image.length == 1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.network(
+                              widget.post.image[0],
+                              width: double.infinity, // Full width
+                              fit: BoxFit
+                                  .contain, // Ensures the image maintains its aspect ratio
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height:
+                              200, // You can set height here, or adjust based on your UI
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: widget.post.image.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  showFullScreenImages(
+                                      context, widget.post.image, index);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.network(
+                                      widget.post.image[index],
+                                      width: 220,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                          width: 220,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      )
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: widget.post.image.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 20),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                widget.post.image[index],
-                                height: 100,
-                                width: 220,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'lib/assets/avt2.jpg', // Path to your fallback image
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                  );
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                ),
               ),
             // Likes and comments section
             Padding(

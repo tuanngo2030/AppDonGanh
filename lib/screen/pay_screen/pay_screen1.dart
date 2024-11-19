@@ -648,7 +648,7 @@ class _PayScreen1State extends State<PayScreen1> {
                           BorderSide(color: Color.fromARGB(255, 204, 202, 202)),
                     )),
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

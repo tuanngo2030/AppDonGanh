@@ -177,4 +177,19 @@ class UserApiService {
     throw Exception('Failed to load user data');
   }
 }
+
+  Future<Map<String, dynamic>> getUserFollowers(String userId) async {
+    final url = Uri.parse("${dotenv.env['API_URL']}/user/getUserFollowers/$userId");
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to load followers');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
 }

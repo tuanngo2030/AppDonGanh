@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/models/converstation_model.dart';
+import 'package:don_ganh_app/thu_mua_screen/chat_screen_thuMua.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 
 class ListConversation extends StatefulWidget {
   const ListConversation({super.key});
@@ -19,11 +19,65 @@ class _ListConversationState extends State<ListConversation> {
   String? userId;
   final ChatApiService apiService = ChatApiService();
   List<Conversation> conversations = []; // Store conversations
+  bool _isLoading = false; // Biến để theo dõi trạng thái tải
+  final double _uploadProgress = 0.0;
+  String? token;
 
   @override
   void initState() {
     super.initState();
     _loadUserId();
+  }
+
+  void _onChat(String receiverId) async {
+    setState(() {
+      _isLoading = true; // Start loading state
+    });
+
+    final ChatApiService apiService = ChatApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    token = prefs.getString('token');
+
+    if (userId != null && token != null) {
+      // Ensure userId and token are not null
+      try {
+        print('User ID: $userId');
+        print('Token: $token');
+
+        final response =
+            await apiService.createConversation(userId!, receiverId);
+
+        if (response != null && response['_id'] != null) {
+          String conversationId = response['_id'];
+
+          print('conversationId: $conversationId');
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreenThumua(
+                token: token!,
+                title: conversationId,
+                userId: userId!,
+                conversationId: conversationId,
+                receiverData: response['receiver_id'] ?? {},
+              ),
+            ),
+          );
+        } else {
+          _showSnackBar('Không thể tạo cuộc trò chuyện.');
+        }
+      } catch (e) {
+        _showSnackBar('Đã xảy ra lỗi: $e');
+      }
+    } else {
+      _showSnackBar('User ID hoặc token không có sẵn.');
+    }
+
+    setState(() {
+      _isLoading = false; // End loading state
+    });
   }
 
   Future<void> _loadUserId() async {
@@ -42,20 +96,20 @@ class _ListConversationState extends State<ListConversation> {
 
     try {
       final response = await http.get(
-        Uri.parse('$apiUrl$userId'), // Assume this fetches all conversations
+        Uri.parse('$apiUrl$userId'), // API URL
         headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
-        print('error ${response.body}');
+        print('Response body: ${response.body}');
         List<dynamic> data = jsonDecode(response.body);
 
-        // Parse and filter conversations by senderId or receiverId matching userId
-        List<Conversation> allConversations =
-            data.map((json) => Conversation.fromJson(json)).toList();
-
         setState(() {
-          conversations = allConversations;
+          // Convert List<dynamic> to List<Conversation> using the fromJson method
+          conversations = data
+              .map(
+                  (conversationJson) => Conversation.fromJson(conversationJson))
+              .toList();
         });
       } else {
         print('Failed to get list of conversations: ${response.body}');
@@ -64,21 +118,23 @@ class _ListConversationState extends State<ListConversation> {
       print('Error: $error');
     }
   }
-   // Method to show SnackBar
+
+  // Method to show SnackBar
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(),
         ),
         title: const Text(
-          'Thông báo',
+          'Danh sách cuộc trò chuyện',
           style: TextStyle(
               color: Color.fromRGBO(41, 87, 35, 1),
               fontWeight: FontWeight.bold),
@@ -87,60 +143,53 @@ class _ListConversationState extends State<ListConversation> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-          body: ListView.builder(
-            itemCount: conversations.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                leading: const CircleAvatar(
-                  radius: 30,
-                  child: Icon(Icons.message), // Placeholder for icon
-                ),
-                title: Text(
-                  conversations[index]
-                      .id, // Display conversation ID (or other info)
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                    'Messages: ${conversations[index].messageIds.length}'), // Show number of messages
-                trailing: Text(conversations[index]
-                    .updatedAt
-                    .toIso8601String()), // Show last updated time
-                onTap: () async {
-                  if (userId != null) {
-                    try {
-                      // In ra userId
-                      print('User ID: $userId'); // Thêm dòng này để in ra userId
+      body: _isLoading
+          ? const Center(
+              child: Text('Chưa có đoạn hội thoại'),
+            )
+          : ListView.builder(
+              itemCount: conversations.length,
+              itemBuilder: (context, index) {
+                var conversation = conversations[index];
+                var receiver = conversation.receiverId;
 
-                      final conversationId = conversations[index].id;
-                      String receiverId = '671326ec38c65820c766c473';
-                      final success =
-                          await apiService.createConversation(userId!, receiverId);
-                      print('conversationId: $conversationId');
-                      if (success != null) {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => ChatScreen(
-                        //       title: conversations[index].receiverId.id!,
-                        //       userId: userId!, // Gửi userId tới ChatScreen
-                        //       conversationId:
-                        //           conversationId, // Gửi conversationId tới ChatScreen // Set chat screen title as conversation ID
-                        //     ),
-                        //   ),
-                        // );
-                      } else {
-                        _showSnackBar('Không thể tạo cuộc trò chuyện.');
-                      }
-                    } catch (e) {
-                      _showSnackBar('Đã xảy ra lỗi: $e');
-                    }
-                  } else {
-                    _showSnackBar('Không tìm thấy người dùng.');
-                  }
-                },
-              );
-            },
-          ),
+                // Bỏ qua nếu không có tin nhắn
+                if (conversation.messageIds.isEmpty) {
+                  return const SizedBox.shrink(); // Không hiển thị gì
+                }
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    // Use the Image widget to handle errors
+                    child: receiver?.anhDaiDien != null
+                        ? Image.network(
+                            receiver!.anhDaiDien!,
+                            width: 40, // Adjust the size as needed
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person,
+                                  color: Colors
+                                      .grey); // Fallback icon if image fails
+                            },
+                          )
+                        : const Icon(Icons.person,
+                            color: Colors
+                                .grey), // Default icon if no image is available
+                  ),
+                  title: Text(
+                    receiver?.tenNguoiDung ??
+                        'Unknown User', // Fallback to 'Unknown User' if null
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text('Nhấn để bắt đầu trò chuyện'),
+                  onTap: () {
+                    // If receiver?.id is null, pass a default string like "Unknown" or empty string
+                    _onChat(receiver?.id ?? 'Unknown');
+                  },
+                );
+              },
+            ),
     );
   }
 }

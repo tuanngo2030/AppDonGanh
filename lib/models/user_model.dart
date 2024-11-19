@@ -143,5 +143,5 @@ class Permission {
       'actions': actions,
       '_id': id,
     };
-  }
+  } 
 }

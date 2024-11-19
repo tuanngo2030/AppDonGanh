@@ -29,48 +29,58 @@ class _HomeThumuaState extends State<HomeThumua> {
     _fetchBlogPosts();
   }
 
-  void showFullScreenImages(
-      BuildContext context, List<String> images, int initialIndex) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.black,
-          child: Stack(
-            children: [
-              PhotoViewGallery.builder(
-                itemCount: images.length,
-                builder: (context, index) {
-                  return PhotoViewGalleryPageOptions(
-                    imageProvider: NetworkImage(images[index]),
-                    minScale: PhotoViewComputedScale.contained,
-                    maxScale: PhotoViewComputedScale.contained,
-                  );
-                },
-                scrollPhysics: const BouncingScrollPhysics(),
-                backgroundDecoration: const BoxDecoration(color: Colors.black),
-                pageController: PageController(initialPage: initialIndex),
-              ),
-              Positioned(
-                top: 20,
-                right: 20,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 30,
+ void showFullScreenImages(
+    BuildContext context, List<String> images, int initialIndex) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            PhotoViewGallery.builder(
+              itemCount: images.length,
+              builder: (context, index) {
+                return PhotoViewGalleryPageOptions.customChild(
+                  child: Image.network(
+                    images[index],
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                        fit: BoxFit.contain,
+                      );
+                    },
                   ),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.contained,
+                );
+              },
+              scrollPhysics: const BouncingScrollPhysics(),
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
+              pageController: PageController(initialPage: initialIndex),
+            ),
+            Positioned(
+              top: 20,
+              right: 20,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 30,
                 ),
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
   Future<void> _fetchBlogPosts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -682,6 +692,13 @@ class _HomeThumuaState extends State<HomeThumua> {
                               width: double.infinity, // Full width
                               fit: BoxFit
                                   .contain, // Ensures the image maintains its aspect ratio
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                );
+                              },
                             ),
                           ),
                         )
@@ -705,7 +722,14 @@ class _HomeThumuaState extends State<HomeThumua> {
                                       post.image[index],
                                       width: 220,
                                       fit: BoxFit.cover,
-                                      
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                          width: 220,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
@@ -786,4 +810,3 @@ class _HomeThumuaState extends State<HomeThumua> {
     );
   }
 }
-

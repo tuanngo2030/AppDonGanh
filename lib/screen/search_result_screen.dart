@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:don_ganh_app/api_services/search_api_service.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/detail_product_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:don_ganh_app/api_services/favorite_api_service.dart';
 
@@ -15,6 +16,7 @@ class SearchResultsScreen extends StatefulWidget {
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Future<List<dynamic>>? sanphamsFuture;
+  bool isDescending = true; // Trạng thái sắp xếp mặc định là giảm dần
 
   @override
   void initState() {
@@ -25,13 +27,23 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Future<void> _initializeSearch() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId') ?? '';
-    const yeuthichId = '67299b5b3318cd90d77a43b6';
-    sanphamsFuture = searchSanPham(widget.searchTerm, userId: userId, yeuthichId: yeuthichId);
+    final IDYeuThich = prefs.getString('IDYeuThich');
+    sanphamsFuture = searchSanPham(widget.searchTerm,
+        userId: userId, yeuthichId: IDYeuThich ?? '');
     setState(() {});
   }
 
+  void _sortProducts(List<dynamic> products, {required bool descending}) {
+    products.sort((a, b) {
+      final priceA = a['DonGiaBan'] ?? 0;
+      final priceB = b['DonGiaBan'] ?? 0;
+      return descending ? priceB.compareTo(priceA) : priceA.compareTo(priceB);
+    });
+  }
+
   // Function to handle the favorite toggle with API integration
-  Future<void> _toggleFavorite(BuildContext context, String productId, bool isFavorited) async {
+  Future<void> _toggleFavorite(
+      BuildContext context, String productId, bool isFavorited) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
 
@@ -47,10 +59,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     try {
       // Call the API to add or remove from favorites
       if (isFavorited) {
-         favoriteService.addToFavorites(userId, productId);
-      
+        favoriteService.addToFavorites(userId, productId);
       } else {
-         favoriteService.addToFavorites(userId, productId);
+        favoriteService.addToFavorites(userId, productId);
       }
 
       // Update the UI after toggling the favorite
@@ -67,7 +78,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(isFavorited ? 'Removed from favorites' : 'Added to favorites')),
+        SnackBar(
+            content: Text(
+                isFavorited ? 'Removed from favorites' : 'Added to favorites')),
       );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,6 +94,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Kết quả tìm kiếm cho: ${widget.searchTerm}"),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              setState(() {
+                if (value == 'Giá cao nhất') {
+                  isDescending = true;
+                } else if (value == 'Giá thấp nhất') {
+                  isDescending = false;
+                }
+              });
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Giá cao nhất',
+                child: Text('Sắp xếp giá cao nhất'),
+              ),
+              const PopupMenuItem(
+                value: 'Giá thấp nhất',
+                child: Text('Sắp xếp giá thấp nhất'),
+              ),
+            ],
+            icon: const Icon(Icons.sort),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -98,6 +135,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             List<dynamic> activeProducts = snapshot.data!
                 .where((product) => product['TinhTrang'] != 'Đã xóa')
                 .toList();
+
+            // Sắp xếp sản phẩm theo trạng thái isDescending
+            _sortProducts(activeProducts, descending: isDescending);
 
             return GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -117,7 +157,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailProductScreen(
-                          product: ProductModel.fromJSON(sanpham), 
+                          product: ProductModel.fromJSON(sanpham),
                           isfavorited: isFavorited,
                         ),
                       ),
@@ -128,29 +168,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       Flexible(
                         child: Stack(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                sanpham['HinhSanPham'] ?? '',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'lib/assets/avt2.jpg',
-                                    fit: BoxFit.cover,
-                                  );
-                                },
+                            SizedBox(
+                              height: 150,
+                              width: 200,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  sanpham['HinhSanPham'] ?? '',
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, exception, stackTrace) {
+                                    return Image.asset(
+                                      'lib/assets/avt2.jpg',
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             if (sanpham['PhanTramGiamGia'] != null)
                               Positioned(
                                 top: 15,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: const BoxDecoration(
                                     color: Color.fromRGBO(142, 198, 65, 1),
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(5),
                                       bottomRight: Radius.circular(10),
+                                      topRight: Radius.circular(10),
                                     ),
                                   ),
                                   child: Text(
@@ -167,18 +214,27 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                               right: 5,
                               child: GestureDetector(
                                 onTap: () {
-                                  _toggleFavorite(context, sanpham['_id'] ?? '', isFavorited);
+                                  _toggleFavorite(context, sanpham['_id'] ?? '',
+                                      isFavorited);
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: isFavorited ? Colors.red : const Color.fromRGBO(241, 247, 234, 1),
+                                    color: isFavorited
+                                        ? Colors.red
+                                        : const Color.fromRGBO(
+                                            241, 247, 234, 1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(5),
                                     child: Icon(
-                                      isFavorited ? Icons.favorite : Icons.favorite_border_outlined,
-                                      color: isFavorited ? Colors.white : const Color.fromRGBO(142, 198, 65, 1),
+                                      isFavorited
+                                          ? Icons.favorite
+                                          : Icons.favorite_border_outlined,
+                                      color: isFavorited
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              142, 198, 65, 1),
                                     ),
                                   ),
                                 ),
@@ -219,7 +275,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       Row(
                         children: [
                           Text(
-                            '${sanpham['DonGiaBan']} đ/kg',
+                            '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(sanpham['DonGiaBan'])} đ/kg',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,

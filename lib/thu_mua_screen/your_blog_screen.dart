@@ -521,6 +521,12 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                             ? Image.network(
                                 anhDaiDien!, // Load avatar from network if available
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'lib/assets/avt2.jpg', // Placeholder image if error occurs
+                                    fit: BoxFit.cover,
+                                  );
+                                },
                               )
                             : Image.asset(
                                 'lib/assets/avt2.jpg', // Placeholder image if null
