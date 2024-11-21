@@ -77,23 +77,7 @@ class TrangXinChao extends StatelessWidget {
                   child: const Text('Bạn là người mới? Đăng ký ngay!',style: TextStyle(fontSize: 15,color: Colors.white),),
                 ),
               ),
-              const SizedBox(height: 120), // Add space between buttons and social media icons
-              const SizedBox(
-                width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                     SizedBox(width: 10), 
-                    Image(image: AssetImage('lib/assets/logo_facebook.png'),height: 48,width: 48),
-                      SizedBox(width: 10), 
-                   Image(image: AssetImage('lib/assets/logo_google.png'),height: 48,width: 48),
-                      SizedBox(width: 10), 
-                    Image(image: AssetImage('lib/assets/logo_tiwter.png'),height: 48,width: 48),
-                      SizedBox(width: 10), 
-                  ],
-                  
-                ),
-              ),
+            
             ],
           ),
         ),
