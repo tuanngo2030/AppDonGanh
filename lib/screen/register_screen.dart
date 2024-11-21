@@ -75,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 // Tạo CAPTCHA ngẫu nhiên
   void _generateCaptcha() {
     final random = Random();
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     setState(() {
       _captcha =
           List.generate(6, (_) => characters[random.nextInt(characters.length)])

@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:device_preview/device_preview.dart';
+import 'package:don_ganh_app/CreatPassword/sendotpcreatPw.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
 import 'package:don_ganh_app/thu_mua_screen/dang_ky_thu_mua_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
@@ -107,6 +108,7 @@ class MyApp extends StatelessWidget {
         '/your_blog_screen': (context) => const YourBlogScreen(),
          '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
           '/so_du_screen': (context) => const SoDuScreen(),
+          '/sendotpcreate_screen': (context) => Sendotpcreatpw(),
         // '/other_profile_screen': (context) => const O(),
       },
       onGenerateRoute: (settings) {

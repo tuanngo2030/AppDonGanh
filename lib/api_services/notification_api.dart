@@ -48,9 +48,11 @@ class NotificationApi {
     final url = Uri.parse("$baseUrl/deleteThongBao/$thongBaoId");
     final response = await http.delete(url);
 
-    if (response.statusCode != 200) {
-      throw Exception("Lỗi khi xóa thông báo: ${response.statusCode}");
-    }
+ if (response.statusCode != 200) {
+  print("Response body: ${response.body}");
+  throw Exception("Lỗi khi xóa thông báo: ${response.statusCode}");
+}
+
   }
 
   // Xóa tất cả thông báo của người dùng
