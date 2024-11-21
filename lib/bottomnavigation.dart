@@ -28,7 +28,7 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     const HomeScreen(),
     const ShopScreen(),
     const FavoriteScreen(),
-    NotifitionScreen(),
+    NotificationScreen(),
     ManageraccountScreen()
   ];
 

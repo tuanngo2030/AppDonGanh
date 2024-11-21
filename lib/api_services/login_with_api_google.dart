@@ -69,7 +69,9 @@ class LoginWithApiGoogle {
     }
   }
 
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+      clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com', 
+  );
 
   static Future<GoogleSignInAccount?> login() async {
     await _googleSignIn.signOut();

@@ -67,7 +67,6 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-  
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -75,9 +74,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.861823949799-vc35cprkp249096uujjn0vvnmcvjppkn</string>
+				<string>com.googleusercontent.apps.459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh</string>
 			</array>
 		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>google</string>
+		<string>com.googleusercontent.apps.459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh</string>
 	</array>
 
 	<key>io.flutter.embedded_views_preview</key>
