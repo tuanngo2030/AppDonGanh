@@ -331,10 +331,10 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         ),
                         MainFuntion(
                           icon: Icon(Icons.person),
-                          title: 'Thông tin tài khoản',
-                          subtitle: 'Bao gồm thông tin cá nhân:',
+                          title: 'Số dư',
+                          subtitle: 'Số dư trong ví của bạn:',
                           onTap: () {
-                            Navigator.pushNamed(context, '/your_blog_screen');
+                            Navigator.pushNamed(context, '/so_du_screen');
                           },
                         ),
                         MainFuntion(

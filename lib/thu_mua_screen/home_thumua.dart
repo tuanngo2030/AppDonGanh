@@ -82,28 +82,31 @@ class _HomeThumuaState extends State<HomeThumua> {
 }
 
 
-  Future<void> _fetchBlogPosts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
+ Future<void> _fetchBlogPosts() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final userId = prefs.getString('userId');
 
+  if (!mounted) return; // Check if widget is still in the tree
+  setState(() {
+    isLoading = true; // Show loading indicator
+  });
+
+  try {
+    List<BlogModel> blogPosts = await _blogApiService
+        .getListBaiViet(userId!); // Replace with actual user ID
+    if (!mounted) return; // Check again before updating state
     setState(() {
-      isLoading = true; // Show loading indicator
+      _blogPosts = blogPosts;
     });
-
-    try {
-      List<BlogModel> blogPosts = await _blogApiService
-          .getListBaiViet(userId!); // Replace with actual user ID
-      setState(() {
-        _blogPosts = blogPosts;
-      });
-    } catch (e) {
-      print('Error fetching blog posts: $e');
-    } finally {
-      setState(() {
-        isLoading = false; // Hide loading indicator
-      });
-    }
+  } catch (e) {
+    print('Error fetching blog posts: $e');
+  } finally {
+    if (!mounted) return; // Final check
+    setState(() {
+      isLoading = false; // Hide loading indicator
+    });
   }
+}
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'Unknown date';

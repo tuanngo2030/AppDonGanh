@@ -21,6 +21,7 @@ class NguoiDung {
   final List<Permission>? permissions;
   final List<String>? follower;
   final List<String>? following;
+  final int? soTienHienTai;
 
   NguoiDung({
     this.id,
@@ -45,6 +46,7 @@ class NguoiDung {
     this.permissions,
     this.follower,
     this.following,
+    this.soTienHienTai,
   });
 
   // Convert JSON to NguoiDung
@@ -84,6 +86,7 @@ class NguoiDung {
       following: json['following'] != null
           ? List<String>.from(json['following'])
           : null,
+      soTienHienTai: json['soTienHienTai'] ?? 0,
     );
   }
 
@@ -111,6 +114,7 @@ class NguoiDung {
       'IDYeuThich': IDYeuThich,
       'followers' : follower,
       'following' : following,
+      'soTienHienTai' : soTienHienTai,
     };
   }
 }

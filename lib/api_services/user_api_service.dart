@@ -68,6 +68,7 @@ class UserApiService {
               await prefs.setString('IDYeuThich', user.IDYeuThich ?? '');
               await prefs.setStringList('follower', user.follower ?? []);
               await prefs.setStringList('following', user.following ?? []);
+              await prefs.setInt('soTienHienTai', user.soTienHienTai ?? 0);
               return user;
             }
           }
