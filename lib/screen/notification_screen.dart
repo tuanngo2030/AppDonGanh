@@ -23,18 +23,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     fetchNotifications();
-    startTimer();
+    // startTimer();
   }
 
-  void startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      fetchNotifications(); // Periodically fetch notifications
-    });
-  }
+  // void startTimer() {
+  //   _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+  //     fetchNotifications(); // Periodically fetch notifications
+  //   });
+  // }
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the screen is disposed
+    // _timer.cancel(); // Cancel the timer when the screen is disposed
     super.dispose();
   }
 

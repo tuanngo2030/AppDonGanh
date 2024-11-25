@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:don_ganh_app/CreatPassword/sendotpcreatPw.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
 import 'package:don_ganh_app/thu_mua_screen/dang_ky_thu_mua_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/lich_su_rut_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/so_du_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
@@ -64,7 +65,9 @@ void main() async {
     ),
   );
 }
+
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -72,8 +75,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-       navigatorObservers: [routeObserver], // Register the RouteObserver here
-      home:  const gioithieu(),
+      navigatorObservers: [routeObserver], // Register the RouteObserver here
+      home: const gioithieu(),
       routes: {
         '/registerscreen': (context) => const RegisterScreen(),
         '/loginscreen': (context) => const LoginScreen(),
@@ -106,6 +109,9 @@ class MyApp extends StatelessWidget {
         '/Resetpassword': (context) => const Resetpassword(),
         // '/Checkbot': (context) => const Checkbot(),
         '/your_blog_screen': (context) => const YourBlogScreen(),
+        '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
+        '/so_du_screen': (context) => const SoDuScreen(),
+        '/yeu_cau_rut_screen': (context) => const LichSuRutScreen(),
          '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
           '/so_du_screen': (context) => const SoDuScreen(),
           '/sendotpcreate_screen': (context) => Sendotpcreatpw(),

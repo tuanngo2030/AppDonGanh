@@ -8,35 +8,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginWithApiGoogle {
-   Future<void> checkUserPassword(String userId) async {
-    // Giả sử bạn có API để lấy thông tin người dùng từ ID
-    var uri = Uri.parse('${dotenv.env['API_URL']}/user/showUserID/$userId');
-    
-    try {
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        // Kiểm tra xem người dùng đã có mật khẩu chưa
-        if (data['matKhau'] == null || data['matKhau'].isEmpty) {
-          showPasswordNotSetAlert(); // Hiển thị thông báo mật khẩu chưa được tạo
-        } else {
-          // Nếu đã có mật khẩu, bạn có thể thực hiện các bước tiếp theo
-        }
-      } else {
-        print('Failed to fetch user details: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-    void showPasswordNotSetAlert() {
-    // Hàm để hiển thị thông báo mật khẩu chưa được tạo
-    print("Mật khẩu chưa được tạo!");
-    // Bạn có thể hiển thị thông báo qua Dialog hoặc Snackbar trong Flutter
-  }
-
   Future<void> registerUserGoogle(
       String displayName, String email, String googleId) async {
     final url = '${dotenv.env['API_URL']}/user/RegisterUserGG';
@@ -97,10 +68,12 @@ class LoginWithApiGoogle {
       throw Exception('Error occurred while registering user: $error');
     }
   }
+  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-      clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com', 
-  );
+
+  // static final GoogleSignIn _googleSignIn = GoogleSignIn(
+  //     clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com', 
+  // );
 
   static Future<GoogleSignInAccount?> login() async {
     await _googleSignIn.signOut();
@@ -128,8 +101,6 @@ class LoginWithApiGoogle {
         await prefs.setString('tenNguoiDung', data['tenNguoiDung']);
         await prefs.setString('gmail', data['gmail']);
         await prefs.setString('token', data['token']);
-       // Kiểm tra mật khẩu người dùng
-        await checkUserPassword(data['_id']);  // Kiểm tra mật khẩu sau khi lấy thông tin
 
         // Bạn có thể thêm các dữ liệu khác nếu cần
         return NguoiDung.fromJson(data);

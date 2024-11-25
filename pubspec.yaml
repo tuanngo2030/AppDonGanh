@@ -82,8 +82,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "lib/assets/logo_app.png"
   min_sdk_android: 21
-  adaptive_icon: true
-  remove_alpha_ios: true
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -110,7 +109,6 @@ flutter:
   assets:
     - lib/assets/
     - lib/.env
-    - lib/assets/webpages/index.html
   # - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
