@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:don_ganh_app/models/user_model.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +13,6 @@ class LoginWithApiGoogle {
   Future<void> registerUserGoogle(
       String displayName, String email, String googleId) async {
     final url = '${dotenv.env['API_URL']}/user/RegisterUserGG';
-_googleSignIn = GoogleSignIn(clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com');
 
     try {
       final response = await http.post(
@@ -81,27 +81,24 @@ _googleSignIn = GoogleSignIn(clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vn
   //   await _googleSignIn.signOut();
   //   return await _googleSignIn.signIn();
   // }
-
-static GoogleSignIn _googleSignIn = GoogleSignIn();
-
+static final GoogleSignIn _googleSignIn = GoogleSignIn(
+  clientId: Platform.isIOS
+      ? '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com'
+      : null, // Android không cần clientId nếu cấu hình đúng trên Firebase Console
+);
 static Future<GoogleSignInAccount?> login() async {
   try {
-    // Thử đăng nhập Google Sign-In bình thường
-    await _googleSignIn.signOut();
+    await _googleSignIn.signOut(); // Đảm bảo thoát phiên trước
     return await _googleSignIn.signIn();
-  } catch (e) {
-    if (e is PlatformException) {
-      // Kiểm tra mã lỗi của ApiException
-      if (e.message?.contains("10:") ?? false) {
-        // Nếu bị lỗi ApiException: 10, sử dụng GoogleSignIn không có clientId
-        _googleSignIn = GoogleSignIn();  // Đặt lại _googleSignIn mặc định
-      }
+  } catch (error) {
+    print("Google Sign-In error: $error");
+    if (error.toString().contains('PlatformException(sign_in_failed')) {
+      // Log chi tiết lỗi hoặc cấu hình lại nếu cần
     }
-    // Thử lại đăng nhập sau khi thay đổi cấu hình
-    await _googleSignIn.signOut();
-    return await _googleSignIn.signIn();
+    return null; // Trả về null nếu đăng nhập thất bại
   }
 }
+
   static Future<void> logout() async {
     await _googleSignIn.disconnect();
   }
