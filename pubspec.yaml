@@ -73,6 +73,7 @@ dependencies:
   connectivity_plus: ^6.1.0
   flutter_map_directions: ^0.0.8
   timeago: ^3.7.0
+  fl_chart: ^0.69.2
   
   
 

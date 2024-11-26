@@ -7,8 +7,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class CartApiService {
   final String baseUrl = '${dotenv.env['API_URL']}/cart/gioHang/user/';
 
-  Future<CartModel> getCart() async {
-    // Retrieve userId from SharedPreferences
+Future<List<CartModel>> getGioHangByUserId() async {
+  try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
 
@@ -16,31 +16,47 @@ class CartApiService {
       throw Exception('User ID not found in SharedPreferences');
     }
 
-    final String url = '$baseUrl$userId'; // Construct the URL with dynamic userId
-
+    final String url = '$baseUrl$userId';
     final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}'); // Print received data
 
-      try {
-        Map<String, dynamic> cartData = json.decode(response.body);
-        // Convert JSON to CartModel
-        return CartModel.fromJSON(cartData);
-      } catch (e) {
-        print('Error decoding JSON: $e');
-        throw Exception('Failed to decode JSON');
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Response Data Cart: $responseData');
+
+      // Trả về toàn bộ dữ liệu nếu không có mergedCart riêng biệt
+      if (responseData != null) {
+        // Nếu dữ liệu là một danh sách (List) hoặc đối tượng (Map)
+        if (responseData is List) {
+          return responseData
+              .map((cartData) => CartModel.fromJSON(cartData as Map<String, dynamic>))
+              .toList();
+        } else if (responseData is Map) {
+          // Nếu trả về một object, cần lấy các trường cần thiết như mergedCart, user, v.v.
+          // Explicitly cast the responseData to Map<String, dynamic>
+          Map<String, dynamic> castedData = Map<String, dynamic>.from(responseData);
+
+          return [
+            CartModel.fromJSON(castedData), // Chuyển đổi toàn bộ dữ liệu thành CartModel
+          ];
+        } else {
+          throw Exception('Expected responseData to be a list or map, but got: ${responseData.runtimeType}');
+        }
+      } else {
+        throw Exception('No data found in response');
       }
+    } else {
+      throw Exception('Failed to load cart. Status code: ${response.statusCode}');
     }
-     else {
-      print('Response body: ${response.body}');
-      throw Exception('Failed to load cart');
-    }
+  } catch (error) {
+    print('Error fetching cart data: $error');
+    throw Exception('Error fetching cart data');
   }
+}
+
 
   Future<CartModel> addToCart(
       String userId, String idBienThe, int quantity, int donGia) async {
-    final addToCartURL =
-        '${dotenv.env['API_URL']}/cart/gioHang?';
+    final addToCartURL = '${dotenv.env['API_URL']}/cart/gioHang?';
 
     Map<String, dynamic> data = {
       'userId': userId,
@@ -105,7 +121,8 @@ class CartApiService {
     }
   }
 
-  Future<void> updateCart(String idGioHang, String idBienThe, int soLuong, int donGia) async {
+  Future<void> updateCart(
+      String idGioHang, String idBienThe, int soLuong, int donGia) async {
     final updateCartURL = '${dotenv.env['API_URL']}/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {

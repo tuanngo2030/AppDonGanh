@@ -24,18 +24,23 @@ class _SearchScreenState extends State<SearchScreen> {
     loadSavedKeywords(); // Load saved keywords when the screen initializes
   }
 
-  Future<void> fetchSanPhams(String tenSanPham) async {
+  void fetchSanPhams(String tenSanPham) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
+    final yeuthichId = prefs.getString('IDYeuThich');
 
     try {
-      final results = await searchSanPham(tenSanPham, userId: userId!, yeuthichId: '67299b5b3318cd90d77a43b6');
+      final results = await searchSanPham(tenSanPham,
+          userId: userId!, yeuthichId: yeuthichId!);
       setState(() {
-        // Convert each result to ProductModel
         sanphams = results
             .map<ProductModel>((item) => ProductModel.fromJSON(item))
             .toList();
-        filteredSanphams = sanphams; // Initialize filtered list
+        filteredSanphams = sanphams.where((product) {
+          return product.nameProduct
+              .toLowerCase()
+              .contains(tenSanPham.toLowerCase());
+        }).toList();
       });
     } catch (e) {
       print("Error fetching products: $e");
@@ -115,6 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -152,8 +158,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       fetchSanPhams(searchTerm);
                     } else {
                       setState(() {
-                        sanphams = [];
-                        filteredSanphams = [];
+                        filteredSanphams =
+                            []; // Clear filtered list when search term is empty
                       });
                     }
                   },
@@ -164,8 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         color: Color.fromRGBO(131, 183, 60, 1),
                         size: 30,
                       ),
-                      onPressed:
-                          navigateToResults, // Call navigateToResults when search icon is pressed
+                      onPressed: navigateToResults,
                     ),
                     hintText: "Tìm kiếm sản phẩm",
                     border: OutlineInputBorder(
@@ -212,16 +217,15 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: ListView.builder(
                           itemCount: filteredSanphams.length,
                           itemBuilder: (context, index) {
-                            final product = filteredSanphams[
-                                index]; // Get the ProductModel instance
+                            final product = filteredSanphams[index];
                             return GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => DetailProductScreen(
-                                        product:
-                                            product, isfavorited: product.isFavorited,), // Pass the product instance
+                                        product: product,
+                                        isfavorited: product.isFavorited),
                                   ),
                                 );
                               },
@@ -240,7 +244,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                                       Object exception,
                                                       StackTrace? stackTrace) {
                                                 return Image.asset(
-                                                  'lib/assets/avt2.jpg', // Ensure this path is correct
+                                                  'lib/assets/avt2.jpg',
                                                   fit: BoxFit.cover,
                                                 );
                                               },
@@ -252,12 +256,12 @@ class _SearchScreenState extends State<SearchScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text("Đơn giá bán: ${product.donGiaBan}"),
+                                        Text(
+                                            "Đơn giá bán: ${product.donGiaBan}"),
                                         Text(
                                           "Mô tả: ${product.moTa}",
-                                          maxLines: 2, // Limit to one line
-                                          overflow: TextOverflow
-                                              .ellipsis, // Show ellipsis when overflowed
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ],
                                     ),

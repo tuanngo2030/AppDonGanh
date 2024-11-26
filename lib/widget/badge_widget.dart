@@ -11,7 +11,7 @@ class BadgeWidget extends StatefulWidget {
 }
 
 class _BadgeWidgetState extends State<BadgeWidget> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
   int _cartItemCount = 0;
 
   @override
@@ -20,29 +20,33 @@ class _BadgeWidgetState extends State<BadgeWidget> {
     _fetchCartItemCount();
   }
 
-  void _fetchCartItemCount() async {
-    try {
-      CartModel cart = await CartApiService().getCart();
-      int itemCount = cart.chiTietGioHang.length;
-      setState(() {
-        _cartItemCount = itemCount; // Cập nhật biến trạng thái
-      });
-    } catch (e) {
-      print("Lỗi khi lấy giỏ hàng: $e");
+ void _fetchCartItemCount() async {
+  try {
+    List<CartModel> carts = await CartApiService().getGioHangByUserId();  // Expecting a list of CartModels
+    int itemCount = 0;
+    for (var cart in carts) {
+      itemCount += cart.mergedCart.length;  // Sum the item count from all carts
     }
+    setState(() {
+      _cartItemCount = itemCount;  // Update the cart item count
+    });
+  } catch (e) {
+    print("Lỗi khi lấy giỏ hàng: $e");
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     return badges.Badge(
       badgeContent: Text(
         _cartItemCount.toString(),
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w900,
         ),
       ),
-      badgeStyle: badges.BadgeStyle(
+      badgeStyle: const badges.BadgeStyle(
         badgeColor: Color.fromRGBO(255, 0, 0, 1),
         borderSide: BorderSide(color: Colors.white),
         padding: EdgeInsets.all(8),
@@ -57,9 +61,9 @@ class _BadgeWidgetState extends State<BadgeWidget> {
           height: 45,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
-            color: Color.fromRGBO(41, 87, 35, 1),
+            color: const Color.fromRGBO(41, 87, 35, 1),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.shopping_bag,
             color: Colors.white,
           ),

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:don_ganh_app/api_services/yeu_cau_rut_tien_model.dart';
+import 'package:don_ganh_app/models/yeu_cau_rut_tien_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -89,6 +89,47 @@ class YeuCauRutTienApi {
     };
   }
 }
+
+ Future<Map<String, dynamic>> deleteWithdrawalRequest(String yeuCauId) async {
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/deleteYeuCauRutTienCoDieuKien/$yeuCauId');
+
+    try {
+      final response = await http.delete(url, headers: {
+        'Content-Type': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        throw Exception(json.decode(response.body)['message']);
+      } else if (response.statusCode == 400) {
+        throw Exception(json.decode(response.body)['message']);
+      } else {
+        throw Exception('Đã xảy ra lỗi không xác định');
+      }
+    } catch (error) {
+      throw Exception('Lỗi khi thực hiện yêu cầu: $error');
+    }
+  }
+
+   Future<Map<String, dynamic>> resendYeuCauRutTien(String yeuCauId) async {
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/resendYeuCauRutTien/$yeuCauId');
+
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        // Nếu phản hồi từ server thành công
+        return json.decode(response.body);
+      } else {
+        // Xử lý lỗi nếu có
+        return {'message': 'Lỗi khi gửi lại email xác thực'};
+      }
+    } catch (e) {
+      print('Lỗi khi gọi API: $e');
+      return {'message': 'Đã xảy ra lỗi khi gọi API'};
+    }
+  }
 
 }
 

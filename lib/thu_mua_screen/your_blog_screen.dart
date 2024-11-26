@@ -5,6 +5,8 @@ import 'package:don_ganh_app/models/user_model.dart';
 import 'package:don_ganh_app/thu_mua_screen/edit_blog_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YourBlogScreen extends StatefulWidget {
@@ -39,6 +41,58 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
       followerCount = prefs.getStringList('follower')?.length ?? 0;
       followingCount = prefs.getStringList('following')?.length ?? 0;
     });
+  }
+
+  void showFullScreenImages(
+      BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: images.length,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions.customChild(
+                    child: Image.network(
+                      images[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                          fit: BoxFit.contain,
+                        );
+                      },
+                    ),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(color: Colors.black),
+                pageController: PageController(initialPage: initialIndex),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   String _formatDate(DateTime? date) {
@@ -718,43 +772,72 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
             ),
 
             // Post image (only if it exists)
+            // Post image (only if it exists)
             if (post.image.isNotEmpty)
               SizedBox(
-                height: 200, // Adjust height as needed
-                child: post.image.length == 1
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(
-                            post.image[0],
-                            // Make image full height
-                            width: double.infinity, // Make image full width
-                            fit: BoxFit.cover,
+                width: double
+                    .infinity, // Ensure the container takes the full width
+                child: GestureDetector(
+                  onTap: () {
+                    showFullScreenImages(context, post.image, 0);
+                  },
+                  child: post.image.length == 1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.network(
+                              post.image[0],
+                              width: double.infinity, // Full width
+                              fit: BoxFit
+                                  .contain, // Ensures the image maintains its aspect ratio
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height:
+                              200, // You can set height here, or adjust based on your UI
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: post.image.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  showFullScreenImages(
+                                      context, post.image, index);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.network(
+                                      post.image[index],
+                                      width: 220,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'lib/assets/avt2.jpg', // Đường dẫn tới ảnh thay thế
+                                          width: 220,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      )
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: post.image.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 20),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                post.image[index],
-                                height:
-                                    100, // Regular height for multiple images
-                                width: 220, // Regular width for multiple images
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                ),
               ),
-
             // Likes and comments section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -820,22 +903,6 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
 
             // Comment input
             const Divider(thickness: 1),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-            //   child: Row(
-            //     children: [
-            //       Padding(
-            //         padding: const EdgeInsets.only(right: 10),
-            //         child: Image.asset('lib/assets/logo_app.png'), // User's profile image placeholder
-            //       ),
-            //       const Expanded(
-            //         child: TextField(
-            //           decoration: InputDecoration(hintText: 'Bình luận công khai'),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:don_ganh_app/screen/manageraccount_screen.dart';
 import 'package:don_ganh_app/screen/notification_screen.dart';
 import 'package:don_ganh_app/screen/notifition_screen.dart';
 import 'package:don_ganh_app/screen/shop_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/home_thumua.dart';
 import 'package:flutter/material.dart';
 
 class BottomnavigationMenu extends StatefulWidget {
@@ -26,10 +27,10 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
 
   final List screens = [
     const HomeScreen(),
-    const ShopScreen(),
+    const HomeThumua(),
     const FavoriteScreen(),
-    NotificationScreen(),
-    ManageraccountScreen()
+    const NotificationScreen(),
+    const ManageraccountScreen()
   ];
 
   @override

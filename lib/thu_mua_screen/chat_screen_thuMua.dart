@@ -443,7 +443,7 @@ Widget build(BuildContext context) {
 }
 
 
-  Widget _buildMessage(Message message) {
+Widget _buildMessage(Message message) {
   String formattedTime = DateFormat('HH:mm').format(message.createdAt);
 
   return Padding(
@@ -461,6 +461,7 @@ Widget build(BuildContext context) {
             // Hiển thị tin nhắn văn bản
             if (message.text.isNotEmpty)
               Container(
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7), // Giới hạn chiều rộng
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
                   color: message.msgByUserId == widget.userId
@@ -483,12 +484,13 @@ Widget build(BuildContext context) {
                     Text(
                       message.text,
                       style: const TextStyle(fontSize: 16),
+                      overflow: TextOverflow.visible,  // Thêm dấu ba chấm khi văn bản quá dài
+                      softWrap: true,  // Cho phép văn bản tự xuống dòng
                     ),
                     const SizedBox(height: 4),
                     Text(
                       formattedTime,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],
                 ),

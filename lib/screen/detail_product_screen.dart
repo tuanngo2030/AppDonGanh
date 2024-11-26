@@ -1063,8 +1063,15 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                               children: [
                                 CircleAvatar(
                                   radius: 20,
-                                  backgroundImage: NetworkImage(
-                                      widget.product.userId.anhDaiDien!),
+                                  backgroundImage:
+                                      widget.product.userId.anhDaiDien !=
+                                                  null &&
+                                              widget.product.userId.anhDaiDien!
+                                                  .isNotEmpty
+                                          ? NetworkImage(
+                                              widget.product.userId.anhDaiDien!)
+                                          : AssetImage('lib/assets/avt2.jpg')
+                                              as ImageProvider,
                                 ),
                                 SizedBox(width: 8),
                                 Text(widget.product.userId.tenNguoiDung!),

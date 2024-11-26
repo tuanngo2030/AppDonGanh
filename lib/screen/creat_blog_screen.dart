@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:don_ganh_app/api_services/blog_api_service.dart';
-import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +18,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
   List<File> _selectedImages = [];
   bool _isLoading = false;
   bool _isFormValid = false;
-  String? userId;
 
   final BlogApiService _blogApiService = BlogApiService();
 
@@ -38,7 +36,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     super.dispose();
   }
 
-  // Check if the form is valid
   void _validateForm() {
     setState(() {
       _isFormValid = _titleController.text.isNotEmpty &&
@@ -46,7 +43,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     });
   }
 
-  // Image picker
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final images = await picker.pickMultiImage();
@@ -55,19 +51,16 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     });
   }
 
-  // Remove image from selected images list
   void _removeImage(int index) {
     setState(() {
       _selectedImages.removeAt(index);
     });
   }
 
-  // Submit blog post
   Future<void> _submitPost() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
     if (userId == null) {
-      // Handle user ID not found
       print("User not logged in");
       return;
     }
@@ -85,7 +78,6 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
         imageFiles: _selectedImages,
       );
 
-      // After successful submission, clear fields or navigate back
       setState(() {
         _titleController.clear();
         _contentController.clear();
@@ -94,15 +86,11 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
         _isFormValid = false;
       });
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bài viết đã được đăng thành công!')),
       );
-
-      // Optionally, navigate back
       Navigator.pop(context);
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đăng bài viết thất bại: $e')),
       );
@@ -117,185 +105,210 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: [
-                // AppBar-like container
-                Container(
-                  height: 100,
-                  decoration: const BoxDecoration(
-                    color: Color.fromRGBO(59, 99, 53, 1),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            height: 35,
-                            width: 35,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Color.fromRGBO(59, 99, 53, 1),
-                            ),
-                          ),
-                        ),
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 20),
-                            child: Text(
-                              "Tạo bài viết",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed:
-                              _isFormValid && !_isLoading ? _submitPost : null,
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            foregroundColor: _isFormValid && !_isLoading
-                                ? const Color.fromRGBO(59, 99, 53, 1)
-                                : Colors.white,
-                            backgroundColor: _isFormValid && !_isLoading
-                                ? Colors.white
-                                : Colors.grey,
-                          ),
-                          child: _isLoading
-                              ? const CircularProgressIndicator()
-                              : const Text(
-                                  "Đăng",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
+        body: Column(
+          children: [
+            Container(
+              height: 100,
+              decoration: const BoxDecoration(
+                color: Color.fromRGBO(59, 99, 53, 1),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
                 ),
-
-                // User information and image picker
-                Padding(
-                  padding: const EdgeInsets.all(25),
-                  child: Row(
-                    children: [
-                      Image.asset('lib/assets/logo_app.png'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('HiHi'),
-                          ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        height: 35,
+                        width: 35,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Color.fromRGBO(59, 99, 53, 1),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                // Title input field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      hintText: "Nhập tiêu đề",
-                      contentPadding: EdgeInsets.all(15),
                     ),
-                  ),
-                ),
-
-                // Content input field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: TextFormField(
-                    controller: _contentController,
-                    maxLines: 15,
-                    minLines: 10,
-                    decoration: const InputDecoration(
-                      hintText: "Đăng bài viết của bạn.",
-                      contentPadding: EdgeInsets.all(25),
-                    ),
-                  ),
-                ),
-
-                // Tags input field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: TextFormField(
-                    controller: _tagsController,
-                    decoration: const InputDecoration(
-                      hintText: "Nhập tags (cách nhau bởi dấu phẩy)",
-                      contentPadding: EdgeInsets.all(15),
-                    ),
-                  ),
-                ),
-
-                // Image picker button
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: ElevatedButton(
-                    onPressed: _pickImages,
-                    child: const Text("Chọn hình ảnh"),
-                  ),
-                ),
-
-                // Display selected images with delete button
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: _selectedImages.map((image) {
-                    int index = _selectedImages.indexOf(image);
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Image.file(image, width: 100, height: 100),
-                        Positioned(
-                          top: -5,
-                          right: -5,
-                          child: GestureDetector(
-                            onTap: () => _removeImage(index),
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.red,
-                              radius: 12,
-                              child: Icon(
-                                Icons.close,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 20),
+                        child: Text(
+                          "Tạo bài viết",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                    );
-                  }).toList(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed:
+                          _isFormValid && !_isLoading ? _submitPost : null,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        foregroundColor: _isFormValid && !_isLoading
+                            ? const Color.fromRGBO(59, 99, 53, 1)
+                            : Colors.white,
+                        backgroundColor: _isFormValid && !_isLoading
+                            ? Colors.white
+                            : Colors.grey,
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text(
+                              "Đăng",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+
+            // User info and content input
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  children: [
+                    const Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundImage: AssetImage('lib/assets/avatar2.png'),
+                        ),
+                        SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Trần Đức A",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text("Trần Đức A"),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // Title input field
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        hintText: "Nhập tiêu đề",
+                        contentPadding: EdgeInsets.all(15),
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: _contentController,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        hintText: "Đăng bài viết của bạn.",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: _selectedImages.map((image) {
+                int index = _selectedImages.indexOf(image);
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Image.file(image, width: 100, height: 100),
+                    Positioned(
+                      top: -5,
+                      right: -5,
+                      child: GestureDetector(
+                        onTap: () => _removeImage(index),
+                        child: const CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 12,
+                          child: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+
+            // Bottom action bar
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildActionButton(
+                    icon: Icons.photo_library,
+                    label: "Ảnh/video",
+                    onPressed: _pickImages,
+                  ),
+                  _buildActionButton(
+                    icon: Icons.camera_alt,
+                    label: "Chụp",
+                    onPressed: () {
+                      print("Chụp ảnh");
+                    },
+                  ),
+                  _buildActionButton(
+                    icon: Icons.tag,
+                    label: "Tag",
+                    onPressed: () {
+                      print("Thêm tag");
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildActionButton(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onPressed}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(onPressed: onPressed, icon: Icon(icon)),
+        Text(label),
+      ],
     );
   }
 }

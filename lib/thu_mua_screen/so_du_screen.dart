@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'package:don_ganh_app/api_services/bank_api_service.dart';
 import 'package:don_ganh_app/api_services/rut_tien_api_service.dart';
+import 'package:don_ganh_app/models/bank_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart'; // Import intl package for formatting
+import 'package:intl/intl.dart';
 
 class SoDuScreen extends StatefulWidget {
   const SoDuScreen({super.key});
@@ -15,29 +18,47 @@ class _SoDuScreenState extends State<SoDuScreen> {
   String? name;
   String? userId;
 
-  // Add TextEditingController variables for each field
-  TextEditingController tenNganHangController = TextEditingController();
+  // TextEditingController variables for other fields
   TextEditingController soTaiKhoanController = TextEditingController();
   TextEditingController soTienController = TextEditingController();
   TextEditingController ghiChuController = TextEditingController();
 
+  // Dropdown-related variables
+  List<Bank> danhSachNganHang = [];
+  Bank? tenNganHangDaChon; // Lưu trữ Bank thay vì String
+
   @override
   void initState() {
     super.initState();
-    _getSoDu(); // Call the function to load the data
+    _getSoDu();
+    _fetchDanhSachNganHang();
   }
 
-  // Retrieve the data from SharedPreferences
+  // Retrieve user data from SharedPreferences
   Future<void> _getSoDu() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? storedSoDu = prefs.getInt('soTienHienTai');
     String? storedName = prefs.getString('tenNguoiDung');
     String? storedUserId = prefs.getString('userId');
     setState(() {
-      soDu = storedSoDu; // Update the state with the retrieved value
-      name = storedName; // Update the state with the retrieved value
-      userId = storedUserId; // Update the state with the retrieved value
+      soDu = storedSoDu;
+      name = storedName;
+      userId = storedUserId;
     });
+  }
+
+  // Fetch list of banks
+  Future<void> _fetchDanhSachNganHang() async {
+    try {
+      final List<Bank> banks = await BankService.fetchBanks();
+      setState(() {
+        danhSachNganHang = banks; // danhSachNganHang là List<Bank>
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lỗi khi tải danh sách ngân hàng')),
+      );
+    }
   }
 
   // Format the balance with thousands separators
@@ -47,8 +68,8 @@ class _SoDuScreenState extends State<SoDuScreen> {
     return '${formatter.format(soDu)} VNĐ';
   }
 
+  // Handle Withdraw Modal
   void _handleWithdraw(BuildContext context) async {
-    // Show the bottom sheet
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -63,24 +84,63 @@ class _SoDuScreenState extends State<SoDuScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Tên ngân hàng'),
-                controller: tenNganHangController,
+              DropdownButtonFormField<Bank>(
+                value: tenNganHangDaChon,
+                items: danhSachNganHang
+                    .map((bank) => DropdownMenuItem<Bank>(
+                          value: bank,
+                          child: Row(
+                            children: [
+                              Image.network(
+                                bank.logo, // Hiển thị logo từ API
+                                height: 50,
+                                width: 50,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(bank.shortName),
+                            ],
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (Bank? value) {
+                  setState(() {
+                    tenNganHangDaChon = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Tên ngân hàng',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
-                decoration: const InputDecoration(labelText: 'Số tài khoản'),
+                decoration: const InputDecoration(
+                  labelText: 'Số tài khoản',
+                  border: OutlineInputBorder(),
+                ),
                 controller: soTaiKhoanController,
               ),
               const SizedBox(height: 8),
               TextField(
-                decoration: const InputDecoration(labelText: 'Tổng tiền rút'),
+                decoration: const InputDecoration(
+                  labelText: 'Tổng tiền rút',
+                  border: OutlineInputBorder(),
+                ),
                 controller: soTienController,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 8),
               TextField(
-                decoration: const InputDecoration(labelText: 'Ghi chú'),
+                decoration: const InputDecoration(
+                  labelText: 'Ghi chú',
+                  border: OutlineInputBorder(),
+                ),
                 controller: ghiChuController,
               ),
               const SizedBox(height: 16),
@@ -89,77 +149,60 @@ class _SoDuScreenState extends State<SoDuScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      // Clear all fields when closing the bottom sheet
-                      tenNganHangController.clear();
+                      tenNganHangDaChon = null;
                       soTaiKhoanController.clear();
                       soTienController.clear();
                       ghiChuController.clear();
-                      Navigator.pop(
-                          context); // Close the bottom sheet without doing anything
+                      Navigator.pop(context);
                     },
-                    child: const Text('Cancel'),
+                    child: const Text('Hủy'),
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      // Retrieve the entered values
-                      String enteredTenNganHang = tenNganHangController.text;
-                      String enteredSoTaiKhoan = soTaiKhoanController.text;
-                      String enteredSoTien = soTienController.text;
-                      String enteredGhiChu = ghiChuController.text;
-
-                      // Validate input fields
-                      if (enteredTenNganHang.isEmpty ||
-                          enteredSoTaiKhoan.isEmpty ||
-                          enteredSoTien.isEmpty ||
-                          double.tryParse(enteredSoTien) == null) {
-                        // Show error message if any field is empty or invalid
+                      if (tenNganHangDaChon == null ||
+                          soTaiKhoanController.text.isEmpty ||
+                          soTienController.text.isEmpty ||
+                          double.tryParse(soTienController.text) == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text('Vui lòng điền đầy đủ thông tin')),
                         );
-                        return; // Prevent submission
+                        return;
                       }
 
-                      // Parse the withdrawal amount to a double
-                      double enteredSoTienParsed =
-                          double.tryParse(enteredSoTien) ?? 0;
-
-                      // Call the API to create the withdrawal request
-                      final response = await YeuCauRutTienApi().createYeuCauRutTien(
-                        userId: userId ??
-                            '', // Pass the userId (you can set it from shared prefs or another source)
-                        tenNganHang: enteredTenNganHang,
-                        soTaiKhoan: enteredSoTaiKhoan,
-                        soTien: enteredSoTienParsed,
-                        ghiChu: enteredGhiChu,
+                      double enteredSoTien =
+                          double.tryParse(soTienController.text) ?? 0;
+                      final response =
+                          await YeuCauRutTienApi().createYeuCauRutTien(
+                        userId: userId ?? '',
+                        tenNganHang: tenNganHangDaChon!
+                            .shortName, // Truyền tên ngân hàng
+                        soTaiKhoan: soTaiKhoanController.text,
+                        soTien: enteredSoTien,
+                        ghiChu: ghiChuController.text,
                       );
 
-                      // Check API response
                       if (response['success']) {
-                        // Show success message
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                                  'Withdrawal request successful: ${response['message']}')),
+                                  'Yêu cầu rút tiền thành công: ${response['message']}')),
                         );
                       } else {
-                        // Show error message
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content: Text('Error: ${response['message']}')),
+                              content: Text(
+                                  'Lỗi khi rút tiền: ${response['message']}')),
                         );
                       }
 
-                      // Clear all fields after submission
-                      tenNganHangController.clear();
+                      tenNganHangDaChon = null;
                       soTaiKhoanController.clear();
                       soTienController.clear();
                       ghiChuController.clear();
-
-                      // Close the bottom sheet
                       Navigator.pop(context);
                     },
-                    child: const Text('Submit'),
+                    child: const Text('Xác nhận'),
                   ),
                 ],
               ),
@@ -299,40 +342,83 @@ class _SoDuScreenState extends State<SoDuScreen> {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/yeu_cau_rut_screen');
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Container(
-                height: 80,
-                width: 150,
-                alignment: Alignment.centerLeft,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: const Color.fromRGBO(217, 217, 217, 1)),
-                child: const Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.text_snippet_outlined),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10,),
-                        child: Text(
-                          'Giao dịch',
-                          style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w900),
-                        ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/yeu_cau_rut_screen');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    height: 80,
+                    width: 160,
+                    alignment: Alignment.centerLeft,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: const Color.fromRGBO(217, 217, 217, 1)),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.text_snippet_outlined),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 10,
+                            ),
+                            child: Text(
+                              'Giao dịch',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          )
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/doanh_thu_screen');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    height: 80,
+                    width: 160,
+                    alignment: Alignment.centerLeft,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: const Color.fromRGBO(217, 217, 217, 1)),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.bar_chart_outlined),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 10,
+                            ),
+                            child: Text(
+                              'Doanh thu',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ],
       ),
     );
