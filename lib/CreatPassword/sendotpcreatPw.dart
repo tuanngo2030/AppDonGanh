@@ -1,17 +1,40 @@
 import 'package:don_ganh_app/api_services/forgotpassword_api.dart';
 import 'package:don_ganh_app/forgotpassword_screen/otp_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:don_ganh_app/screen/cach_xac_minh_tkScreen.dart'; // Import file API
+import 'package:shared_preferences/shared_preferences.dart';
 
-class Sendotpgmail extends StatefulWidget {
+class Sendotpcreatpw extends StatefulWidget {
   @override
-  _Sendotpgmail createState() => _Sendotpgmail();
+  _Sendotpcreatpw createState() => _Sendotpcreatpw();
 }
 
-class _Sendotpgmail extends State<Sendotpgmail> {
+class _Sendotpcreatpw extends State<Sendotpcreatpw> {
   bool isSubscribed = false;
   final TextEditingController _emailController = TextEditingController();
- String? _errorMessage; // Biến lưu thông báo lỗi
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail(); // Load email từ SharedPreferences khi khởi tạo
+  }
+
+  // Hàm lấy email từ SharedPreferences
+  Future<void> _loadSavedEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('email'); // 'savedEmail' là key lưu email
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      setState(() {
+        _emailController.text = savedEmail; // Gán email vào TextField
+      });
+    }
+  }
+
+  // Hàm lưu email vào SharedPreferences
+  Future<void> _saveEmail(String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('savedEmail', email); // Lưu email vào SharedPreferences
+  }
 
   void _validateAndSubmit() async {
     String email = _emailController.text.trim();
@@ -29,6 +52,7 @@ class _Sendotpgmail extends State<Sendotpgmail> {
 
     try {
       await ForgotpasswordApi.sendOtpForgotPassword(email);
+      await _saveEmail(email); // Lưu email khi gửi OTP thành công
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -96,7 +120,7 @@ class _Sendotpgmail extends State<Sendotpgmail> {
                     borderRadius: BorderRadius.circular(30.0),
                     borderSide: BorderSide.none,
                   ),
-                  errorText: _errorMessage, // Hiển thị lỗi
+                  errorText: _errorMessage,
                 ),
               ),
               const SizedBox(height: 30),

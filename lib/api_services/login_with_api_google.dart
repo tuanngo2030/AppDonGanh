@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -68,15 +70,34 @@ class LoginWithApiGoogle {
       throw Exception('Error occurred while registering user: $error');
     }
   }
+  // static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-      clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com', 
-  );
 
-  static Future<GoogleSignInAccount?> login() async {
-    await _googleSignIn.signOut();
+  // // static final GoogleSignIn _googleSignIn = GoogleSignIn(
+  // //     clientId: '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com', 
+  // // );
+
+  // static Future<GoogleSignInAccount?> login() async {
+  //   await _googleSignIn.signOut();
+  //   return await _googleSignIn.signIn();
+  // }
+static final GoogleSignIn _googleSignIn = GoogleSignIn(
+  clientId: Platform.isIOS
+      ? '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com'
+      : null, // Android không cần clientId nếu cấu hình đúng trên Firebase Console
+);
+static Future<GoogleSignInAccount?> login() async {
+  try {
+    await _googleSignIn.signOut(); // Đảm bảo thoát phiên trước
     return await _googleSignIn.signIn();
+  } catch (error) {
+    print("Google Sign-In error: $error");
+    if (error.toString().contains('PlatformException(sign_in_failed')) {
+      // Log chi tiết lỗi hoặc cấu hình lại nếu cần
+    }
+    return null; // Trả về null nếu đăng nhập thất bại
   }
+}
 
   static Future<void> logout() async {
     await _googleSignIn.disconnect();

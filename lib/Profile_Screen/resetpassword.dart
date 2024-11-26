@@ -281,7 +281,31 @@ class _ResetpasswordState extends State<Resetpassword> {
                     ),
                   ),
                 ),
-              SizedBox(height: 40),
+              SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/sendotpcreate_screen');
+                      },
+                      child: const Text(
+                        "Tạo mật khẩu (nếu chưa có)!",
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromRGBO(248, 158, 25, 1),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -293,7 +317,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                   child: _isLoading
                       ? CircularProgressIndicator(
                           valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white),
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         )
                       : const Text(
                           'Xác nhận',

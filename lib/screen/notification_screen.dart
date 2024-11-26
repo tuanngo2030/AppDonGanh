@@ -17,23 +17,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
   List<NotificationModel> notifications = [];
   bool isLoading = true;
   late Timer _timer;
- Map<String, bool> isDeleting = {}; // Track the deletion state for each notification
+  Map<String, bool> isDeleting =
+      {}; // Track the deletion state for each notification
   @override
   void initState() {
     super.initState();
     fetchNotifications();
-    startTimer();
+    // startTimer();
   }
 
-  void startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      fetchNotifications(); // Periodically fetch notifications
-    });
-  }
+  // void startTimer() {
+  //   _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+  //     fetchNotifications(); // Periodically fetch notifications
+  //   });
+  // }
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the screen is disposed
+    // _timer.cancel(); // Cancel the timer when the screen is disposed
     super.dispose();
   }
 
@@ -61,20 +62,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
         isLoading = false;
       });
 
-      // Show error in dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Lỗi"),
-          content: Text(e.toString()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Đóng"),
-            ),
-          ],
-        ),
-      );
+      // // Show error in dialog
+      // showDialog(
+      //   context: context,
+      //   builder: (context) => AlertDialog(
+      //     title: const Text("Lỗi"),
+      //     content: Text(e.toString()),
+      //     actions: [
+      //       TextButton(
+      //         onPressed: () => Navigator.of(context).pop(),
+      //         child: const Text("Đóng"),
+      //       ),
+      //     ],
+      //   ),
+      // );
     }
   }
 
@@ -218,7 +219,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           content: Text("Tất cả thông báo đã được xóa."),
         ),
       );
-    } catch (e) {
+    } 
+    catch (e) {
       // Handle error
       showDialog(
         context: context,
@@ -255,6 +257,59 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
+  Future<void> _showDeleteDialog(NotificationModel notification) async {
+    // Tạo một bool để theo dõi trạng thái loading
+    bool isLoading = false;
+
+    // Hiển thị dialog xác nhận xóa
+     showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Người dùng phải chọn một lựa chọn
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Xóa thông báo'),
+          content: isLoading
+              ? Center(
+                  child:
+                      CircularProgressIndicator()) // Hiển thị loading khi isLoading = true
+              : Text('Bạn có chắc chắn muốn xóa thông báo này?'),
+          actions: <Widget>[
+            // Nút Hủy
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog nếu hủy
+              },
+              child: Text('Hủy'),
+            ),
+            // Nút Xóa
+            TextButton(
+              onPressed: () async {
+                // Hiển thị loading khi nhấn Xóa
+                setState(() {
+                  isLoading = true;
+                });
+
+                // Thực hiện xóa thông báo
+                await _removeNotification(notification);
+
+                // Đóng dialog loading
+                Navigator.of(context).pop();
+
+                // Hiển thị thông báo thành công
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Đã xóa thông báo'),
+                  ),
+                );
+              },
+              child: Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Group notifications by date
@@ -288,9 +343,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Align(
-              alignment: Alignment.centerRight,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   TextButton(
                     onPressed: markAllAsRead,
@@ -354,17 +409,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   return Dismissible(
                                     key: Key(notification
                                         .id), // Use a unique key for each item
-                                    onDismissed: (direction) async {
-                                      await _removeNotification(notification);
+                                    onDismissed: (direction) {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
 
-                                      // Show a Snackbar message when a notification is deleted
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              "Đã xóa thông báo"),
-                                        ),
-                                      );
+                                      setState(() {
+                                        _showDeleteDialog(notification);
+                                      });
                                     },
                                     background: Container(
                                       color: Colors.red,

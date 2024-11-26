@@ -441,9 +441,9 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
   Future<void> signIn() async {
     final user = await LoginWithApiGoogle.login();
+
     if (user == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
