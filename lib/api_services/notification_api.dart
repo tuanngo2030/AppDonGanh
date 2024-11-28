@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:don_ganh_app/models/notification_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class NotificationApi {
-  static const String baseUrl =
-      "https://chipmunk-pro-phoenix.ngrok-free.app/api/user";
+  static String baseUrl =
+      "${dotenv.env['API_URL']}/user";
 
   // Lấy danh sách thông báo
   static Future<List<NotificationModel>> fetchNotifications(String userId) async {

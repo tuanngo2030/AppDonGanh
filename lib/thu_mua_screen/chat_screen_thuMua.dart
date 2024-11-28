@@ -4,6 +4,8 @@ import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:don_ganh_app/models/chat_model.dart';
@@ -74,33 +76,57 @@ class _ChatScreenThumuaState extends State<ChatScreenThumua> {
     });
   }
 
-  void _showFullImage(String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.black,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width *
-                0.9, // Chiều rộng 90% màn hình
-            height: MediaQuery.of(context).size.height *
-                0.5, // Chiều cao 50% màn hình
-            child: InteractiveViewer(
-              panEnabled: true,
-              boundaryMargin: const EdgeInsets.all(10),
-              minScale: 0.5,
-              maxScale: 5.0,
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit
-                    .cover, // Đặt BoxFit.cover để hình ảnh chiếm toàn bộ dialog
+  void _showFullImage(String imageUrl,) {
+
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            PhotoViewGallery.builder(
+              itemCount: imageUrl.length,
+              builder: (context, index) {
+                return PhotoViewGalleryPageOptions.customChild(
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.contained,
+                );
+              },
+              scrollPhysics: const BouncingScrollPhysics(),
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
+              // pageController: PageController(initialPage: initialIndex),
+            ),
+            Positioned(
+              top: 20,
+              right: 20,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 30,
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          ],
+        ),
+      );
+    },
+  );
+}
 
   // Play the received video
   void _playReceivedVideo(String base64Video) {

@@ -83,7 +83,7 @@ class LoginWithApiGoogle {
   // }
 static final GoogleSignIn _googleSignIn = GoogleSignIn(
   clientId: Platform.isIOS
-      ? '459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh.apps.googleusercontent.com'
+      ? '69595535813-6n7s204uk2enkavfap0kpvfpj0e4op8a.apps.googleusercontent.com'
       : null, // Android không cần clientId nếu cấu hình đúng trên Firebase Console
 );
 static Future<GoogleSignInAccount?> login() async {
