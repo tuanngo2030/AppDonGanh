@@ -13,7 +13,7 @@ class PaymentInfo with ChangeNotifier {
   String duongThonXom = '';
   String ghiChu = '';
   int transitionID = 0;
-  List<ChiTietGioHang> selectedItems = [];
+  List<CartModel> selectedItems = [];
   double totalPrice = 0;
   String assetPath = '';
   String title = '';
@@ -32,7 +32,7 @@ class PaymentInfo with ChangeNotifier {
     String? phuongXa,
     required String duongThonXom,
     required String ghiChu,
-    required List<ChiTietGioHang> selectedItems,
+    required List<CartModel> selectedItems,
     required double totalPrice,
   }) {
     this.order_id = order_id;

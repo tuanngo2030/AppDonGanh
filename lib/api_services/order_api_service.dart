@@ -37,7 +37,7 @@ class OrderApiService {
     required String ghiChu,
     required String khuyenmaiId,
     required double TongTien,
-    required List<ChiTietGioHang> selectedItems,
+    required List<CartModel> selectedItems,
     // required String YeuCauNhanHang,
   }) async {
     String url =
@@ -48,7 +48,7 @@ class OrderApiService {
       'diaChiMoi': diaChiMoi.toJson(),
       'ghiChu': ghiChu,
       'khuyenmaiId': khuyenmaiId,
-      'ChiTietGioHang': selectedItems.map((item) => item.toJson()).toList(),
+      'mergedCart': selectedItems.map((item) => item.toJson()).toList(),
       // 'YeuCauNhanHang': YeuCauNhanHang,
       'TongTien': TongTien,
     };
