@@ -74,14 +74,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh</string>
+				<string>com.googleusercontent.apps.69595535813-6n7s204uk2enkavfap0kpvfpj0e4op8a</string>
 			</array>
 		</dict>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>google</string>
-		<string>com.googleusercontent.apps.459872854706-6q2tk8as2nnu427otlpoprtc4vnm84oh</string>
+		<string>com.googleusercontent.apps.69595535813-6n7s204uk2enkavfap0kpvfpj0e4op8a</string>
 	</array>
 
 	<key>io.flutter.embedded_views_preview</key>
