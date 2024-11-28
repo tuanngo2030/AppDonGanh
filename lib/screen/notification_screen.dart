@@ -37,7 +37,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
     // _timer.cancel(); // Cancel the timer when the screen is disposed
     super.dispose();
   }
+Future<void> _refreshNotifications() async {
+  setState(() {
+    isLoading = true;
+  });
 
+  // Giả lập tải dữ liệu từ server
+  await Future.delayed(const Duration(seconds: 2));
+
+  // Gọi API hoặc thực hiện thao tác làm mới dữ liệu
+  await fetchNotifications(); // Thay thế bằng logic thực tế của bạn
+
+  setState(() {
+    isLoading = false;
+  });
+}
   Future<void> fetchNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -311,34 +325,36 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Group notifications by date
-    Map<String, List<NotificationModel>> groupedNotifications = {};
-    for (var notification in notifications) {
-      String formattedDate = getFormattedDate(notification.ngayTao);
-      if (!groupedNotifications.containsKey(formattedDate)) {
-        groupedNotifications[formattedDate] = [];
-      }
-      groupedNotifications[formattedDate]!.add(notification);
+Widget build(BuildContext context) {
+  // Group notifications by date
+  Map<String, List<NotificationModel>> groupedNotifications = {};
+  for (var notification in notifications) {
+    String formattedDate = getFormattedDate(notification.ngayTao);
+    if (!groupedNotifications.containsKey(formattedDate)) {
+      groupedNotifications[formattedDate] = [];
     }
+    groupedNotifications[formattedDate]!.add(notification);
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: GestureDetector(),
-        ),
-        title: const Text(
-          'Thông báo',
-          style: TextStyle(
-              color: Color.fromRGBO(41, 87, 35, 1),
-              fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
+  return Scaffold(
+    appBar: AppBar(
+      leading: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: GestureDetector(),
       ),
-      body: Column(
+      title: const Text(
+        'Thông báo',
+        style: TextStyle(
+            color: Color.fromRGBO(41, 87, 35, 1),
+            fontWeight: FontWeight.bold),
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+    ),
+    body: RefreshIndicator(
+      onRefresh: _refreshNotifications, // Hàm gọi lại để làm mới dữ liệu
+      child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -358,8 +374,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed:
-                        deleteAllNotifications, // Function to delete all notifications
+                    onPressed: deleteAllNotifications,
                     child: const Text(
                       "Xóa tất cả",
                       style: TextStyle(
@@ -406,96 +421,93 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   final notification =
                                       notificationsForDate[index];
 
-                                  return Dismissible(
-                                    key: Key(notification
-                                        .id), // Use a unique key for each item
-                                    onDismissed: (direction) {
-                                      setState(() {
-                                        isLoading = true;
-                                      });
-
-                                      setState(() {
-                                        _showDeleteDialog(notification);
-                                      });
-                                    },
-                                    background: Container(
-                                      color: Colors.red,
-                                      alignment: Alignment.centerRight,
+                                  return GestureDetector(
+                                    onTap: () => _showFullNotificationDialog(
+                                        notification),
+                                    child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 20),
-                                      child: const Icon(Icons.delete,
-                                          color: Colors.white),
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () => _showFullNotificationDialog(
-                                          notification),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 16),
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            bottom: BorderSide(
-                                              color: Colors.grey,
-                                              width: 0.5,
-                                            ),
+                                          vertical: 10, horizontal: 16),
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey,
+                                            width: 0.5,
                                           ),
                                         ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Avatar
-                                            CircleAvatar(
-                                              radius: 25,
-                                              backgroundColor: Colors.grey[300],
-                                            ),
-                                            const SizedBox(width: 16),
-                                            // Notification content
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    notification.tieude,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          notification.daDoc
-                                                              ? FontWeight.w500
-                                                              : FontWeight.bold,
-                                                      fontSize: 16,
-                                                    ),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Avatar
+                                          CircleAvatar(
+                                            radius: 25,
+                                            backgroundColor: Colors.grey[300],
+                                          ),
+                                          const SizedBox(width: 16),
+                                          // Notification content
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  notification.tieude,
+                                                  style: TextStyle(
+                                                    fontWeight:
+                                                        notification.daDoc
+                                                            ? FontWeight.w500
+                                                            : FontWeight.bold,
+                                                    fontSize: 16,
                                                   ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    notification.noidung,
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.grey,
-                                                    ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  notification.noidung,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey,
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                            // Time
-                                            Text(
-                                              notification.daDoc
-                                                  ? "Đã xem"
-                                                  : getTimeAgo(
-                                                      notification.ngayTao),
-                                              style: TextStyle(
-                                                color: notification.daDoc
-                                                    ? Color.fromRGBO(
-                                                        41, 87, 35, 1)
-                                                    : Colors.grey,
-                                                fontSize: 12,
+                                          ),
+                                          // Time
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                notification.daDoc
+                                                    ? "Đã xem"
+                                                    : getTimeAgo(
+                                                        notification.ngayTao),
+                                                style: TextStyle(
+                                                  color: notification.daDoc
+                                                      ? const Color.fromRGBO(
+                                                          41, 87, 35, 1)
+                                                      : Colors.grey,
+                                                  fontSize: 12,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                              const SizedBox(height: 8),
+                                              // Trash IconButton
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ),
+                                                onPressed: () {
+                                                  _showDeleteDialog(
+                                                      notification);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   );
@@ -508,6 +520,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

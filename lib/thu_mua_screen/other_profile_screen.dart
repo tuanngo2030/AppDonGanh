@@ -111,7 +111,7 @@ class _OState extends State<O> {
     userId = prefs.getString('userId');
     String SetuserId = widget.nguoiDung.id!;
     final response = await UserApiService().fetchUserData(SetuserId, userId!);
-
+if (mounted) {
     setState(() {
       final sanPhamData = response['sanPham']['list'];
       if (sanPhamData is List) {
@@ -124,7 +124,7 @@ class _OState extends State<O> {
       }
     });
   }
-
+}
   Future<void> _initializeFollowStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');

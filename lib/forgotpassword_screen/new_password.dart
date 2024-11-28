@@ -15,8 +15,10 @@ class _NewPasswordState extends State<NewPassword> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
-  Future<void> _updatePassword() async {
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  String? _passwordError;
+Future<void> _updatePassword() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? gmail = prefs.getString('gmail'); // Lấy gmail từ SharedPreferences
     String? resetToken = prefs.getString('resetToken'); // Lấy resetToken
@@ -27,7 +29,7 @@ class _NewPasswordState extends State<NewPassword> {
       final url = Uri.parse(
           '${dotenv.env['API_URL']}/user/SendPassword');
 
-      try {
+      try { 
         final response = await http.post(
           url,
           headers: {'Content-Type': 'application/json'},
@@ -66,6 +68,11 @@ class _NewPasswordState extends State<NewPassword> {
       );
     }
   }
+  bool _validatePassword(String password) {
+    final passwordRegex =
+        RegExp(r'^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[a-z]).{7,}$');
+    return passwordRegex.hasMatch(password);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,30 +88,28 @@ class _NewPasswordState extends State<NewPassword> {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Column(
-            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Mật khẩu mới',
                 style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 41, 87, 35)),
+                    color: Color.fromARGB(255, 41, 87, 35)),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'Hãy nhập mật khẩu mới mà bạn muốn đặt.',
                 style: TextStyle(fontSize: 10, color: Colors.black),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 60),
-              // Trường nhập mật khẩu mới
+              const SizedBox(height: 60),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+                children: const [
                   Text(
                     'Mật khẩu mới',
                     style: TextStyle(
@@ -117,17 +122,34 @@ class _NewPasswordState extends State<NewPassword> {
               ),
               TextField(
                 controller: _newPasswordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30)),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  // Hiển thị lỗi dưới ô nhập
+                  errorText: _passwordError,
+                  errorStyle: const TextStyle(
+                      color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(height: 10),
-              // Trường xác nhận mật khẩu
+              const SizedBox(height: 10),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+                children: const [
                   Text(
                     'Xác nhận mật khẩu mới',
                     style: TextStyle(
@@ -140,25 +162,48 @@ class _NewPasswordState extends State<NewPassword> {
               ),
               TextField(
                 controller: _confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30)),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
                 ),
               ),
-              SizedBox(height: 40),
-              // Nút xác nhận
+              const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    if (!_validatePassword(_newPasswordController.text)) {
+                      setState(() {
+                        _passwordError =
+                            'Mật khẩu phải có ít nhất 7 ký tự, 1 chữ cái viết hoa và 1 ký tự đặc biệt.';
+                      });
+                      return;
+                    }
                     if (_newPasswordController.text ==
                         _confirmPasswordController.text) {
-                      _updatePassword(); // Gọi hàm cập nhật mật khẩu
+                      setState(() {
+                        _passwordError = null;
+                      });
+                      _updatePassword();
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Mật khẩu không khớp.')),
-                      );
+                      setState(() {
+                        _passwordError = 'Mật khẩu không khớp.';
+                      });
                     }
                   },
                   style: ElevatedButton.styleFrom(
