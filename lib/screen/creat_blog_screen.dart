@@ -29,6 +29,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
     _titleController.addListener(_validateForm);
     _contentController.addListener(_validateForm);
     _loadUserData();
+    _checkPermissions();
   }
 
   @override
@@ -45,7 +46,12 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
           _contentController.text.isNotEmpty;
     });
   }
-
+Future<void> _checkPermissions() async {
+  PermissionStatus cameraPermission = await Permission.camera.status;
+  if (cameraPermission.isDenied) {
+    await Permission.camera.request();
+  }
+}
   Future<void> _takePhoto() async {
     // Check and request camera permission
     PermissionStatus status = await Permission.camera.request();

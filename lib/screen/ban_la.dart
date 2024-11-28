@@ -9,13 +9,11 @@ class BanLa extends StatelessWidget {
       backgroundColor: const Color.fromARGB(255, 41, 87, 35),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+       padding: const EdgeInsets.only(top: 80, left: 16.0, right: 16.0), 
           child: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start  ,
               children: <Widget>[
-                // logo
-                const SizedBox(height: 100),
                 Image.asset("lib/assets/logo_xinchao.png"),
                 const Text(
                   'Đòn gánh xin chào!',
