@@ -36,9 +36,8 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
-  pod 'GoogleSignIn' # Đã có
-  pod 'FirebaseCore' # Nếu sử dụng Firebase
-  pod 'image_picker' # Nếu đang dùng plugin lấy ảnh  
+  pod 'GoogleSignIn' 
+  pod 'FirebaseCore'
 end
 
 post_install do |installer|
