@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:don_ganh_app/Profile_Screen/dia_chi_screen.dart';
 import 'package:don_ganh_app/api_services/address_api.dart';
 import 'package:don_ganh_app/api_services/diachi_api.dart';
@@ -13,6 +11,8 @@ import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen2.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,17 +43,20 @@ class _PayScreen1State extends State<PayScreen1> {
   bool _isOrderProcessing = false; // For handling order processing state
 
   // Selected items and products map
-  List<ChiTietGioHang> selectedItems = [];
-  Map<String, ProductModel> _productsMap = {};
+  List<CartModel> selectedItems = [];
+
+  final Map<String, ProductModel> _productsMap = {};
 
   // To ensure products are fetched only once
-  bool _productsFetched = false;
+  final bool _productsFetched = false;
+  double totalAmount = 0.0;
 
   final OrderApiService _orderApiService = OrderApiService();
 
   @override
   void initState() {
     super.initState();
+
     _fetchDefaultAddress();
   }
 
@@ -85,7 +88,7 @@ class _PayScreen1State extends State<PayScreen1> {
             _isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
+            const SnackBar(content: Text('Bạn chưa có địa chỉ nào.')),
           );
         }
       }
@@ -94,7 +97,7 @@ class _PayScreen1State extends State<PayScreen1> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
+        const SnackBar(content: Text('Lỗi khi tải danh sách địa chỉ.')),
       );
     }
   }
@@ -102,62 +105,12 @@ class _PayScreen1State extends State<PayScreen1> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_productsFetched) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args != null && args is List<ChiTietGioHang>) {
+    // Nhận dữ liệu từ arguments trong didChangeDependencies
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is List<CartModel>) {
+      setState(() {
         selectedItems = args;
-        print('Selected Items: ${selectedItems.length}');
-        for (var item in selectedItems) {
-          print('Product ID: ${item.variantModel.idProduct}');
-        }
-        _fetchAllProducts();
-      } else {
-        // Handle the case where arguments are missing or of incorrect type
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không tìm thấy sản phẩm.')),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      _productsFetched = true;
-    }
-  }
-
-  // Fetch all products based on selectedItems
-  Future<void> _fetchAllProducts() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Extract unique product IDs
-    Set<String> productIds =
-        selectedItems.map((item) => item.variantModel.idProduct).toSet();
-    print('Unique Product IDs: $productIds');
-
-    try {
-      // Fetch all products concurrently
-      List<Future<ProductModel>> fetchFutures =
-          productIds.map((id) => fetchProduct(id)).toList();
-
-      List<ProductModel> products = await Future.wait(fetchFutures);
-      print('Fetched Products: ${products.map((p) => p.id).toList()}');
-
-      // Create a map from product ID to ProductModel
-      _productsMap = {for (var product in products) product.id: product};
-      print('_productsMap: $_productsMap');
-
-      setState(() {
-        _isLoading = false;
       });
-    } catch (e) {
-      print('Error fetching products: $e');
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi tải thông tin sản phẩm.')),
-      );
     }
   }
 
@@ -167,7 +120,7 @@ class _PayScreen1State extends State<PayScreen1> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            AddressScreen(), // Điều hướng đến trang thêm địa chỉ
+            const AddressScreen(), // Điều hướng đến trang thêm địa chỉ
       ),
     ).then((result) {
       if (result == true) {
@@ -236,7 +189,7 @@ class _PayScreen1State extends State<PayScreen1> {
                       );
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   SizedBox(
@@ -248,28 +201,28 @@ class _PayScreen1State extends State<PayScreen1> {
                             .center, // Center the icon and text
                         children: [
                           Container(
-                            padding: EdgeInsets.all(
+                            padding: const EdgeInsets.all(
                                 4), // Add some padding inside the border
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: Color.fromRGBO(
+                                color: const Color.fromRGBO(
                                     59, 99, 53, 1), // Border color
                                 width: 1, // Border width
                               ),
                               borderRadius:
                                   BorderRadius.circular(100), // Rounded corners
                             ),
-                            child: Icon(
+                            child: const Icon(
                               size: 20,
                               Icons.add, // Icon
                               color:
                                   Color.fromRGBO(59, 99, 53, 1), // Icon color
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                               width:
                                   8), // Add some spacing between the icon and text
-                          Text('Thêm địa chỉ mới',
+                          const Text('Thêm địa chỉ mới',
                               style: TextStyle(
                                   fontSize: 15,
                                   color: Color.fromRGBO(59, 99, 53, 1))),
@@ -304,7 +257,28 @@ class _PayScreen1State extends State<PayScreen1> {
     }
   }
 
+  double calculateTotal(List<CartModel> selectedItems) {
+    double total = 0.0;
+
+    // Duyệt qua danh sách CartModel
+    for (var cart in selectedItems) {
+      // Duyệt qua danh sách SanPhamCart trong mỗi CartModel
+      for (var sanPhamCart in cart.mergedCart) {
+        // Duyệt qua danh sách SanPhamList trong mỗi SanPhamCart
+        for (var sanPhamItem in sanPhamCart.sanPhamList) {
+          // Duyệt qua danh sách ChiTietGioHang trong mỗi SanPhamList
+          for (var chiTiet in sanPhamItem.chiTietGioHangs) {
+            // Tính tổng: số lượng * đơn giá
+            total += chiTiet.soLuong * chiTiet.donGia;
+          }
+        }
+      }
+    }
+    return total;
+  }
+
   Future<void> _createOrUpdateOrder() async {
+    print(' hihi: $selectedItems');
     setState(() {
       _isOrderProcessing = true;
     });
@@ -329,14 +303,11 @@ class _PayScreen1State extends State<PayScreen1> {
         _isOrderProcessing = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
+        const SnackBar(
+            content: Text('Vui lòng điền đầy đủ thông tin khách hàng.')),
       );
       return;
     }
-
-    double totalPrice = selectedItems.fold(
-        0, (sum, item) => sum + (item.soLuong * item.donGia));
-    print('Total Price: $totalPrice');
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -347,11 +318,15 @@ class _PayScreen1State extends State<PayScreen1> {
           _isOrderProcessing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text('User ID không tìm thấy. Vui lòng đăng nhập lại.')),
         );
         return;
       }
+
+      // Calculate total price
+      double totalPrice = calculateTotal(selectedItems);
+      print('Total Price: $totalPrice');
 
       diaChiList newAddress = diaChiList(
         tinhThanhPho: tinhThanhPho!,
@@ -361,16 +336,6 @@ class _PayScreen1State extends State<PayScreen1> {
         name: hoTen,
         soDienThoai: soDienThoai,
       );
-
-      // Chuyển đổi chi tiết giỏ hàng thành danh sách đối tượng
-      List<ChiTietGioHang> chiTietGioHang = selectedItems
-          .map((item) => ChiTietGioHang(
-                id: item.id,
-                variantModel: item.variantModel,
-                soLuong: item.soLuong,
-                donGia: item.donGia,
-              ))
-          .toList();
 
       // Lấy thông tin `order_id` từ Provider
       PaymentInfo paymentInfo =
@@ -385,7 +350,8 @@ class _PayScreen1State extends State<PayScreen1> {
           ghiChu: ghiChu,
         );
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cập nhật địa chỉ và ghi chú thành công!')),
+          const SnackBar(
+              content: Text('Cập nhật địa chỉ và ghi chú thành công!')),
         );
 
         // Cập nhật thông tin `order_id` trong Provider
@@ -413,7 +379,7 @@ class _PayScreen1State extends State<PayScreen1> {
           ghiChu: ghiChu,
           khuyenmaiId: "", // ID khuyến mãi nếu có
           TongTien: totalPrice,
-          selectedItems: chiTietGioHang,
+          selectedItems: selectedItems,
         );
 
         print('Order Response: $response');
@@ -431,38 +397,31 @@ class _PayScreen1State extends State<PayScreen1> {
           duongThonXom: duongThonXom,
           ghiChu: ghiChu,
           selectedItems: selectedItems,
-          totalPrice: totalPrice,
+          totalPrice: 10,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đặt hàng thành công!')),
+          const SnackBar(content: Text('Đặt hàng thành công!')),
         );
         widget.nextStep();
       }
     } catch (e) {
+      print(selectedItems);
       print('Lỗi khi tạo/cập nhật hóa đơn: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xảy ra lỗi khi xử lý đơn hàng.')),
+        const SnackBar(content: Text('Đã xảy ra lỗi khi xử lý đơn hàng.')),
       );
     } finally {
       setState(() {
-        _isOrderProcessing = false; // Kết thúc quá trình xử lý
+        _isOrderProcessing = false;
       });
     }
   }
 
-// Phương thức kiểm tra dữ liệu đầu vào
-  bool _validateInput(
-      String hoTen,
-      String soDienThoai,
-      // String email,
-      String? tinhThanhPho,
-      String? quanHuyen,
-      String? phuongXa,
-      String duongThonXom) {
+  bool _validateInput(String hoTen, String soDienThoai, String? tinhThanhPho,
+      String? quanHuyen, String? phuongXa, String duongThonXom) {
     return hoTen.isEmpty ||
         soDienThoai.isEmpty ||
-        // email.isEmpty ||
         tinhThanhPho == null ||
         tinhThanhPho.isEmpty ||
         quanHuyen == null ||
@@ -474,196 +433,145 @@ class _PayScreen1State extends State<PayScreen1> {
 
   @override
   Widget build(BuildContext context) {
+    final List<CartModel> selectedCart =
+        ModalRoute.of(context)?.settings.arguments as List<CartModel>;
     print('Building PayScreen1');
-    print('Selected Items Count: ${selectedItems.length}');
-    print('Products Map Keys: ${_productsMap.keys.toList()}');
+    print('Selected Items Count: ${selectedCart.length}');
 
     return Scaffold(
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 children: [
                   SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: ListView.builder(
-                      itemCount: selectedItems.length,
-                      itemBuilder: (context, index) {
-                        final item = selectedItems[index];
-                        final product =
-                            _productsMap[item.variantModel.idProduct];
-
-                        if (product == null) {
-                          print(
-                              'Product not found for ID: ${item.variantModel.idProduct}');
-                          // Handle the case where the product was not fetched successfully
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            child: Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      height: 100,
-                                      width: 100,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Colors.grey[300],
-                                      ),
-                                      child:
-                                          Icon(Icons.error, color: Colors.red),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Sản phẩm không tồn tại',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Không tìm thấy thông tin sản phẩm.',
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          child: Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 12),
-                                    child: Container(
-                                      height: 100,
-                                      width: 100,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                              product.imageProduct),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                    child: Column(
+                      children: selectedCart.map((cart) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: cart.mergedCart.map((sanPhamCart) {
+                            double userTotal = 0.0;
+                            int totalProducts = 0;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  color: Colors.grey[200],
+                                  child: Text(
+                                    sanPhamCart.user.tenNguoiDung!,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Expanded(
+                                ),
+                                ...sanPhamCart.sanPhamList.map((sanPhamItem) {
+                                  return Card(
+                                    elevation: 3,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          product.nameProduct,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: 4),
-                                        Row(
-                                          children: item
-                                              .variantModel.ketHopThuocTinh
-                                              .map((thuocTinh) {
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 8.0),
-                                              child: Text(
-                                                thuocTinh
-                                                    .giaTriThuocTinh.GiaTri,
-                                                style: TextStyle(
-                                                  fontSize: 14,
+                                      children: sanPhamItem.chiTietGioHangs
+                                          .map((chiTiet) {
+                                        userTotal +=
+                                            chiTiet.donGia * chiTiet.soLuong;
+                                                 totalProducts += chiTiet.soLuong; // Count the total number of products
+
+
+                                        return Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                child: Image.network(
+                                                  sanPhamItem.sanPham
+                                                          .imageProduct ??
+                                                      '',
+                                                  width: 100,
+                                                  height: 100,
+                                                  fit: BoxFit.cover,
                                                 ),
                                               ),
-                                            );
-                                          }).toList(),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text('Đơn giá: ${item.donGia} đ/kg'),
-                                        SizedBox(height: 4),
-                                        SizedBox(
-                                          width: 120,
-                                          height: 30,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "${item.soLuong}",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 14),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(vertical: 10),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        'Loại sản phẩm: ${chiTiet.variantModel.ketHopThuocTinh.map((thuocTinh) => thuocTinh.giaTriThuocTinh.GiaTri).join(', ')}',
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                      Text(
+                                                        'Số lượng: ${chiTiet.soLuong}',
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                      Text(
+                                                        'Đơn giá:${NumberFormat("#,##0").format(chiTiet.donGia)} VND',
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                }),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  child: Text(
+                                       'Tổng số tiền ($totalProducts sản phẩm): ${NumberFormat("#,###").format(userTotal)} VND',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
+                                ),
+                                const Divider(),
+                              ],
+                            );
+                          }).toList(),
                         );
-                      },
+                      }).toList(),
                     ),
                   ),
                   // Customer information and address selection
                   Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                      top:
-                          BorderSide(color: Color.fromARGB(255, 204, 202, 202)),
-                    )),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Thông tin khách hàng',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w700),
                           ),
-                          SizedBox(height: 8),
-                          Text(
+                          const SizedBox(height: 8),
+                          const Text(
                             '*Những thông tin ở đây là thông tin mặc định của quý khách và những thay đổi ở đây sẽ không được lưu.',
                             style: TextStyle(
                                 fontSize: 12, fontWeight: FontWeight.normal),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           // Radio Buttons for Gender
                           // Row(
                           //   children: [
@@ -698,7 +606,7 @@ class _PayScreen1State extends State<PayScreen1> {
                           //     ),
                           //   ],
                           // ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
                           ElevatedButton(
                             onPressed: _showDiaChiDialog,
@@ -720,55 +628,6 @@ class _PayScreen1State extends State<PayScreen1> {
                             ),
                           ),
                           const SizedBox(height: 16),
-
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //       flex: 6,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: TextField(
-                          //           controller: hoTenController,
-                          //           decoration: InputDecoration(
-                          //             labelText: 'Họ và tên',
-                          //             border: OutlineInputBorder(
-                          //               borderRadius: BorderRadius.circular(8),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     Expanded(
-                          //       flex: 4,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: TextField(
-                          //           controller: soDienThoaiController,
-                          //           keyboardType: TextInputType.phone,
-                          //           decoration: InputDecoration(
-                          //             labelText: 'Số điện thoại',
-                          //             border: OutlineInputBorder(
-                          //               borderRadius: BorderRadius.circular(8),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          // Padding(
-                          //   padding: const EdgeInsets.all(8.0),
-                          //   child: TextField(
-                          //     controller: emailController,
-                          //     keyboardType: TextInputType.emailAddress,
-                          //     decoration: InputDecoration(
-                          //       labelText: 'Email',
-                          //       border: OutlineInputBorder(
-                          //         borderRadius: BorderRadius.circular(8),
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
 
                           hoTenController.isEmpty || duongThonController.isEmpty
                               ? Container(
@@ -793,8 +652,9 @@ class _PayScreen1State extends State<PayScreen1> {
                                   height: 150,
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.fromBorderSide(BorderSide(
-                                          width: 1, color: Colors.grey))),
+                                      border: const Border.fromBorderSide(
+                                          BorderSide(
+                                              width: 1, color: Colors.grey))),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 10, horizontal: 20),
@@ -860,9 +720,9 @@ class _PayScreen1State extends State<PayScreen1> {
                                   ),
                                 ),
 
-                          SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          const SizedBox(height: 20),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: Text(
                               "Yêu cầu nhận hàng",
                               style: TextStyle(
@@ -879,7 +739,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     children: [
                                       Radio<String>(
                                         activeColor:
-                                            Color.fromRGBO(59, 99, 53, 1),
+                                            const Color.fromRGBO(59, 99, 53, 1),
                                         value: "Giao hàng tại nhà",
                                         groupValue: groupValueRequest,
                                         onChanged: (value) {
@@ -888,7 +748,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                           });
                                         },
                                       ),
-                                      Expanded(
+                                      const Expanded(
                                         child: Text(
                                           "Giao hàng tại nhà",
                                           overflow: TextOverflow.ellipsis,
@@ -899,7 +759,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 20),
                               Expanded(
                                 flex: 1,
                                 child: Container(
@@ -907,7 +767,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                     children: [
                                       Radio<String>(
                                         activeColor:
-                                            Color.fromRGBO(59, 99, 53, 1),
+                                            const Color.fromRGBO(59, 99, 53, 1),
                                         value: "Nhận tại cửa hàng",
                                         groupValue: groupValueRequest,
                                         onChanged: (value) {
@@ -916,7 +776,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                           });
                                         },
                                       ),
-                                      Expanded(
+                                      const Expanded(
                                         child: Text(
                                           "Nhận tại cửa hàng",
                                           overflow: TextOverflow.ellipsis,
@@ -929,131 +789,11 @@ class _PayScreen1State extends State<PayScreen1> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 16),
-                          // Address Dropdowns
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //       flex: 6,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: DropdownSearch<String>(
-                          //           popupProps: PopupProps.menu(
-                          //             showSearchBox: true,
-                          //           ),
-                          //           items: _tinhThanhPhoList,
-                          //           selectedItem:
-                          //               selectedTinhThanhPho!.isNotEmpty
-                          //                   ? selectedTinhThanhPho
-                          //                   : null,
-                          //           onChanged: (newValue) async {
-                          //             setState(() {
-                          //               selectedTinhThanhPho = newValue;
-                          //               selectedQuanHuyen = null;
-                          //               selectedPhuongXa = null;
-                          //               _quanHuyenList = [];
-                          //               _phuongXaList = [];
-                          //             });
-                          //             if (newValue != null) {
-                          //               // await _fetchQuanHuyen(newValue);
-                          //             }
-                          //           },
-                          //           dropdownDecoratorProps:
-                          //               DropDownDecoratorProps(
-                          //             dropdownSearchDecoration: InputDecoration(
-                          //               labelText: 'Tỉnh/Thành Phố',
-                          //               border: OutlineInputBorder(),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     Expanded(
-                          //       flex: 4,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: DropdownSearch<String>(
-                          //           popupProps: PopupProps.menu(
-                          //             showSearchBox: true,
-                          //           ),
-                          //           items: _quanHuyenList,
-                          //           selectedItem: selectedQuanHuyen != null &&
-                          //                   selectedQuanHuyen!.isNotEmpty
-                          //               ? selectedQuanHuyen
-                          //               : null,
-                          //           onChanged: (newValue) async {
-                          //             setState(() {
-                          //               selectedQuanHuyen = newValue;
-                          //               selectedPhuongXa = null;
-                          //               _phuongXaList = [];
-                          //             });
-                          //             if (newValue != null) {
-                          //               await _fetchPhuongXa(newValue);
-                          //             }
-                          //           },
-                          //           dropdownDecoratorProps:
-                          //               DropDownDecoratorProps(
-                          //             dropdownSearchDecoration: InputDecoration(
-                          //               labelText: "Quận/Huyện",
-                          //               border: OutlineInputBorder(),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //       flex: 6,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: DropdownSearch<String>(
-                          //           popupProps: PopupProps.menu(
-                          //             showSearchBox: true,
-                          //           ),
-                          //           items: _phuongXaList,
-                          //           selectedItem: selectedPhuongXa != null &&
-                          //                   selectedPhuongXa!.isNotEmpty
-                          //               ? selectedPhuongXa
-                          //               : null,
-                          //           onChanged: (newValue) {
-                          //             setState(() {
-                          //               selectedPhuongXa = newValue;
-                          //             });
-                          //           },
-                          //           dropdownDecoratorProps:
-                          //               DropDownDecoratorProps(
-                          //             dropdownSearchDecoration: InputDecoration(
-                          //               labelText: "Phường/Xã",
-                          //               border: OutlineInputBorder(),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     Expanded(
-                          //       flex: 4,
-                          //       child: Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: TextField(
-                          //           controller: duongThonController,
-                          //           decoration: InputDecoration(
-                          //             labelText: 'Đường/Thôn xóm',
-                          //             border: OutlineInputBorder(
-                          //               borderRadius: BorderRadius.circular(8),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
+
                           // Notes for the seller
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: Text(
                               "Ghi chú cho người bán",
                               style: TextStyle(
@@ -1071,14 +811,14 @@ class _PayScreen1State extends State<PayScreen1> {
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8)),
                                 hintText: 'Gõ vào đây',
-                                contentPadding: EdgeInsets.all(16),
+                                contentPadding: const EdgeInsets.all(16),
                               ),
                             ),
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           // Submit Button
                           _isOrderProcessing
-                              ? Center(child: CircularProgressIndicator())
+                              ? const Center(child: CircularProgressIndicator())
                               : SizedBox(
                                   width: double.infinity,
                                   height: 50,
@@ -1088,12 +828,12 @@ class _PayScreen1State extends State<PayScreen1> {
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
-                                          Color.fromRGBO(59, 99, 53, 1),
+                                          const Color.fromRGBO(59, 99, 53, 1),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    child: Text(
+                                    child: const Text(
                                       'Tiếp tục',
                                       style: TextStyle(
                                         color: Colors.white,

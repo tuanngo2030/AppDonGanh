@@ -86,8 +86,7 @@ class _PayProcessScreenState extends State<PayProcessScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<ChiTietGioHang> selectedItems =
-        ModalRoute.of(context)!.settings.arguments as List<ChiTietGioHang>;
+     final selectedCart = ModalRoute.of(context)!.settings.arguments as List<CartModel>;
 
     return SafeArea(
       child: Scaffold(

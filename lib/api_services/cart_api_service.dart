@@ -122,12 +122,13 @@ Future<List<CartModel>> getGioHangByUserId() async {
   }
 
   Future<void> updateCart(
-      String idGioHang, String idBienThe, int soLuong, int donGia) async {
+      String idGioHang, String idBienThe, int soLuong, int donGia, String idChitietgiohang) async {
     final updateCartURL = '${dotenv.env['API_URL']}/cart/gioHang/$idGioHang';
 
     Map<String, dynamic> requestBody = {
       'chiTietGioHang': [
         {
+          '_id' : idChitietgiohang,
           'idBienThe': idBienThe,
           'soLuong': soLuong,
           'donGia': donGia,

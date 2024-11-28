@@ -246,7 +246,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   //     }
   //   }
   // }
-  void _onChat() async {
+  void _onChat(String receiverId) async {
     setState(() {
       _isLoading = true; // Start loading state
     });
@@ -262,7 +262,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         print('User ID: $userId');
         print('Token: $token');
 
-        String receiverId = '671fa0042871b08206a87749';
+        // String receiverId = '671fa0042871b08206a87749';
         final response =
             await apiService.createConversation(userId!, receiverId);
 
@@ -525,6 +525,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                           onTap: () {
                             setState(() {
                               quantity = 1;
+                              _quantityController.text = quantity.toString();
                             });
                             print(widget.product.id);
                             showModalBottomSheet(
@@ -704,7 +705,12 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                           child: IconButton(
                                                             onPressed: () {
                                                               setModalState(() {
-                                                                minusQuantity();
+                                                                if (int.parse(
+                                                                        _quantityController
+                                                                            .text) >
+                                                                    1) {
+                                                                  minusQuantity();
+                                                                }
                                                               });
                                                             },
                                                             icon: Icon(
@@ -718,7 +724,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                         onTap: () {
                                                           FocusScope.of(context)
                                                               .requestFocus(
-                                                                  _quantityFocusNode); // Request focus on the quantity input
+                                                                  _quantityFocusNode);
                                                         },
                                                         child: SizedBox(
                                                           width: 50,
@@ -731,24 +737,53 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                                 TextInputType
                                                                     .number,
                                                             textAlign: TextAlign
-                                                                .center, // Center the text horizontally
+                                                                .center,
                                                             style: TextStyle(
                                                                 fontSize: 16),
                                                             decoration:
                                                                 InputDecoration(
-                                                              border: InputBorder
-                                                                  .none, // Removes the underline
+                                                              border:
+                                                                  InputBorder
+                                                                      .none,
                                                               contentPadding:
                                                                   EdgeInsets.only(
                                                                       bottom:
-                                                                          17.0), // Adjusts vertical padding to center text
+                                                                          17.0),
                                                             ),
+                                                            onChanged: (value) {
+                                                              if (value
+                                                                  .isNotEmpty) {
+                                                                int? quantity =
+                                                                    int.tryParse(
+                                                                        value);
+                                                                if (quantity ==
+                                                                        null ||
+                                                                    quantity <
+                                                                        1 ||
+                                                                    quantity >
+                                                                        10) {
+                                                                  _quantityController
+                                                                      .text = (quantity !=
+                                                                              null &&
+                                                                          quantity >
+                                                                              10)
+                                                                      ? '10'
+                                                                      : '1';
+                                                                  _quantityController
+                                                                          .selection =
+                                                                      TextSelection.fromPosition(TextPosition(
+                                                                          offset: _quantityController
+                                                                              .text
+                                                                              .length));
+                                                                }
+                                                              }
+                                                            },
                                                             onSubmitted:
                                                                 (value) {
-                                                              updateQuantity(); // Update quantity when input is submitted
+                                                              updateQuantity();
                                                               FocusScope.of(
                                                                       context)
-                                                                  .unfocus(); // Dismiss the keyboard
+                                                                  .unfocus();
                                                             },
                                                           ),
                                                         ),
@@ -760,7 +795,12 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                           child: IconButton(
                                                             onPressed: () {
                                                               setModalState(() {
-                                                                plusQuantity();
+                                                                if (int.parse(
+                                                                        _quantityController
+                                                                            .text) <
+                                                                    10) {
+                                                                  plusQuantity();
+                                                                }
                                                               });
                                                             },
                                                             icon:
@@ -782,11 +822,15 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                           child: Center(
                                             child: ElevatedButton(
                                               onPressed:
-                                                  selectedVariantId.isEmpty &&
+                                                  selectedVariantId.isEmpty ||
                                                           _isLoading
-                                                      ? null
+                                                      ? null 
                                                       : () async {
                                                           setState(() {
+                                                            quantity = int.tryParse(
+                                                                    _quantityController
+                                                                        .text) ??
+                                                                1; // Chuyển đổi giá trị từ TextEditingController
                                                             _isLoading =
                                                                 true; // Bắt đầu trạng thái loading khi bấm nút
                                                           });
@@ -805,7 +849,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                     const Size.fromHeight(60),
                                                 backgroundColor:
                                                     selectedVariantId.isEmpty ||
-                                                            _isLoading
+                                                            _isLoading 
                                                         ? Colors.grey
                                                         : const Color.fromRGBO(
                                                             41, 87, 35, 1),
@@ -947,31 +991,70 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                         color: Color.fromRGBO(41, 87, 35, 1),
                                       ),
                                     ),
-                                    Text(
-                                        'Đánh giá: 4.5 ($_totalReviews lượt đánh giá)'),
+                                    FutureBuilder<List<DanhGia>>(
+                                      future: _reviewsFuture,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return Text(
+                                            'Đang tải đánh giá...',
+                                            style: TextStyle(fontSize: 16),
+                                          );
+                                        } else if (snapshot.hasError) {
+                                          return Text(
+                                            'Lỗi: ${snapshot.error}',
+                                            style: TextStyle(fontSize: 16),
+                                          );
+                                        } else if (!snapshot.hasData ||
+                                            snapshot.data!.isEmpty) {
+                                          return Text(
+                                            'Chưa có lượt đánh giá nào',
+                                            style: TextStyle(fontSize: 16),
+                                          );
+                                        }
+
+                                        // Tính tổng số sao và trung bình sao
+                                        final reviews = snapshot.data!;
+                                        _totalReviews = reviews.length;
+                                        double totalStars = reviews.fold(
+                                            0.0,
+                                            (sum, review) =>
+                                                sum + review.xepHang);
+                                        double averageStars =
+                                            totalStars / _totalReviews;
+
+                                        return Text(
+                                          'Đánh giá: ${averageStars.toStringAsFixed(1)} ($_totalReviews lượt đánh giá)',
+                                          style: TextStyle(fontSize: 16),
+                                        );
+                                      },
+                                    ),
                                     SizedBox(height: 10),
                                   ],
                                 ),
                                 GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  OrderReviewScreen(
-                                                    title: 'sản phẩm',
-                                                    id: widget.product.id,
-                                                  ))).then((_) {
-                                        _fetchReviews();
-                                      });
-                                    },
-                                    child: Text(
-                                      'Đánh giá',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Color.fromRGBO(41, 87, 35, 1),
-                                          decoration: TextDecoration.underline),
-                                    )),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OrderReviewScreen(
+                                          title: 'sản phẩm',
+                                          id: widget.product.id,
+                                        ),
+                                      ),
+                                    ).then((_) {
+                                      _fetchReviews();
+                                    });
+                                  },
+                                  child: Text(
+                                    'Đánh giá',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color.fromRGBO(41, 87, 35, 1),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -1111,7 +1194,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                   });
                   _startHideTimer();
                 } else {
-                  _onChat();
+                  _onChat(widget.product.userId.id!);
                 }
               },
               child: Opacity(
@@ -1125,7 +1208,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                       });
                       _startHideTimer();
                     } else {
-                      _onChat();
+                      _onChat(widget.product.userId.id!);
                     }
                   },
                   child: Icon(Icons.message_outlined, color: Colors.white),
