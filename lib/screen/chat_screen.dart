@@ -47,11 +47,12 @@ class _ChatScreenState extends State<ChatScreen> {
   VideoPlayerController? _videoController;
   bool _isLoading = false; // Biến để theo dõi trạng thái tải
   double _uploadProgress = 0.0;
+  bool yeuCauHoTro = false;
   @override
   void initState() {
     super.initState();
     _loadTokenAndConnect();
-    _controller.text = widget.productModel.nameProduct;
+    // _controller.text = widget.productModel.nameProduct;
   }
 
   @override
@@ -80,57 +81,59 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _showFullImage(String imageUrl,) {
-
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return Dialog(
-        insetPadding: EdgeInsets.zero,
-        backgroundColor: Colors.black,
-        child: Stack(
-          children: [
-            PhotoViewGallery.builder(
-              itemCount: imageUrl.length,
-              builder: (context, index) {
-                return PhotoViewGalleryPageOptions.customChild(
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'lib/assets/avt2.jpg', // Hình ảnh thay thế
-                        fit: BoxFit.contain,
-                      );
-                    },
+  void _showFullImage(
+    String imageUrl,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: imageUrl.length,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions.customChild(
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                          fit: BoxFit.contain,
+                        );
+                      },
+                    ),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(color: Colors.black),
+                // pageController: PageController(initialPage: initialIndex),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 30,
                   ),
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.contained,
-                );
-              },
-              scrollPhysics: const BouncingScrollPhysics(),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
-              // pageController: PageController(initialPage: initialIndex),
-            ),
-            Positioned(
-              top: 20,
-              right: 20,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 30,
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   // Play the received video
   void _playReceivedVideo(String base64Video) {
     final videoBytes = base64Decode(base64Video);
@@ -190,9 +193,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void connect() {
-      setState(() {
-    _isLoading = true; // Bắt đầu trạng thái loading
-  });
+    setState(() {
+      _isLoading = true; // Bắt đầu trạng thái loading
+    });
     // Kiểm tra nếu socket đã tồn tại và đang kết nối thì không cần tạo kết nối mới
     if (socket != null && socket!.connected) {
       print("Socket is already connected.");
@@ -281,9 +284,9 @@ class _ChatScreenState extends State<ChatScreen> {
         'conversationId': widget.conversationId,
       });
     });
-      setState(() {
-    _isLoading = false; // Kết thúc trạng thái loading
-  });
+    setState(() {
+      _isLoading = false; // Kết thúc trạng thái loading
+    });
   }
 
   // Hàm để chuyển đổi tệp thành base64
@@ -292,11 +295,11 @@ class _ChatScreenState extends State<ChatScreen> {
     return base64Encode(bytes);
   }
 
-  void sendMessage(String text) async {
-
-      setState(() {
-    _isLoading = true; // Bắt đầu trạng thái loading
-  });
+  void sendMessage(String text,
+      {String? productName, String? productId}) async {
+    setState(() {
+      _isLoading = true; // Bắt đầu trạng thái loading
+    });
     if (!mounted || text.isEmpty && _image == null && _video == null) return;
 
     if (socket != null && socket!.connected) {
@@ -335,8 +338,7 @@ class _ChatScreenState extends State<ChatScreen> {
         'text': text,
         'imageUrl': imageUrl,
         'videoUrl': videoUrl,
-        if (text == widget.productModel.nameProduct)
-          'IDSanPham': widget.productModel.id,
+        if (productId != null) 'IDSanPham': widget.productModel.id,
         'token': token,
       });
 
@@ -353,7 +355,6 @@ class _ChatScreenState extends State<ChatScreen> {
       print("Socket is not connected.");
     }
   }
-
 
   void addMessage(Message message) {
     if (mounted) {
@@ -376,233 +377,183 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: Stack(
-      children: [
-        SafeArea(
-          child: Column(
-            children: <Widget>[
-              // Header với avatar và thông tin người nhận
-              Container(
-                height: 120,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                  color: Color.fromRGBO(41, 87, 35, 1),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          height: 35,
-                          width: 35,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(100)),
-                            color: Colors.white,
-                          ),
-                          child: const Icon(Icons.arrow_back,
-                              color: Color.fromRGBO(41, 87, 35, 1)),
-                        ),
-                      ),
-                      const SizedBox(width: 30),
-                      CircleAvatar(
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage:
-                            widget.receiverData?['anhDaiDien'] != null
-                                ? NetworkImage(widget.receiverData!['anhDaiDien'])
-                                : null,
-                        radius: 20,
-                        child: widget.receiverData?['anhDaiDien'] == null
-                            ? const Icon(Icons.person, color: Colors.grey)
-                            : null,
-                      ),
-                      const SizedBox(width: 15),
-                      if (widget.receiverData != null)
-                        Text(
-                          widget.receiverData!['tenNguoiDung'] ?? 'Unknown User',
-                          style: const TextStyle(
-                              fontSize: 20, color: Colors.white70),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Danh sách sản phẩm và tin nhắn
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messages.length + 1, // Sản phẩm + tin nhắn
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        // Hiển thị sản phẩm ở đầu danh sách
-                        return _buildProductWidget();
-                      } else {
-                        // Hiển thị tin nhắn
-                        final message = messages[index - 1];
-                        return _buildMessage(message);
-                      }
-                    },
-                  ),
-                ),
-              ),
-
-              // Vùng nhập tin nhắn
-              _buildInputArea(),
-            ],
-          ),
-        ),
-
-        // Hiển thị hiệu ứng tải khi _isLoading là true
-        if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    Color.fromRGBO(59, 99, 53, 1)),
-              ),
-            ),
-          ),
-      ],
-    ),
-  );
-}
-
-
-Widget _buildMessage(Message message) {
-  String formattedTime = DateFormat('HH:mm').format(message.createdAt);
-
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Column(
-      crossAxisAlignment: message.msgByUserId == widget.userId
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        // Displaying text message
-        if (message.text.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: message.msgByUserId == widget.userId
-                  ? Colors.green[200]
-                  : Colors.grey[300],
-              borderRadius: BorderRadius.circular(15),
-            ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          SafeArea(
             child: Column(
-              crossAxisAlignment: message.msgByUserId == widget.userId
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                Text(
-                  message.text,
-                  style: const TextStyle(fontSize: 16),
-                  overflow: TextOverflow.visible, // Add ellipsis for overflow
-                  softWrap: true, // Wrap text if needed
+              children: <Widget>[
+                // Header với avatar và thông tin người nhận
+                Container(
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            height: 30,
+                            width: 30,
+                            decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(100)),
+                              color: Colors.white,
+                            ),
+                            child: const Icon(Icons.arrow_back,
+                                color: Color.fromRGBO(41, 87, 35, 1)),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        CircleAvatar(
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: widget.receiverData?['anhDaiDien'] !=
+                                  null
+                              ? NetworkImage(widget.receiverData!['anhDaiDien'])
+                              : null,
+                          radius: 20,
+                          child: widget.receiverData?['anhDaiDien'] == null
+                              ? const Icon(Icons.person, color: Colors.grey)
+                              : null,
+                        ),
+                        const SizedBox(width: 15),
+                        if (widget.receiverData != null)
+                          Text(
+                            widget.receiverData!['tenNguoiDung'] ??
+                                'Unknown User',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.white70),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  formattedTime,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: messages.length +
+                          1, // Số lượng phần tử (tin nhắn + sản phẩm)
+                      itemBuilder: (context, index) {
+                        if (index == messages.length) {
+                          // Hiển thị sản phẩm ở cuối danh sách
+                          return _buildProductWidget();
+                        } else {
+                          // Hiển thị tin nhắn
+                          final message = messages[index];
+                          return _buildMessage(message);
+                        }
+                      },
+                    ),
+                  ),
                 ),
+
+                // Vùng nhập tin nhắn
+                _buildInputArea(),
               ],
             ),
           ),
-        // Displaying image if available
-        if (message.imageUrl != null)
-          GestureDetector(
-            onTap: () {
-              _showFullImage(message.imageUrl!);
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Image.network(
-                  message.imageUrl!,
-                  fit: BoxFit.cover,
+
+          // Hiển thị hiệu ứng tải khi _isLoading là true
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromRGBO(59, 99, 53, 1)),
                 ),
               ),
             ),
-          ),
-        // Displaying video if available
-        if (message.videoUrl != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: SizedBox(
-              height: 150,
-              width: 150,
-              child: VideoPlayerWidget(videoUrl: message.videoUrl!),
-            ),
-          ),
-        // Displaying product information if available
-        if (message.IDSanPham != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessage(Message message) {
+    String formattedTime = DateFormat('HH:mm').format(message.createdAt);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: message.msgByUserId == widget.userId
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          // Displaying text message
+          if (message.text.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(12.0),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blueAccent),
+                color: message.msgByUserId == widget.userId
+                    ? Colors.green[200]
+                    : Colors.grey[300],
+                borderRadius: BorderRadius.circular(15),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: message.msgByUserId == widget.userId
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
-                  // Display product image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      message.IDSanPham!.imageProduct,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
+                  Text(
+                    message.text,
+                    style: const TextStyle(fontSize: 16),
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
-                  const SizedBox(width: 10),
-                  // Display product name and description
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message.IDSanPham!.nameProduct,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          message.IDSanPham!.moTa,
-                          maxLines: 2, // Limit description to 2 lines
-                          overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formattedTime,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
               ),
             ),
-          ),
-      ],
-    ),
-  );
-}
-
+          // Displaying image if available
+          if (message.imageUrl != null)
+            GestureDetector(
+              onTap: () {
+                _showFullImage(message.imageUrl!);
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Image.network(
+                    message.imageUrl!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          // Displaying video if available
+          if (message.videoUrl != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                height: 150,
+                width: 150,
+                child: VideoPlayerWidget(videoUrl: message.videoUrl!),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildInputArea() {
     return Padding(
@@ -768,7 +719,11 @@ Widget _buildMessage(Message message) {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.pop(context);
+                sendMessage(
+                  'Yêu cầu hỗ trợ cho sản phẩm: ${widget.productModel.nameProduct}',
+                  productName: widget.productModel.nameProduct,
+                  productId: widget.productModel.id,
+                );
               },
               child: Container(
                 width: double.infinity,
@@ -971,7 +926,6 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                           ),
                         ),
                       ),
-                      
                     ],
                   )
                 : const Center(child: Text("Video không thể phát!")),

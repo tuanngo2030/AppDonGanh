@@ -141,7 +141,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/hoso_icon.png"),
               title: const Text('Hồ sơ'),
@@ -149,7 +149,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/ProfileScreen');
               },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/lienketthu_icon.png"),
               title: const Text('Liên kết thẻ'),
@@ -157,7 +157,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/CardLinkScreen');
               },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),
               title: const Text('Đơn hàng'),
@@ -165,7 +165,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/oder_screen');
               },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/caidat_icon.png"),
               title: const Text('Cài đặt'),
@@ -173,13 +173,15 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/setting_screen');
               },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/trungtamhotro_icon.png"),
-              title: const Text('Trung tâm hỗ trợ'),
-              onTap: () {},
+              title: const Text('Đăng ký hộ kinh doanh'),
+              onTap: () {
+                 Navigator.pushNamed(context, '/dang_ky_thu_mua_screen');
+              },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/baomat_icon.png"),
               title: const Text('Bảo mật'),
@@ -187,7 +189,7 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                 Navigator.pushNamed(context, '/SecurityScreen');
               },
             ),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/dangxuat_icon.png"),
               title: const Text('Đăng xuất'),

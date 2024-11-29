@@ -119,7 +119,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No reviews available.'));
+                  return const Center(child: Text('Chưa có đánh giá nào.'));
                 }
 
                 // Display filtered reviews list

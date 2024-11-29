@@ -1,9 +1,13 @@
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:don_ganh_app/models/order_model.dart';
+import 'package:don_ganh_app/models/paymentInfo.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:provider/provider.dart';
 
 class OrderApiService {
   Future<List<OrderModel>> fetchOrder(String userId) async {
@@ -31,15 +35,15 @@ class OrderApiService {
     }
   }
 
-  Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
+Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
+    required BuildContext context, // Add BuildContext here
     required String userId,
     required diaChiList diaChiMoi,
     required String ghiChu,
     required String khuyenmaiId,
     required double TongTien,
-    required List<CartModel> selectedItems,
-    // required String YeuCauNhanHang,
-  }) async {
+    required CartModel selectedItems,
+}) async {
     String url =
         "${dotenv.env['API_URL']}/hoadon/createUserDiaChivaThongTinGiaoHang";
 
@@ -48,8 +52,7 @@ class OrderApiService {
       'diaChiMoi': diaChiMoi.toJson(),
       'ghiChu': ghiChu,
       'khuyenmaiId': khuyenmaiId,
-      'mergedCart': selectedItems.map((item) => item.toJson()).toList(),
-      // 'YeuCauNhanHang': YeuCauNhanHang,
+      'mergedCart': selectedItems.toJson(),
       'TongTien': TongTien,
     };
 
@@ -64,9 +67,13 @@ class OrderApiService {
     print('Response Status: ${response.statusCode}');
     print('Response Body: ${response.body}');
 
-    if (response.statusCode != 200) {
-      print('Failed to create HoaDon: ${response.statusCode} ${response.body}');
-      throw Exception('Failed to create HoaDon');
+    if (response.statusCode == 200) {
+      final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+      final responseData = json.decode(response.body);
+      final List<OrderModel> orders = (responseData['hoadon'] as List)
+          .map((data) => OrderModel.fromJson(data))
+          .toList();
+      paymentInfo.setOrders(orders);
     }
 
     if (response.body.isEmpty) {
@@ -80,7 +87,8 @@ class OrderApiService {
       print('Error decoding JSON: $e');
       throw Exception('Failed to decode JSON');
     }
-  }
+}
+
 
   Future<OrderModel> updateTransactionHoaDon({
     required String hoadonId,
@@ -89,9 +97,56 @@ class OrderApiService {
     required int giaTriGiam,
   }) async {
     final String url =
-        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon/$hoadonId";
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon";
 
     final Map<String, dynamic> body = {
+      'transactionId': transactionId,
+      'khuyenmaiId': khuyeimaiId,
+      'giaTriGiam': giaTriGiam,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(body),
+    );
+
+    print('Response Status: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      try {
+        final decodedResponse = json.decode(response.body);
+        if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
+          return OrderModel.fromJson(decodedResponse['data']);
+        } else {
+          throw Exception('API returned error: ${decodedResponse['message']}');
+        }
+      } catch (e) {
+        print('Error decoding JSON: $e');
+        throw Exception('Failed to decode JSON');
+      }
+    } else {
+      print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to update HoaDon');
+    }
+  }
+
+   Future<OrderModel> updateTransactionHoaDonList({
+    required List<OrderModel> list,
+    required String hoadonId,
+    required String transactionId,
+    required String khuyeimaiId,
+    required int giaTriGiam,
+  }) async {
+    final String url =
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionlistHoaDon";
+          final List<Map<String, dynamic>> orderListJson = list.map((order) => order.toJson()).toList();
+
+    final Map<String, dynamic> body = {
+      'hoadon': orderListJson,
       'transactionId': transactionId,
       'khuyenmaiId': khuyeimaiId,
       'giaTriGiam': giaTriGiam,

@@ -41,9 +41,15 @@ class _PayScreen2State extends State<PayScreen2> {
     setState(() {
       _isProcessing = true;
     });
+    // Assuming you have the PaymentInfo instance as paymentInfo
+
+// Access the _orders list using the getter
+List<OrderModel> orders = paymentInfo.orders;
+
 
     try {
-      OrderModel? updatedOrder = await _orderApiService.updateTransactionHoaDon(
+      OrderModel? updatedOrder = await _orderApiService.updateTransactionHoaDonList(
+        list: orders,
         hoadonId: hoadonId,
         transactionId: transactionId,
         khuyeimaiId: selectedPromoId,

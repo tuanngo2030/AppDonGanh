@@ -60,7 +60,7 @@ class UserApiService {
               await prefs.setInt('tinhTrang', user.tinhTrang ?? 0);
               await prefs.setStringList(
                   'phuongThucThanhToan', user.phuongThucThanhToan ?? []);
-              await prefs.setString('role', user.role ?? 'user');
+              await prefs.setString('role', user.role ?? 'khachhang');
               await prefs.setBool('isVerified', user.isVerified ?? false);
               await prefs.setString('googleId', user.googleId ?? '');
               await prefs.setString('facebookId', user.facebookId ?? '');

@@ -164,7 +164,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Đăng ký hộ thu mua'),
+        title: const Text('Đăng ký hộ kinh doanh'),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -438,70 +438,70 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
         ),
 
         const SizedBox(height: 20),
-        const Text(
-          "Hình thức giao hàng",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
+        // const Text(
+        //   "Hình thức giao hàng",
+        //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        // ),
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 1,
-              child: Container(
-                child: Row(
-                  children: [
-                    Radio<String>(
-                      activeColor: const Color.fromRGBO(59, 99, 53, 1),
-                      value: "tugiao",
-                      groupValue: groupValueRequest,
-                      onChanged: (value) {
-                        setState(() {
-                          groupValueRequest = value!;
-                        });
-                      },
-                    ),
-                    const Expanded(
-                      child: Text(
-                        "Đòn gánh tới lấy",
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              flex: 1,
-              child: Container(
-                child: Row(
-                  children: [
-                    Radio<String>(
-                      activeColor: const Color.fromRGBO(59, 99, 53, 1),
-                      value: "denlay",
-                      groupValue: groupValueRequest,
-                      onChanged: (value) {
-                        setState(() {
-                          groupValueRequest = value!;
-                        });
-                      },
-                    ),
-                    const Expanded(
-                      child: Text(
-                        "Tự tới lấy",
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.start,
+        //   crossAxisAlignment: CrossAxisAlignment.start,
+        //   children: [
+        //     Expanded(
+        //       flex: 1,
+        //       child: Container(
+        //         child: Row(
+        //           children: [
+        //             Radio<String>(
+        //               activeColor: const Color.fromRGBO(59, 99, 53, 1),
+        //               value: "tugiao",
+        //               groupValue: groupValueRequest,
+        //               onChanged: (value) {
+        //                 setState(() {
+        //                   groupValueRequest = value!;
+        //                 });
+        //               },
+        //             ),
+        //             const Expanded(
+        //               child: Text(
+        //                 "Đòn gánh tới lấy",
+        //                 overflow: TextOverflow.ellipsis,
+        //                 style: TextStyle(fontSize: 15),
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //     const SizedBox(width: 20),
+        //     Expanded(
+        //       flex: 1,
+        //       child: Container(
+        //         child: Row(
+        //           children: [
+        //             Radio<String>(
+        //               activeColor: const Color.fromRGBO(59, 99, 53, 1),
+        //               value: "denlay",
+        //               groupValue: groupValueRequest,
+        //               onChanged: (value) {
+        //                 setState(() {
+        //                   groupValueRequest = value!;
+        //                 });
+        //               },
+        //             ),
+        //             const Expanded(
+        //               child: Text(
+        //                 "Tự tới lấy",
+        //                 overflow: TextOverflow.ellipsis,
+        //                 style: TextStyle(fontSize: 15),
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
 
         const SizedBox(height: 30),
 

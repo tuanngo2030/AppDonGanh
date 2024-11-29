@@ -262,12 +262,13 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         print('User ID: $userId');
         print('Token: $token');
 
-        // String receiverId = '671fa0042871b08206a87749';
         final response =
             await apiService.createConversation(userId!, receiverId);
 
         if (response != null && response['_id'] != null) {
           String conversationId = response['_id'];
+          bool isCurrentUserSender =
+              (receiverId == response['sender_id']['_id']);
 
           print('conversationId: $conversationId');
 
@@ -279,8 +280,9 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                 title: conversationId,
                 userId: userId!,
                 conversationId: conversationId,
-                receiverData:
-                    response['receiver_id'] ?? {}, // Use empty map as fallback
+               receiverData: isCurrentUserSender
+                  ? response['sender_id'] ?? {} // Nếu là sender, hiển thị receiver
+                  : response['receiver_id'] ?? {}, // Nếu không, hiển thị sender
                 productModel: widget.product,
               ),
             ),
@@ -824,7 +826,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                               onPressed:
                                                   selectedVariantId.isEmpty ||
                                                           _isLoading
-                                                      ? null 
+                                                      ? null
                                                       : () async {
                                                           setState(() {
                                                             quantity = int.tryParse(
@@ -849,7 +851,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                     const Size.fromHeight(60),
                                                 backgroundColor:
                                                     selectedVariantId.isEmpty ||
-                                                            _isLoading 
+                                                            _isLoading
                                                         ? Colors.grey
                                                         : const Color.fromRGBO(
                                                             41, 87, 35, 1),
@@ -1227,17 +1229,6 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                 ),
               ),
             ),
-          // if (_isLoading)
-          //   Positioned.fill(
-          //     child: Container(
-          //       color: Colors.black.withOpacity(0.5), // Tạo màu mờ cho toàn bộ màn hình
-          //       child: const Center(
-          //         child: CircularProgressIndicator(
-          //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
         ],
       ),
     );

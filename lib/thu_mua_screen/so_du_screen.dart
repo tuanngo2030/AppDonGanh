@@ -186,13 +186,13 @@ class _SoDuScreenState extends State<SoDuScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                                  'Yêu cầu rút tiền thành công: ${response['message']}')),
+                                  '${response['message']}')),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                                  'Lỗi khi rút tiền: ${response['message']}')),
+                                  '${response['message']}')),
                         );
                       }
 
@@ -381,42 +381,42 @@ class _SoDuScreenState extends State<SoDuScreen> {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/doanh_thu_screen');
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    height: 80,
-                    width: 160,
-                    alignment: Alignment.centerLeft,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: const Color.fromRGBO(217, 217, 217, 1)),
-                    child: const Padding(
-                      padding: EdgeInsets.only(left: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.bar_chart_outlined),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 10,
-                            ),
-                            child: Text(
-                              'Doanh thu',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w900),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )
+              // GestureDetector(
+              //   onTap: () {
+              //     Navigator.pushNamed(context, '/doanh_thu_screen');
+              //   },
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(8),
+              //     child: Container(
+              //       height: 80,
+              //       width: 160,
+              //       alignment: Alignment.centerLeft,
+              //       decoration: BoxDecoration(
+              //           borderRadius: BorderRadius.circular(10),
+              //           color: const Color.fromRGBO(217, 217, 217, 1)),
+              //       child: const Padding(
+              //         padding: EdgeInsets.only(left: 20),
+              //         child: Column(
+              //           mainAxisAlignment: MainAxisAlignment.center,
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //             Icon(Icons.bar_chart_outlined),
+              //             Padding(
+              //               padding: EdgeInsets.only(
+              //                 top: 10,
+              //               ),
+              //               child: Text(
+              //                 'Doanh thu',
+              //                 style: TextStyle(
+              //                     fontSize: 13, fontWeight: FontWeight.w900),
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // )
             ],
           ),
         ],

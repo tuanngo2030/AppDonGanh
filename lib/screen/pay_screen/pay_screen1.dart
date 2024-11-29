@@ -278,12 +278,11 @@ class _PayScreen1State extends State<PayScreen1> {
   }
 
   Future<void> _createOrUpdateOrder() async {
-    print(' hihi: $selectedItems');
     setState(() {
       _isOrderProcessing = true;
     });
 
-    // Thu thập thông tin từ form
+    // Collect form information
     String hoTen = hoTenController;
     String soDienThoai = soDienThoaiController;
     String yeuCauNhanHang = groupValueRequest;
@@ -293,10 +292,8 @@ class _PayScreen1State extends State<PayScreen1> {
     String duongThonXom = duongThonController;
     String ghiChu = ghiChuController.text.trim().isEmpty
         ? 'Không có ghi chú'
-        : ghiChuController.text
-            .trim(); // Kiểm tra và gán giá trị chuỗi rỗng nếu trống
+        : ghiChuController.text.trim();
 
-    // Kiểm tra dữ liệu nhập vào
     if (_validateInput(
         hoTen, soDienThoai, tinhThanhPho, quanHuyen, phuongXa, duongThonXom)) {
       setState(() {
@@ -324,9 +321,24 @@ class _PayScreen1State extends State<PayScreen1> {
         return;
       }
 
-      // Calculate total price
       double totalPrice = calculateTotal(selectedItems);
-      print('Total Price: $totalPrice');
+      CartModel selectedItem = selectedItems[0];
+      CartModel chiTietGioHang = CartModel(
+        id: selectedItem.id,
+        user: selectedItem.user,
+        mergedCart: selectedItem.mergedCart.map((mergedCartItem) {
+          return SanPhamCart(
+            user: mergedCartItem.user,
+            sanPhamList: mergedCartItem.sanPhamList.map((sanPhamItem) {
+              return SanPhamList(
+                user: sanPhamItem.user,
+                sanPham: sanPhamItem.sanPham,
+                chiTietGioHangs: sanPhamItem.chiTietGioHangs,
+              );
+            }).toList(),
+          );
+        }).toList(),
+      );
 
       diaChiList newAddress = diaChiList(
         tinhThanhPho: tinhThanhPho!,
@@ -337,24 +349,17 @@ class _PayScreen1State extends State<PayScreen1> {
         soDienThoai: soDienThoai,
       );
 
-      // Lấy thông tin `order_id` từ Provider
       PaymentInfo paymentInfo =
           Provider.of<PaymentInfo>(context, listen: false);
       String? orderId = paymentInfo.order_id;
 
       if (orderId.isNotEmpty) {
-        // Nếu đã có `order_id`, cập nhật địa chỉ và ghi chú cho hóa đơn
         await _orderApiService.updateDiaChiGhiChuHoaDon(
           hoadonId: orderId,
           diaChiMoi: newAddress,
           ghiChu: ghiChu,
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Cập nhật địa chỉ và ghi chú thành công!')),
-        );
 
-        // Cập nhật thông tin `order_id` trong Provider
         paymentInfo.updateInfo(
           order_id: orderId,
           hoTen: hoTen,
@@ -366,25 +371,23 @@ class _PayScreen1State extends State<PayScreen1> {
           phuongXa: phuongXa,
           duongThonXom: duongThonXom,
           ghiChu: ghiChu,
-          selectedItems: selectedItems,
+          selectedItems: chiTietGioHang,
           totalPrice: totalPrice,
         );
         widget.nextStep();
       } else {
-        // Nếu chưa có `order_id`, tạo đơn hàng mới
+        // Create new order
         OrderModel? response =
             await _orderApiService.createUserDiaChivaThongTinGiaoHang(
+          context: context,
           userId: userId,
           diaChiMoi: newAddress,
           ghiChu: ghiChu,
-          khuyenmaiId: "", // ID khuyến mãi nếu có
+          khuyenmaiId: "",
           TongTien: totalPrice,
-          selectedItems: selectedItems,
+          selectedItems: chiTietGioHang, // Use List<CartModel>
         );
 
-        print('Order Response: $response');
-
-        // Cập nhật thông tin `order_id` trong Provider
         paymentInfo.updateInfo(
           order_id: response.id,
           hoTen: hoTen,
@@ -396,9 +399,11 @@ class _PayScreen1State extends State<PayScreen1> {
           phuongXa: phuongXa,
           duongThonXom: duongThonXom,
           ghiChu: ghiChu,
-          selectedItems: selectedItems,
-          totalPrice: 10,
+          selectedItems: chiTietGioHang,
+          totalPrice: totalPrice,
         );
+
+        // print('hoadonList ${hoadonList.toString()}');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đặt hàng thành công!')),
@@ -406,7 +411,6 @@ class _PayScreen1State extends State<PayScreen1> {
         widget.nextStep();
       }
     } catch (e) {
-      print(selectedItems);
       print('Lỗi khi tạo/cập nhật hóa đơn: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đã xảy ra lỗi khi xử lý đơn hàng.')),
@@ -477,8 +481,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                           .map((chiTiet) {
                                         userTotal +=
                                             chiTiet.donGia * chiTiet.soLuong;
-                                                 totalProducts += chiTiet.soLuong; // Count the total number of products
-
+                                        totalProducts += chiTiet
+                                            .soLuong; // Count the total number of products
 
                                         return Padding(
                                           padding: const EdgeInsets.all(10),
@@ -509,6 +513,15 @@ class _PayScreen1State extends State<PayScreen1> {
                                                             .start,
                                                     children: [
                                                       Text(
+                                                        sanPhamItem.sanPham
+                                                            .nameProduct,
+                                                        style: const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                      ),
+                                                      Text(
                                                         'Loại sản phẩm: ${chiTiet.variantModel.ketHopThuocTinh.map((thuocTinh) => thuocTinh.giaTriThuocTinh.GiaTri).join(', ')}',
                                                         style: const TextStyle(
                                                             fontSize: 14),
@@ -519,7 +532,7 @@ class _PayScreen1State extends State<PayScreen1> {
                                                             fontSize: 14),
                                                       ),
                                                       Text(
-                                                        'Đơn giá:${NumberFormat("#,##0").format(chiTiet.donGia)} VND',
+                                                        'Đơn giá: ${NumberFormat("#,##0").format(chiTiet.donGia)} VND',
                                                         style: const TextStyle(
                                                             fontSize: 14),
                                                       ),
@@ -534,11 +547,22 @@ class _PayScreen1State extends State<PayScreen1> {
                                     ),
                                   );
                                 }),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  child: Text(
+                                    'Khuyến mãi của shop',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 16),
                                   child: Text(
-                                       'Tổng số tiền ($totalProducts sản phẩm): ${NumberFormat("#,###").format(userTotal)} VND',
+                                    'Tổng số tiền ($totalProducts sản phẩm): ${NumberFormat("#,###").format(userTotal)} VND',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,

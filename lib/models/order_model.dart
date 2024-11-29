@@ -5,6 +5,7 @@ import 'package:don_ganh_app/models/variant_model.dart';
 
 class OrderModel {
   final String id;
+  final String hoKinhDoanhId; 
   final String userId;
   final diaChiList diaChi;
   final int TrangThai;
@@ -26,7 +27,7 @@ class OrderModel {
   OrderModel({
     required this.id,
     required this.userId,
-    // required this.orderId,
+    required this.hoKinhDoanhId,
     required this.diaChi,
     required this.TrangThai,
     required this.thanhToan,
@@ -67,6 +68,7 @@ class OrderModel {
     // Ensure proper parsing of nested structures
     return OrderModel(
       id: json['_id'] ?? '',
+      hoKinhDoanhId: json['hoKinhDoanhId'] ?? '',
       userId: json['userId'] is String
           ? json['userId']
           : (json['userId'] != null
@@ -94,6 +96,7 @@ class OrderModel {
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
+      'hoKinhDoanhId' : hoKinhDoanhId,
       'userId': userId,
       'diaChi': diaChi.toJson(),
       'TrangThai': TrangThai,
@@ -111,6 +114,11 @@ class OrderModel {
       'expiresAt': expiresAt.toIso8601String(),
       'SoTienKhuyenMai': SoTienKhuyenMai,
     };
+  }
+
+    @override
+  String toString() {
+    return 'OrderModel(id: $id, userId: $userId, TongTien: $TongTien, TrangThai: $TrangThai, NgayTao: $NgayTao, mrc_order_id: $mrc_order_id)';
   }
 }
 

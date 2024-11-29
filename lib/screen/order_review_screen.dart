@@ -21,6 +21,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
   final List<File> _imageFiles = []; // Changed to a list for multiple images
   String? userId;
   bool _isLoading = false; // Add loading state
+  final bool _isSendReview = false;
 
   Future<void> _pickImage() async {
     final pickedFiles =
@@ -39,6 +40,14 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
     setState(() {
       _isLoading = true; // Start loading
     });
+
+    // if(_selectedStars < 1){
+    //   setState(() {
+    //     _isSendReview == false;
+    //   });
+    // }else{
+    //    _isSendReview == true;
+    // }
 
     try {
       // Call API to create review
@@ -220,7 +229,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed: _isLoading
+                                onPressed:(_isLoading || _selectedStars == 0)
                                     ? null // Disable button if loading
                                     : () async {
                                         setState(() {
