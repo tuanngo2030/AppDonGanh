@@ -36,7 +36,8 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
-  pod 'GoogleSignIn'
+  pod 'GoogleSignIn' 
+  pod 'FirebaseCore'
 end
 
 post_install do |installer|

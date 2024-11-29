@@ -53,16 +53,25 @@ import 'package:don_ganh_app/forgotpassword_screen/otp_screen.dart';
 import 'package:don_ganh_app/screen/register_screen.dart';
 import 'package:don_ganh_app/screen/trang_xin_chao.dart';
 
+// void main() async {
+//   await dotenv.load(fileName: "lib/.env");
+//   runApp(
+//     // const MyApp(),
+//     DevicePreview(
+//       enabled: !kReleaseMode,
+//       builder: (context) => ChangeNotifierProvider(
+//         create: (context) => PaymentInfo(),
+//         child: const MyApp(),
+//       ),
+//     ),
+//   );
+// }
 void main() async {
   await dotenv.load(fileName: "lib/.env");
   runApp(
-    // const MyApp(),
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => ChangeNotifierProvider(
-        create: (context) => PaymentInfo(),
-        child: const MyApp(),
-      ),
+    ChangeNotifierProvider(
+      create: (context) => PaymentInfo(),
+      child: const MyApp(),
     ),
   );
 }

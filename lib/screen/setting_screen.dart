@@ -177,12 +177,17 @@ class _SettingScreenState extends State<SettingScreen> {
                 title: Text('Cho phép Đòn Gánh truy cập máy ảnh'),
                 value: quyenCam,
                 onChanged: (bool value) async {
-                  PermissionStatus status = await Permission.camera.request();
-                  if (status == PermissionStatus.granted) {
-                    setState(() {
-                      quyenCam = value;
-                    });
-                    _savePermissionState('quyenCam', value);
+                  // PermissionStatus status = await Permission.camera.request();
+                  // if (status == PermissionStatus.granted) {
+                  //   setState(() {
+                  //     quyenCam = value;
+                  //   });
+                  //   _savePermissionState('quyenCam', value);
+                  // }
+                  PermissionStatus statusCam = await Permission.camera.status;
+                  if (statusCam.isDenied) {
+                    // Nếu quyền bị từ chối, yêu cầu lại quyền
+                    await Permission.camera.request();
                   }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),

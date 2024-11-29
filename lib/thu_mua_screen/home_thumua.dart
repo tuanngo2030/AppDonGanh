@@ -590,38 +590,44 @@ Widget build(BuildContext context) {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Container(
-                        height: 35,
-                        width: 35,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50)),
-                        child: Image.asset('lib/assets/fb_icon.png',
-                            fit: BoxFit.cover),
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          height: 35,
+                          width: 35,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50)),
+                          child: Image.asset('lib/assets/logo_app.png',
+                              fit: BoxFit.cover),
+                        ),
                       ),
                       const SizedBox(
                         width: 10,
                       ),
-                      Container(
-                        height: 40,
-                        width: 300,
-                        decoration: BoxDecoration(
-                            border: const Border.fromBorderSide(BorderSide(
-                                color: Color.fromARGB(255, 184, 182, 182))),
-                            borderRadius: BorderRadius.circular(50)),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Đăng bài viết của bạn.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color.fromARGB(255, 158, 156, 156),
+                      Expanded(
+                        flex: 9,
+                        child: Container(
+                          height: 40,
+                          
+                          decoration: BoxDecoration(
+                              border: const Border.fromBorderSide(BorderSide(
+                                  color: Color.fromARGB(255, 184, 182, 182))),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Đăng bài viết của bạn.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color.fromARGB(255, 158, 156, 156),
+                                  ),
                                 ),
-                              ),
-                              Icon(Icons.camera_alt_outlined),
-                            ],
+                                Icon(Icons.camera_alt_outlined),
+                              ],
+                            ),
                           ),
                         ),
                       ),

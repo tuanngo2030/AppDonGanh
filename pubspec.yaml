@@ -37,7 +37,8 @@ dependencies:
   google_fonts: ^6.2.1
   dropdown_search: ^5.0.2
   url_launcher: ^6.0.20 
-  image_picker: ^0.8.7+3
+  # image_picker: ^0.8.7+3
+  image_picker: ^1.1.2
   json_annotation: ^4.5.0
   jwt_decode: ^0.3.1
   get: ^4.6.5
@@ -74,6 +75,7 @@ dependencies:
   flutter_map_directions: ^0.0.8
   timeago: ^3.7.0
   fl_chart: ^0.69.2
+  google_places_flutter: ^2.0.9
 
 
 flutter_launcher_icons:
