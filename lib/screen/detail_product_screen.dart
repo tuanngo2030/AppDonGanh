@@ -280,9 +280,11 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                 title: conversationId,
                 userId: userId!,
                 conversationId: conversationId,
-               receiverData: isCurrentUserSender
-                  ? response['sender_id'] ?? {} // Nếu là sender, hiển thị receiver
-                  : response['receiver_id'] ?? {}, // Nếu không, hiển thị sender
+                receiverData: isCurrentUserSender
+                    ? response['sender_id'] ??
+                        {} // Nếu là sender, hiển thị receiver
+                    : response['receiver_id'] ??
+                        {}, // Nếu không, hiển thị sender
                 productModel: widget.product,
               ),
             ),
@@ -342,7 +344,12 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
             ),
           ),
         ),
-        title: Text('Chi tiết sản phẩm'),
+        title: const Text(
+          'Chi tiết sản phẩm',
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 15),
@@ -537,343 +544,368 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                 return StatefulBuilder(builder:
                                     (BuildContext context,
                                         StateSetter setModalState) {
-                                  return SizedBox(
-                                    height: 500,
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.5),
-                                                  width: 1),
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 16.0,
+                                      right: 16.0,
+                                      top: 16.0,
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom, // Đẩy theo bàn phím
+                                    ),
+                                    child: SizedBox(
+                                      height: 500,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.5),
+                                                    width: 1),
+                                              ),
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(20.0),
-                                                child: Container(
-                                                  height: 100,
-                                                  width: 100,
-                                                  margin: EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(widget
-                                                          .product
-                                                          .imageProduct),
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    '$donGia đ/kg',
-                                                    style:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
-                                                  Text(
-                                                    'Kho: $soluong sản phẩm',
-                                                    style:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        FutureBuilder(
-                                          future: variantModel,
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return Center(
-                                                  child:
-                                                      CircularProgressIndicator());
-                                            } else if (snapshot.hasError) {
-                                              return Center(
-                                                  child: Text(
-                                                      'Lỗi: ${snapshot.error}'));
-                                            } else if (!snapshot.hasData ||
-                                                snapshot.data == null ||
-                                                snapshot.data!.isEmpty) {
-                                              return Center(
-                                                  child: Text(
-                                                      'Không tìm thấy dữ liệu'));
-                                            }
-
-                                            List<VariantModel> variant =
-                                                snapshot.data!;
-                                            return Expanded(
-                                              child: GridView.builder(
-                                                padding: EdgeInsets.all(20),
-                                                gridDelegate:
-                                                    SliverGridDelegateWithMaxCrossAxisExtent(
-                                                  maxCrossAxisExtent: 100,
-                                                  mainAxisSpacing: 10,
-                                                  crossAxisSpacing: 30,
-                                                ),
-                                                itemCount: variant.length,
-                                                itemBuilder: (context, index) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      setModalState(() {
-                                                        selectedVariantId =
-                                                            variant[index].id;
-                                                        donGia =
-                                                            variant[index].gia;
-                                                        soluong = variant[index]
-                                                            .soLuong;
-                                                        print(
-                                                            '$selectedVariantId $donGia');
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            color: Colors.black,
-                                                            width: 1),
-                                                        color:
-                                                            selectedVariantId ==
-                                                                    variant[index]
-                                                                        .id
-                                                                ? Colors.green
-                                                                : Colors.white,
-                                                      ),
-                                                      child: Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: variant[index]
-                                                            .ketHopThuocTinh
-                                                            .map((item) {
-                                                          return Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(4.0),
-                                                            child: Text(item
-                                                                .giaTriThuocTinh
-                                                                .GiaTri),
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 20, right: 20),
-                                          child: SizedBox(
-                                            height: 50,
-                                            width: double.infinity,
                                             child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
                                               children: [
-                                                Expanded(
-                                                    child: Text("Số lượng")),
-                                                SizedBox(width: 8),
-                                                SizedBox(
-                                                  width: 150,
-                                                  height: 30,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                        child: Align(
-                                                          alignment:
-                                                              Alignment.center,
-                                                          child: IconButton(
-                                                            onPressed: () {
-                                                              setModalState(() {
-                                                                if (int.parse(
-                                                                        _quantityController
-                                                                            .text) >
-                                                                    1) {
-                                                                  minusQuantity();
-                                                                }
-                                                              });
-                                                            },
-                                                            icon: Icon(
-                                                                Icons.remove),
-                                                            padding:
-                                                                EdgeInsets.zero,
-                                                          ),
-                                                        ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      20.0),
+                                                  child: Container(
+                                                    height: 100,
+                                                    width: 100,
+                                                    margin: EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            widget.product
+                                                                .imageProduct),
+                                                        fit: BoxFit.cover,
                                                       ),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .requestFocus(
-                                                                  _quantityFocusNode);
-                                                        },
-                                                        child: SizedBox(
-                                                          width: 50,
-                                                          child: TextField(
-                                                            controller:
-                                                                _quantityController,
-                                                            focusNode:
-                                                                _quantityFocusNode,
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                                fontSize: 16),
-                                                            decoration:
-                                                                InputDecoration(
-                                                              border:
-                                                                  InputBorder
-                                                                      .none,
-                                                              contentPadding:
-                                                                  EdgeInsets.only(
-                                                                      bottom:
-                                                                          17.0),
-                                                            ),
-                                                            onChanged: (value) {
-                                                              if (value
-                                                                  .isNotEmpty) {
-                                                                int? quantity =
-                                                                    int.tryParse(
-                                                                        value);
-                                                                if (quantity ==
-                                                                        null ||
-                                                                    quantity <
-                                                                        1 ||
-                                                                    quantity >
-                                                                        10) {
-                                                                  _quantityController
-                                                                      .text = (quantity !=
-                                                                              null &&
-                                                                          quantity >
-                                                                              10)
-                                                                      ? '10'
-                                                                      : '1';
-                                                                  _quantityController
-                                                                          .selection =
-                                                                      TextSelection.fromPosition(TextPosition(
-                                                                          offset: _quantityController
-                                                                              .text
-                                                                              .length));
-                                                                }
-                                                              }
-                                                            },
-                                                            onSubmitted:
-                                                                (value) {
-                                                              updateQuantity();
-                                                              FocusScope.of(
-                                                                      context)
-                                                                  .unfocus();
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Align(
-                                                          alignment:
-                                                              Alignment.center,
-                                                          child: IconButton(
-                                                            onPressed: () {
-                                                              setModalState(() {
-                                                                if (int.parse(
-                                                                        _quantityController
-                                                                            .text) <
-                                                                    10) {
-                                                                  plusQuantity();
-                                                                }
-                                                              });
-                                                            },
-                                                            icon:
-                                                                Icon(Icons.add),
-                                                            padding:
-                                                                EdgeInsets.zero,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                    ),
                                                   ),
+                                                ),
+                                                Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(donGia)} đ/kg',
+                                                      style: TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+                                                    Text(
+                                                      'Kho: $soluong sản phẩm',
+                                                      style: TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+                                                  ],
                                                 ),
                                               ],
                                             ),
                                           ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Center(
-                                            child: ElevatedButton(
-                                              onPressed:
-                                                  selectedVariantId.isEmpty ||
-                                                          _isLoading
-                                                      ? null
-                                                      : () async {
-                                                          setState(() {
-                                                            quantity = int.tryParse(
-                                                                    _quantityController
-                                                                        .text) ??
-                                                                1; // Chuyển đổi giá trị từ TextEditingController
-                                                            _isLoading =
-                                                                true; // Bắt đầu trạng thái loading khi bấm nút
-                                                          });
+                                          FutureBuilder(
+                                            future: variantModel,
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return Center(
+                                                    child:
+                                                        CircularProgressIndicator());
+                                              } else if (snapshot.hasError) {
+                                                return Center(
+                                                    child: Text(
+                                                        'Lỗi: ${snapshot.error}'));
+                                              } else if (!snapshot.hasData ||
+                                                  snapshot.data == null ||
+                                                  snapshot.data!.isEmpty) {
+                                                return Center(
+                                                    child: Text(
+                                                        'Không tìm thấy dữ liệu'));
+                                              }
 
-                                                          await addToCart(
-                                                              selectedVariantId,
-                                                              donGia);
-
-                                                          setState(() {
-                                                            _isLoading =
-                                                                false; // Kết thúc trạng thái loading sau khi thêm vào giỏ hàng
-                                                          });
-                                                        },
-                                              style: ElevatedButton.styleFrom(
-                                                minimumSize:
-                                                    const Size.fromHeight(60),
-                                                backgroundColor:
-                                                    selectedVariantId.isEmpty ||
-                                                            _isLoading
-                                                        ? Colors.grey
-                                                        : const Color.fromRGBO(
-                                                            41, 87, 35, 1),
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(0),
+                                              List<VariantModel> variant =
+                                                  snapshot.data!;
+                                              return Expanded(
+                                                child: GridView.builder(
+                                                  padding: EdgeInsets.all(20),
+                                                  gridDelegate:
+                                                      SliverGridDelegateWithMaxCrossAxisExtent(
+                                                    maxCrossAxisExtent: 100,
+                                                    mainAxisSpacing: 10,
+                                                    crossAxisSpacing: 30,
+                                                  ),
+                                                  itemCount: variant.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        setModalState(() {
+                                                          selectedVariantId =
+                                                              variant[index].id;
+                                                          donGia =
+                                                              variant[index]
+                                                                  .gia;
+                                                          soluong =
+                                                              variant[index]
+                                                                  .soLuong;
+                                                          print(
+                                                              '$selectedVariantId $donGia');
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(
+                                                              color:
+                                                                  Colors.black,
+                                                              width: 1),
+                                                          color: selectedVariantId ==
+                                                                  variant[index]
+                                                                      .id
+                                                              ? Colors.green
+                                                              : Colors.white,
+                                                        ),
+                                                        child: Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: variant[
+                                                                  index]
+                                                              .ketHopThuocTinh
+                                                              .map((item) {
+                                                            return Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(4.0),
+                                                              child: Text(item
+                                                                  .giaTriThuocTinh
+                                                                  .GiaTri),
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
                                                 ),
+                                              );
+                                            },
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 20, right: 20),
+                                            child: SizedBox(
+                                              height: 50,
+                                              width: double.infinity,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                      child: Text("Số lượng")),
+                                                  SizedBox(width: 8),
+                                                  SizedBox(
+                                                    width: 150,
+                                                    height: 30,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Align(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            child: IconButton(
+                                                              onPressed: () {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (int.parse(
+                                                                          _quantityController
+                                                                              .text) >
+                                                                      1) {
+                                                                    minusQuantity();
+                                                                  }
+                                                                });
+                                                              },
+                                                              icon: Icon(
+                                                                  Icons.remove),
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    context)
+                                                                .requestFocus(
+                                                                    _quantityFocusNode);
+                                                          },
+                                                          child: SizedBox(
+                                                            width: 50,
+                                                            child: TextField(
+                                                              controller:
+                                                                  _quantityController,
+                                                              focusNode:
+                                                                  _quantityFocusNode,
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .number,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                  fontSize: 16),
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    InputBorder
+                                                                        .none,
+                                                                contentPadding:
+                                                                    EdgeInsets.only(
+                                                                        bottom:
+                                                                            17.0),
+                                                              ),
+                                                              onChanged:
+                                                                  (value) {
+                                                                if (value
+                                                                    .isNotEmpty) {
+                                                                  int?
+                                                                      quantity =
+                                                                      int.tryParse(
+                                                                          value);
+                                                                  if (quantity ==
+                                                                          null ||
+                                                                      quantity <
+                                                                          1 ||
+                                                                      quantity >
+                                                                          10) {
+                                                                    _quantityController
+                                                                        .text = (quantity !=
+                                                                                null &&
+                                                                            quantity >
+                                                                                10)
+                                                                        ? '10'
+                                                                        : '1';
+                                                                    _quantityController
+                                                                            .selection =
+                                                                        TextSelection.fromPosition(TextPosition(
+                                                                            offset:
+                                                                                _quantityController.text.length));
+                                                                  }
+                                                                }
+                                                              },
+                                                              onSubmitted:
+                                                                  (value) {
+                                                                updateQuantity();
+                                                                FocusScope.of(
+                                                                        context)
+                                                                    .unfocus();
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Expanded(
+                                                          child: Align(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            child: IconButton(
+                                                              onPressed: () {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (int.parse(
+                                                                          _quantityController
+                                                                              .text) <
+                                                                      10) {
+                                                                    plusQuantity();
+                                                                  }
+                                                                });
+                                                              },
+                                                              icon: Icon(
+                                                                  Icons.add),
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              child: _isLoading
-                                                  ? const CircularProgressIndicator(
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation<
-                                                                  Color>(
-                                                              Colors.white),
-                                                    )
-                                                  : const Text(
-                                                      'Thêm Vào Giỏ Hàng'),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                          Padding(
+                                            padding: const EdgeInsets.all(10),
+                                            child: Center(
+                                              child: ElevatedButton(
+                                                onPressed:
+                                                    selectedVariantId.isEmpty ||
+                                                            _isLoading
+                                                        ? null
+                                                        : () async {
+                                                            setState(() {
+                                                              quantity = int.tryParse(
+                                                                      _quantityController
+                                                                          .text) ??
+                                                                  1; // Chuyển đổi giá trị từ TextEditingController
+                                                              _isLoading =
+                                                                  true; // Bắt đầu trạng thái loading khi bấm nút
+                                                            });
+
+                                                            await addToCart(
+                                                                selectedVariantId,
+                                                                donGia);
+
+                                                            setState(() {
+                                                              _isLoading =
+                                                                  false; // Kết thúc trạng thái loading sau khi thêm vào giỏ hàng
+                                                            });
+                                                          },
+                                                style: ElevatedButton.styleFrom(
+                                                  minimumSize:
+                                                      const Size.fromHeight(60),
+                                                  backgroundColor:
+                                                      selectedVariantId
+                                                                  .isEmpty ||
+                                                              _isLoading
+                                                          ? Colors.grey
+                                                          : const Color
+                                                              .fromRGBO(
+                                                              41, 87, 35, 1),
+                                                  foregroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            0),
+                                                  ),
+                                                ),
+                                                child: _isLoading
+                                                    ? const CircularProgressIndicator(
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                Colors.white),
+                                                      )
+                                                    : const Text(
+                                                        'Thêm Vào Giỏ Hàng'),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 });

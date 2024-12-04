@@ -5,9 +5,11 @@ import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
+import 'package:don_ganh_app/models/khuyen_mai_model.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:don_ganh_app/models/product_model.dart';
+import 'package:don_ganh_app/screen/khuyen_mai_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/pay_screen2.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +53,10 @@ class _PayScreen1State extends State<PayScreen1> {
   final bool _productsFetched = false;
   double totalAmount = 0.0;
 
+  String selectedPromoCode = '';
+  String selectedPromoId = '';
+  int giaTriGiam = 0;
+
   final OrderApiService _orderApiService = OrderApiService();
 
   @override
@@ -58,6 +64,34 @@ class _PayScreen1State extends State<PayScreen1> {
     super.initState();
 
     _fetchDefaultAddress();
+  }
+
+  void _showPromotionBottomSheet(double usertotal) {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    int total = paymentInfo.totalPrice.toInt();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows the bottom sheet to take up more space
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height *
+              0.75, // Adjust height as needed
+          child: KhuyenMaiScreen(
+            totalAmount: usertotal.toInt(),
+            onPromotionSelected: updatePromoCode,
+          ), // Use the existing KhuyenMaiScreen
+        );
+      },
+    );
+  }
+
+  void updatePromoCode(KhuyenMaiModel promotion) {
+    setState(() {
+      selectedPromoId = promotion
+          .id; // Assuming you want to store the promotion ID for later use
+      selectedPromoCode = promotion.tenKhuyenMai;
+      giaTriGiam = promotion.giaTriGiam;
+    });
   }
 
   Future<void> _fetchDefaultAddress() async {
@@ -405,9 +439,7 @@ class _PayScreen1State extends State<PayScreen1> {
 
         // print('hoadonList ${hoadonList.toString()}');
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đặt hàng thành công!')),
-        );
+        
         widget.nextStep();
       }
     } catch (e) {
@@ -547,14 +579,29 @@ class _PayScreen1State extends State<PayScreen1> {
                                     ),
                                   );
                                 }),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 16),
-                                  child: Text(
-                                    'Khuyến mãi của shop',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                GestureDetector(
+                                  onTap: () {
+                                    _showPromotionBottomSheet(userTotal);
+                                    print('show vourcher');
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 16),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            'Khuyến mãi của shop',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text('- ${NumberFormat("#,##0").format(giaTriGiam)} đ'),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

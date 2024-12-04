@@ -1,5 +1,6 @@
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
+import 'package:don_ganh_app/models/oder_model_for_hokinhdoanh.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,93 @@ class OrderApiService {
     }
   }
 
-Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
+  Future<List<OrderModel>> fetchOrderForHoKinhDoanhId(String userId) async {
+    final String baseUrl =
+        "${dotenv.env['API_URL']}/hoadon/getHoaDonByHoKinhDoanhId/$userId";
+    final response = await http.get(Uri.parse(baseUrl));
+
+    if (response.statusCode == 200) {
+      try {
+        // In ra toàn bộ phản hồi để kiểm tra
+        print('Response body order: ${response.body}');
+
+        // Giải mã JSON nhận được
+        List<dynamic> orderDataList = json.decode(response.body);
+
+        // Chuyển đổi mảng JSON thành danh sách OrderModel
+        return orderDataList.map((data) => OrderModel.fromJson(data)).toList();
+      } catch (e) {
+        print('Error decoding JSON: $e');
+        throw Exception('Failed to decode JSON');
+      }
+    } else {
+      // Nếu gặp lỗi, ném ra ngoại lệ.
+      throw Exception('Failed to load order');
+    }
+  }
+
+  Future<OrderModelForHoKinhDoanh> getHoaDonByHoaDonId(String hoadonId) async {
+    final String url =
+        "${dotenv.env['API_URL']}/hoadon/getHoaDonByHoaDonForHoKinhDoanhId/$hoadonId";
+
+    try {
+      final response = await http.get(Uri.parse(url), headers: {
+        'Content-Type': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        print('Response: ${response.body}');
+        final jsonData = json.decode(response.body);
+
+        // Kiểm tra xem jsonData có phải là null không
+        if (jsonData == null) {
+          throw Exception('Dữ liệu trả về từ API là null');
+        }
+
+        return OrderModelForHoKinhDoanh.fromJson(jsonData);
+      } else if (response.statusCode == 404) {
+        throw Exception('Hóa đơn không tồn tại');
+      } else {
+        throw Exception('Không thể tải hóa đơn: ${response.body}');
+      }
+    } catch (error) {
+      print('Lỗi khi lấy hóa đơn: $error');
+      throw Exception('Lỗi khi lấy hóa đơn');
+    }
+  }
+
+  Future<String> updateOrderStatus(String hoadonId, int trangThai) async {
+    final url =
+        '${dotenv.env['API_URL']}/hoadon/updatetrangthaiHoaDOn/$hoadonId'; // Replace with your actual URL
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'TrangThai': trangThai,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Success: Order status updated successfully
+        return 'Cập nhập đơn hàng thành công';
+      } else {
+        // Error: Handle failure
+        final errorResponse = json.decode(response.body);
+        return errorResponse['message'] ??
+            'Lỗi khi cập nhật trang thái hóa đơn';
+      }
+    } catch (error) {
+      // Catch network errors or unexpected issues
+      print('Error: $error');
+      return 'Lỗi kết nối mạng';
+    }
+  }
+
+  Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     required BuildContext context, // Add BuildContext here
     required String userId,
     required diaChiList diaChiMoi,
@@ -43,7 +130,7 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     required String khuyenmaiId,
     required double TongTien,
     required CartModel selectedItems,
-}) async {
+  }) async {
     String url =
         "${dotenv.env['API_URL']}/hoadon/createUserDiaChivaThongTinGiaoHang";
 
@@ -87,8 +174,7 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
       print('Error decoding JSON: $e');
       throw Exception('Failed to decode JSON');
     }
-}
-
+  }
 
   Future<OrderModel> updateTransactionHoaDon({
     required String hoadonId,
@@ -97,7 +183,7 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     required int giaTriGiam,
   }) async {
     final String url =
-        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon";
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionHoaDon/$hoadonId";
 
     final Map<String, dynamic> body = {
       'transactionId': transactionId,
@@ -134,7 +220,7 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     }
   }
 
-   Future<OrderModel> updateTransactionHoaDonList({
+  Future<OrderModel> updateTransactionHoaDonList({
     required List<OrderModel> list,
     required String hoadonId,
     required String transactionId,
@@ -143,7 +229,8 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
   }) async {
     final String url =
         "${dotenv.env['API_URL']}/hoadon/updateTransactionlistHoaDon";
-          final List<Map<String, dynamic>> orderListJson = list.map((order) => order.toJson()).toList();
+    final List<Map<String, dynamic>> orderListJson =
+        list.map((order) => order.toJson()).toList();
 
     final Map<String, dynamic> body = {
       'hoadon': orderListJson,
@@ -164,16 +251,59 @@ Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     print('Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
-      try {
-        final decodedResponse = json.decode(response.body);
-        if (decodedResponse['code'] == 0 && decodedResponse['data'] != null) {
-          return OrderModel.fromJson(decodedResponse['data']);
-        } else {
-          throw Exception('API returned error: ${decodedResponse['message']}');
-        }
-      } catch (e) {
-        print('Error decoding JSON: $e');
-        throw Exception('Failed to decode JSON');
+      final responseData = json.decode(response.body);
+      if (responseData['message'] == 'Cập nhật thành công') {
+        print('Cập nhật hóa đơn thành công');
+        return responseData['message']; // Điều chỉnh theo API response nếu cần
+      } else {
+        print('Cập nhật thất bại: ${responseData['message']}');
+        throw Exception('Cập nhật thất bại: ${responseData['message']}');
+      }
+    } else {
+      print('Failed to update HoaDon: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to update HoaDon');
+    }
+  }
+
+  Future<OrderModel> updateTransactionHoaDonCODList({
+    required List<OrderModel> list,
+    required String hoadonId,
+    required String transactionId,
+    required String khuyeimaiId,
+    required int giaTriGiam,
+  }) async {
+    final String url =
+        "${dotenv.env['API_URL']}/hoadon/updateTransactionListHoaDonCOD";
+    final List<Map<String, dynamic>> orderListJson =
+        list.map((order) => order.toJson()).toList();
+
+    final Map<String, dynamic> body = {
+      'hoadon': orderListJson,
+      'transactionId': transactionId,
+      'khuyenmaiId': khuyeimaiId,
+      'giaTriGiam': giaTriGiam,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(body),
+    );
+
+    print('Response Status: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['message'] == 'Cập nhật thành công') {
+        print('Cập nhật hóa đơn thành công');
+        return OrderModel.fromJson(
+            responseData['data']); // Điều chỉnh theo API response nếu cần
+      } else {
+        print('Cập nhật thất bại: ${responseData['message']}');
+        throw Exception('Cập nhật thất bại: ${responseData['message']}');
       }
     } else {
       print('Failed to update HoaDon: ${response.statusCode} ${response.body}');

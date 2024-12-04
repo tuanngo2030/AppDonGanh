@@ -20,8 +20,7 @@ class _BottomnavthumuaScreenState extends State<BottomnavthumuaScreen> {
     });
   }
 
-  final List screens = [
-    // ChatScreen(title: 'Chat',),
+  final List<Widget> screens = [
     const HomeThumua(),
     const ListConversation(),
     const ProfileThumua(),
@@ -31,63 +30,47 @@ class _BottomnavthumuaScreenState extends State<BottomnavthumuaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: screens[selectedIndex],
-      bottomNavigationBar: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-          topRight: Radius.circular(10.0),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(41, 87, 35, 1),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
         ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.shifting,
-          iconSize: 25,
-          showSelectedLabels: false,
-          unselectedItemColor: Colors.white,
-          currentIndex: selectedIndex,
-          backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-          onTap: onTap,
-          items: [
-            BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.home_outlined,
-                    color: Color.fromRGBO(41, 87, 35, 1)),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+            elevation: 0,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white.withOpacity(0.6),
+            currentIndex: selectedIndex,
+            onTap: onTap,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home, size: 28),
+                label: "Trang chủ",
               ),
-              label: "Home",
-            ),
-            BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.chat_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.chat_outlined,
-                    color: Color.fromRGBO(41, 87, 35, 1)),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_outlined),
+                activeIcon: Icon(Icons.chat, size: 28),
+                label: "Chat",
               ),
-              label: "Home",
-            ),
-            BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.person_pin_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.person_pin_outlined,
-                    color: Color.fromRGBO(41, 87, 35, 1)),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_2_outlined),
+                activeIcon: Icon(Icons.person_2, size: 28),
+                label: "Bạn",
               ),
-              label: "Home",
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

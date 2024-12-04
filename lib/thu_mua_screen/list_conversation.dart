@@ -29,61 +29,61 @@ class _ListConversationState extends State<ListConversation> {
     _loadUserId();
   }
 
- void _onChat(String targetId) async {
-  setState(() {
-    _isLoading = true; // Bắt đầu trạng thái tải
-  });
+  void _onChat(String targetId) async {
+    setState(() {
+      _isLoading = true; // Bắt đầu trạng thái tải
+    });
 
-  final ChatApiService apiService = ChatApiService();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  userId = prefs.getString('userId');
-  token = prefs.getString('token');
+    final ChatApiService apiService = ChatApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    token = prefs.getString('token');
 
-  if (userId != null && token != null) {
-    try {
-      print('User ID: $userId');
-      print('Token: $token');
+    if (userId != null && token != null) {
+      try {
+        print('User ID: $userId');
+        print('Token: $token');
 
-      // Gửi API để tạo cuộc trò chuyện
-      final response = await apiService.createConversation(userId!, targetId);
+        // Gửi API để tạo cuộc trò chuyện
+        final response = await apiService.createConversation(userId!, targetId);
 
-      if (response != null && response['_id'] != null) {
-        String conversationId = response['_id'];
+        if (response != null && response['_id'] != null) {
+          String conversationId = response['_id'];
 
-        print('conversationId: $conversationId');
+          print('conversationId: $conversationId');
 
-        bool isCurrentUserSender = (userId == response['sender_id']['_id']);
+          bool isCurrentUserSender = (userId == response['sender_id']['_id']);
 
-        // Điều hướng sang màn hình ChatScreenThumua
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatScreenThumua(
-              token: token!,
-              title: conversationId,
-              userId: userId!,
-              conversationId: conversationId,
-              receiverData: isCurrentUserSender
-                  ? response['receiver_id'] ?? {} // Nếu là sender, hiển thị receiver
-                  : response['sender_id'] ?? {}, // Nếu không, hiển thị sender
+          // Điều hướng sang màn hình ChatScreenThumua
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreenThumua(
+                token: token!,
+                title: conversationId,
+                userId: userId!,
+                conversationId: conversationId,
+                receiverData: isCurrentUserSender
+                    ? response['receiver_id'] ??
+                        {} // Nếu là sender, hiển thị receiver
+                    : response['sender_id'] ?? {}, // Nếu không, hiển thị sender
+              ),
             ),
-          ),
-        );
-      } else {
-        _showSnackBar('Không thể tạo cuộc trò chuyện.');
+          );
+        } else {
+          _showSnackBar('Không thể tạo cuộc trò chuyện.');
+        }
+      } catch (e) {
+        _showSnackBar('Đã xảy ra lỗi: $e');
       }
-    } catch (e) {
-      _showSnackBar('Đã xảy ra lỗi: $e');
+    } else {
+      _showSnackBar('User ID hoặc token không có sẵn.');
     }
-  } else {
-    _showSnackBar('User ID hoặc token không có sẵn.');
+
+    setState(() {
+      _isLoading = false; // Kết thúc trạng thái tải
+    });
   }
-
-  setState(() {
-    _isLoading = false; // Kết thúc trạng thái tải
-  });
-}
-
 
   Future<void> _loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -131,75 +131,81 @@ class _ListConversationState extends State<ListConversation> {
   }
 
   @override
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      leading: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: GestureDetector(),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(),
+        ),
+        title: const Text(
+          'Danh sách cuộc trò chuyện',
+          style: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+              fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
-      title: const Text(
-        'Danh sách cuộc trò chuyện',
-        style: TextStyle(
-            color: Color.fromRGBO(41, 87, 35, 1), fontWeight: FontWeight.bold),
-      ),
-      centerTitle: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-    ),
-    body: _isLoading
-        ? const Center(
-            child: Text('Chưa có đoạn hội thoại'),
-          )
-        : ListView.builder(
-            itemCount: conversations.length,
-            itemBuilder: (context, index) {
-              var conversation = conversations[index];
-              var sender = conversation.senderId;
-              var receiver = conversation.receiverId;
+      body: _isLoading
+          ? const Center(
+              child: Text('Chưa có đoạn hội thoại'),
+            )
+          : ListView.builder(
+              itemCount: conversations.length,
+              itemBuilder: (context, index) {
+                var conversation = conversations[index];
+                var sender = conversation.senderId;
+                var receiver = conversation.receiverId;
 
-              // Kiểm tra userId lấy từ SharedPreferences có trùng với senderId
-              var isCurrentUserSender = sender?.id == userId;
+                // Kiểm tra userId lấy từ SharedPreferences có trùng với senderId
+                var isCurrentUserSender = sender?.id == userId;
 
-              // Nếu là sender thì hiển thị thông tin sender, nếu không thì hiển thị thông tin receiver
-              var displayUser = isCurrentUserSender ? receiver : sender;
+                // Nếu là sender thì hiển thị thông tin sender, nếu không thì hiển thị thông tin receiver
+                var displayUser = isCurrentUserSender ? receiver : sender;
 
-              // Bỏ qua nếu không có tin nhắn
-              if (conversation.messageIds.isEmpty) {
-                return const SizedBox.shrink(); // Không hiển thị gì
-              }
+                // Bỏ qua nếu không có tin nhắn
+                if (conversation.messageIds.isEmpty) {
+                  return const SizedBox.shrink(); // Không hiển thị gì
+                }
 
-              return ListTile(
-                leading: CircleAvatar(
-                  child: displayUser?.anhDaiDien != null
-                      ? Image.network(
-                          displayUser!.anhDaiDien!,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(Icons.person,
-                                color: Colors.grey); // Fallback icon
-                          },
-                        )
-                      : const Icon(Icons.person,
-                          color: Colors.grey), // Default icon if no image
-                ),
-                title: Text(
-                  displayUser?.tenNguoiDung ?? 'Unknown User',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: const Text('Nhấn để bắt đầu trò chuyện'),
-                onTap: () {
-                  // Nếu là sender thì gửi receiverId, nếu không thì gửi senderId
-                  _onChat(isCurrentUserSender
-                      ? receiver?.id ?? 'Unknown'
-                      : sender?.id ?? 'Unknown');
-                },
-              );
-            },
-          ),
-  );
-}
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 20, // Adjust the size as needed
+                    backgroundColor:
+                        Colors.grey.shade200, // Optional background color
+                    child: ClipOval(
+                      child: displayUser?.anhDaiDien != null
+                          ? Image.network(
+                              displayUser!.anhDaiDien!,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.person,
+                                    color: Colors.grey); // Fallback icon
+                              },
+                            )
+                          : const Icon(Icons.person,
+                              color: Colors.grey), // Default icon if no image
+                    ),
+                  ),
+                  title: Text(
+                    displayUser?.tenNguoiDung ?? 'Unknown User',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text('Nhấn để bắt đầu trò chuyện'),
+                  onTap: () {
+                    // Nếu là sender thì gửi receiverId, nếu không thì gửi senderId
+                    _onChat(isCurrentUserSender
+                        ? receiver?.id ?? 'Unknown'
+                        : sender?.id ?? 'Unknown');
+                  },
+                );
+              },
+            ),
+    );
+  }
 }

@@ -1,18 +1,18 @@
 import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/models/order_model.dart';
-import 'package:don_ganh_app/screen/oder_status_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/quan_ly_don_hang_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OderScreen extends StatefulWidget {
-  const OderScreen({super.key});
+class QuanLyDonHangScreen extends StatefulWidget {
+  const QuanLyDonHangScreen({super.key});
 
   @override
-  State<OderScreen> createState() => _OderScreenState();
+  State<QuanLyDonHangScreen> createState() => _QuanLyDonHangScreenState();
 }
 
-class _OderScreenState extends State<OderScreen> {
+class _QuanLyDonHangScreenState extends State<QuanLyDonHangScreen> {
   late Future<List<OrderModel>> orderModel =
       Future.value([]); // Initialize with an empty Future
   String? userId;
@@ -28,8 +28,8 @@ class _OderScreenState extends State<OderScreen> {
     userId = prefs.getString('userId');
     if (userId != null) {
       setState(() {
-        orderModel = OrderApiService()
-            .fetchOrder(userId!); // Fetch orders when userId is available
+        orderModel = OrderApiService().fetchOrderForHoKinhDoanhId(
+            userId!); // Fetch orders when userId is available
       });
     } else {
       setState(() {
@@ -63,11 +63,11 @@ class _OderScreenState extends State<OderScreen> {
             ),
 //
             title: const Text(
-              'Đơn hàng',
-              style: TextStyle(
-                  color: Color.fromRGBO(41, 87, 35, 1),
-                  fontWeight: FontWeight.bold),
-            ),
+            'Đơn hàng',
+            style: TextStyle(
+                color: Color.fromRGBO(41, 87, 35, 1),
+                fontWeight: FontWeight.bold),
+          ),
             centerTitle: true,
             bottom: const TabBar(
               isScrollable: true,
@@ -116,17 +116,15 @@ class _OderScreenState extends State<OderScreen> {
     );
   }
 
+  // Widget to display all orders
   Widget _buildOrderList(List<OrderModel> orders) {
-    // Sắp xếp danh sách đơn hàng theo NgayTao giảm dần
-    orders.sort((a, b) => b.NgayTao.compareTo(a.NgayTao));
     return _buildListView(orders);
   }
 
+  // Widget to display orders filtered by status
   Widget _buildOrderListByStatus(List<OrderModel> orders, int status) {
-    // Lọc đơn hàng theo trạng thái và sắp xếp theo NgayTao giảm dần
     List<OrderModel> filteredOrders =
         orders.where((order) => order.TrangThai == status).toList();
-    filteredOrders.sort((a, b) => b.NgayTao.compareTo(a.NgayTao));
     return _buildListView(filteredOrders);
   }
 
@@ -135,6 +133,9 @@ class _OderScreenState extends State<OderScreen> {
     if (orders.isEmpty) {
       return const Center(child: Text('Không có đơn hàng trong mục này'));
     }
+
+    // Sắp xếp đơn hàng theo NgayTao giảm dần
+    orders.sort((a, b) => b.NgayTao.compareTo(a.NgayTao));
 
     return ListView.builder(
       itemCount: orders.length,
@@ -146,8 +147,8 @@ class _OderScreenState extends State<OderScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => OderStatusScreen(
-                  orderModel: orders[index],
+                builder: (context) => QuanLyDonHangDetailScreen(
+                  hoadonId: orders[index].id,
                 ),
               ),
             );

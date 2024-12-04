@@ -373,12 +373,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderRadius: BorderRadius.circular(50)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: const BorderSide(color: Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide:
-                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "example",
                       errorText: _usernameError,
@@ -410,12 +410,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderRadius: BorderRadius.circular(50)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: const BorderSide(color: Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide:
-                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "abc@gmail.com",
                       errorText: _emailError,
@@ -448,12 +448,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderRadius: BorderRadius.circular(50)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: const BorderSide(color: Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide:
-                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "********",
                       errorText: _passwordError, // Hiển thị lỗi nếu có
@@ -501,28 +501,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderRadius: BorderRadius.circular(50)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: const BorderSide(color: Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide:
-                            BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "********",
                       errorText: _confirmPasswordError, // Hiển thị lỗi nếu có
-                      // suffixIcon: IconButton(
-                      //   icon: Icon(
-                      //     _obscureConfirmPassword
-                      //         ? Icons.visibility_off
-                      //         : Icons.visibility,
-                      //     color: Colors.grey,
-                      //   ),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       _obscureConfirmPassword = !_obscureConfirmPassword;
-                      //     });
-                      //   },
-                      // ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
                     ),
                     obscureText:
                         _obscureConfirmPassword, // Điều khiển việc ẩn/hiện mật khẩu
@@ -545,8 +545,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _agreedToTerms = value ?? false;
                                 });
                               },
-                              activeColor: Color.fromRGBO(41, 87, 35, 1),
-                              visualDensity: VisualDensity(horizontal: -4.0),
+                              activeColor: const Color.fromRGBO(41, 87, 35, 1),
+                              visualDensity: const VisualDensity(horizontal: -4.0),
                             ),
                             const Text(
                               "Tôi đồng ý với ",

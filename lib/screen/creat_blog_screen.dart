@@ -46,12 +46,14 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
           _contentController.text.isNotEmpty;
     });
   }
-Future<void> _checkPermissions() async {
-  PermissionStatus cameraPermission = await Permission.camera.status;
-  if (cameraPermission.isDenied) {
-    await Permission.camera.request();
+
+  Future<void> _checkPermissions() async {
+    PermissionStatus cameraPermission = await Permission.camera.status;
+    if (cameraPermission.isDenied) {
+      await Permission.camera.request();
+    }
   }
-}
+
   Future<void> _takePhoto() async {
     // Check and request camera permission
     PermissionStatus status = await Permission.camera.request();
@@ -67,13 +69,13 @@ Future<void> _checkPermissions() async {
     } else if (status.isDenied) {
       // Permission is denied, show a message or ask the user to enable it
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text("Camera permission is required to take a photo")),
       );
     } else if (status.isPermanentlyDenied) {
       // User has permanently denied permission, open settings
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text(
                 "Camera permission is permanently denied. Please enable it in settings.")),
       );
@@ -243,16 +245,16 @@ Future<void> _checkPermissions() async {
                               anhDaiDien != null && anhDaiDien!.isNotEmpty
                                   ? NetworkImage(
                                       anhDaiDien!) // Dùng ảnh từ URL nếu hợp lệ
-                                  : AssetImage('lib/assets/avt1.jpg')
+                                  : const AssetImage('lib/assets/avt1.jpg')
                                       as ImageProvider, // Ảnh mặc định
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               tenNguoiDung ?? 'Tên người dùng',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -272,12 +274,19 @@ Future<void> _checkPermissions() async {
                     ),
 
                     const SizedBox(height: 15),
-                    TextField(
-                      controller: _contentController,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        hintText: "Đăng bài viết của bạn.",
-                        border: InputBorder.none,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: TextField(
+                          controller: _contentController,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: "Đăng bài viết của bạn.",
+                            border: InputBorder.none,
+                          ),
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                        ),
                       ),
                     ),
                   ],
@@ -345,21 +354,21 @@ Future<void> _checkPermissions() async {
                       onPressed: _takePhoto,
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    color: Colors.grey,
-                    height: 50,
-                  ),
-                  Expanded(
-                    child: _buildActionButton(
-                      imagePath:
-                          "lib/assets/tagicon.png", // Replace with your image path
-                      label: "Tag",
-                      onPressed: () {
-                        print("Thêm tag");
-                      },
-                    ),
-                  ),
+                  // Container(
+                  //   width: 1,
+                  //   color: Colors.grey,
+                  //   height: 50,
+                  // ),
+                  // Expanded(
+                  //   child: _buildActionButton(
+                  //     imagePath:
+                  //         "lib/assets/tagicon.png", // Replace with your image path
+                  //     label: "Tag",
+                  //     onPressed: () {
+                  //       print("Thêm tag");
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),

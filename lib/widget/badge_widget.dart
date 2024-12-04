@@ -22,18 +22,23 @@ class _BadgeWidgetState extends State<BadgeWidget> {
 
  void _fetchCartItemCount() async {
   try {
-    List<CartModel> carts = await CartApiService().getGioHangByUserId();  // Expecting a list of CartModels
+    List<CartModel> carts = await CartApiService().getGioHangByUserId();
     int itemCount = 0;
     for (var cart in carts) {
-      itemCount += cart.mergedCart.length;  // Sum the item count from all carts
+      for (var item in cart.mergedCart) {
+        for (var product in item.sanPhamList) {
+          itemCount += product.chiTietGioHangs.length;
+        }
+      }
     }
     setState(() {
-      _cartItemCount = itemCount;  // Update the cart item count
+      _cartItemCount = itemCount;
     });
   } catch (e) {
     print("Lỗi khi lấy giỏ hàng: $e");
   }
 }
+
 
 
   @override

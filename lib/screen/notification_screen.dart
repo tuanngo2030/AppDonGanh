@@ -281,19 +281,19 @@ Future<void> _refreshNotifications() async {
       barrierDismissible: false, // Người dùng phải chọn một lựa chọn
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Xóa thông báo'),
+          title: const Text('Xóa thông báo'),
           content: isLoading
-              ? Center(
+              ? const Center(
                   child:
                       CircularProgressIndicator()) // Hiển thị loading khi isLoading = true
-              : Text('Bạn có chắc chắn muốn xóa thông báo này?'),
+              : const Text('Bạn có chắc chắn muốn xóa thông báo này?'),
           actions: <Widget>[
             // Nút Hủy
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Đóng dialog nếu hủy
               },
-              child: Text('Hủy'),
+              child: const Text('Hủy'),
             ),
             // Nút Xóa
             TextButton(
@@ -311,12 +311,12 @@ Future<void> _refreshNotifications() async {
 
                 // Hiển thị thông báo thành công
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text('Đã xóa thông báo'),
                   ),
                 );
               },
-              child: Text('Xóa'),
+              child: const Text('Xóa'),
             ),
           ],
         );

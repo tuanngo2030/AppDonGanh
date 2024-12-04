@@ -20,13 +20,29 @@ class ProductApiService {
 
   Future<ProductModel> getProductByID(String productID) async {
     final response =
-        await http.get(Uri.parse('$apiUrl/findSanPhambyID/$productID'));
+        await http.get(Uri.parse('$apiUrl/getDatabientheByid/$productID'));
 
     if (response.statusCode == 200) {
       var productResponse = json.decode(response.body);
       return ProductModel.fromJSON(productResponse);
     } else {
       throw Exception("Failed to load product details");
+    }
+  }
+
+    Future<Map<String, dynamic>> getVariantById(String idbienthe) async {
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/getDatabientheByid/$idbienthe'));
+
+      if (response.statusCode == 200) {
+        // Successfully fetched the variant data
+        return json.decode(response.body); // Return the decoded response
+      } else {
+        throw Exception('Failed to load variant');
+      }
+    } catch (error) {
+      print("Error fetching variant: $error");
+      throw Exception('Error fetching variant');
     }
   }
 

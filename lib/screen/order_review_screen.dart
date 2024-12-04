@@ -153,12 +153,23 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                           maxLines: 6,
                           minLines: 5,
                           controller: _reviewController,
+                          maxLength: 1000, // Giới hạn số ký tự tối đa
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             hintText: 'Gõ vào đây',
                             contentPadding: const EdgeInsets.all(16),
+                            counter: Text(
+                              '${_reviewController.text.length}/1000', // Hiển thị số ký tự hiện tại
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
                           ),
+                          onChanged: (text) {
+                            // Cập nhật trạng thái để hiển thị số ký tự hiện tại
+                            setState(() {});
+                          },
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(
@@ -229,7 +240,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed:(_isLoading || _selectedStars == 0)
+                                onPressed: (_isLoading || _selectedStars == 0)
                                     ? null // Disable button if loading
                                     : () async {
                                         setState(() {

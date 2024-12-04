@@ -8,6 +8,7 @@ import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeThumua extends StatefulWidget {
@@ -28,75 +29,76 @@ class _HomeThumuaState extends State<HomeThumua> {
     super.initState();
     _fetchBlogPosts();
   }
-// Hàm tải lại dữ liệu
-Future<void> _refreshData() async {
-  setState(() {
-    isLoading = true; // Hiển thị trạng thái loading
-  });
 
-  try {
-    // Gọi API hoặc tải lại dữ liệu từ nguồn
-    await _fetchBlogPosts(); // Thay bằng hàm của bạn để lấy dữ liệu
-  } catch (error) {
-    print('Lỗi khi tải dữ liệu: $error');
-  } finally {
+// Hàm tải lại dữ liệu
+  Future<void> _refreshData() async {
     setState(() {
-      isLoading = false; // Ẩn trạng thái loading
+      isLoading = true; // Hiển thị trạng thái loading
     });
+
+    try {
+      // Gọi API hoặc tải lại dữ liệu từ nguồn
+      await _fetchBlogPosts(); // Thay bằng hàm của bạn để lấy dữ liệu
+    } catch (error) {
+      print('Lỗi khi tải dữ liệu: $error');
+    } finally {
+      setState(() {
+        isLoading = false; // Ẩn trạng thái loading
+      });
+    }
   }
-}
- void showFullScreenImages(
-    BuildContext context, List<String> images, int initialIndex) {
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return Dialog(
-        insetPadding: EdgeInsets.zero,
-        backgroundColor: Colors.black,
-        child: Stack(
-          children: [
-            PhotoViewGallery.builder(
-              itemCount: images.length,
-              builder: (context, index) {
-                return PhotoViewGalleryPageOptions.customChild(
-                  child: Image.network(
-                    images[index],
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'lib/assets/avt2.jpg', // Hình ảnh thay thế
-                        fit: BoxFit.contain,
-                      );
-                    },
+
+  void showFullScreenImages(
+      BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: images.length,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions.customChild(
+                    child: Image.network(
+                      images[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'lib/assets/avt2.jpg', // Hình ảnh thay thế
+                          fit: BoxFit.contain,
+                        );
+                      },
+                    ),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(color: Colors.black),
+                pageController: PageController(initialPage: initialIndex),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 30,
                   ),
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.contained,
-                );
-              },
-              scrollPhysics: const BouncingScrollPhysics(),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
-              pageController: PageController(initialPage: initialIndex),
-            ),
-            Positioned(
-              top: 20,
-              right: 20,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 30,
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 //  Future<void> _fetchBlogPosts() async {
 //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -123,35 +125,35 @@ Future<void> _refreshData() async {
 //     });
 //   }
 // }
-Future<void> _fetchBlogPosts() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getString('userId');
+  Future<void> _fetchBlogPosts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
 
-  if (!mounted) return; // Check if widget is still in the tree
-  setState(() {
-    isLoading = true; // Show loading indicator
-  });
-
-  try {
-    List<BlogModel> blogPosts = await _blogApiService
-        .getListBaiViet(userId!); // Replace with actual user ID
-    
-    // Shuffle the blog posts to make their order random
-    blogPosts.shuffle();
-
-    if (!mounted) return; // Check again before updating state
+    if (!mounted) return; // Check if widget is still in the tree
     setState(() {
-      _blogPosts = blogPosts;
+      isLoading = true; // Show loading indicator
     });
-  } catch (e) {
-    print('Error fetching blog posts: $e');
-  } finally {
-    if (!mounted) return; // Final check
-    setState(() {
-      isLoading = false; // Hide loading indicator
-    });
+
+    try {
+      List<BlogModel> blogPosts = await _blogApiService
+          .getListBaiViet(userId!); // Replace with actual user ID
+
+      // Shuffle the blog posts to make their order random
+      blogPosts.shuffle();
+
+      if (!mounted) return; // Check again before updating state
+      setState(() {
+        _blogPosts = blogPosts;
+      });
+    } catch (e) {
+      print('Error fetching blog posts: $e');
+    } finally {
+      if (!mounted) return; // Final check
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
+    }
   }
-}
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'Unknown date';
@@ -540,332 +542,359 @@ Future<void> _fetchBlogPosts() async {
     );
   }
 
- @override
-Widget build(BuildContext context) {
-  return SafeArea(
-    child: Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _refreshData, // Gọi hàm tải lại dữ liệu
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                color: const Color.fromRGBO(59, 99, 53, 1),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                          height: 100,
-                          width: 200,
-                          child: Image.asset(
-                            'lib/assets/logo_xinchao.png',
-                            fit: BoxFit.contain,
-                          )),
-                      GestureDetector(
-                        onTap: () {
-                          print('Setting');
-                        },
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: Colors.white,
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _refreshData, // Gọi hàm tải lại dữ liệu
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  color: const Color.fromRGBO(59, 99, 53, 1),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                            height: 100,
+                            width: 200,
+                            child: Image.asset(
+                              'lib/assets/logo_xinchao.png',
+                              fit: BoxFit.contain,
+                            )),
+                        GestureDetector(
+                          onTap: () {
+                            print('Setting');
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white,
+                            ),
+                            child: Image.asset('lib/assets/caidat_icon.png'),
                           ),
-                          child: Image.asset('lib/assets/caidat_icon.png'),
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/creat_blog_screen');
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          height: 35,
-                          width: 35,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50)),
-                          child: Image.asset('lib/assets/logo_app.png',
-                              fit: BoxFit.cover),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/creat_blog_screen');
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 20, left: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50)),
+                            child: Image.asset('lib/assets/logo_app.png',
+                                fit: BoxFit.contain),
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        flex: 9,
-                        child: Container(
-                          height: 40,
-                          
-                          decoration: BoxDecoration(
-                              border: const Border.fromBorderSide(BorderSide(
-                                  color: Color.fromARGB(255, 184, 182, 182))),
-                              borderRadius: BorderRadius.circular(50)),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Đăng bài viết của bạn.',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Color.fromARGB(255, 158, 156, 156),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          flex: 9,
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                                border: const Border.fromBorderSide(BorderSide(
+                                    color: Color.fromARGB(255, 184, 182, 182))),
+                                borderRadius: BorderRadius.circular(50)),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Đăng bài viết của bạn.',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color.fromARGB(255, 158, 156, 156),
+                                    ),
                                   ),
-                                ),
-                                Icon(Icons.camera_alt_outlined),
-                              ],
+                                  Icon(Icons.camera_alt_outlined),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              isLoading
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: CircularProgressIndicator(), // Loading indicator
-                    )
-                  : Column(
-                      children: _blogPosts
-                          .map((post) => _buildPostItem(post))
-                          .toList(),
-                    ),
-            ],
+                const SizedBox(
+                  height: 10,
+                ),
+                isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: CircularProgressIndicator(), // Loading indicator
+                      )
+                    : Column(
+                        children: _blogPosts
+                            .map((post) => _buildPostItem(post))
+                            .toList(),
+                      ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildPostItem(BlogModel post) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5), // Màu đổ bóng
-            spreadRadius: 2, // Bán kính lan rộng của bóng
-            blurRadius: 5, // Độ mờ của bóng
-            offset: const Offset(0, 3), // Độ dịch chuyển của bóng
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header (User info and post title)
-          GestureDetector(
-            onTap: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              final userId = prefs.getString('userId');
-              userId == post.userId.id
-                  ? Navigator.pushNamed(context, '/your_blog_screen')
-                  : Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => O(
-                          nguoiDung: post.userId,
+  Widget _buildPostItem(BlogModel post) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5), // Màu đổ bóng
+              spreadRadius: 2, // Bán kính lan rộng của bóng
+              blurRadius: 5, // Độ mờ của bóng
+              offset: const Offset(0, 3), // Độ dịch chuyển của bóng
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Header (User info and post title)
+            GestureDetector(
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                final userId = prefs.getString('userId');
+                userId == post.userId.id
+                    ? Navigator.pushNamed(context, '/your_blog_screen')
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => O(
+                            nguoiDung: post.userId,
+                          ),
+                        ),
+                      );
+              },
+              child: ListTile(
+                leading: post.userId.anhDaiDien != null
+                    ? ClipOval(
+                        child: Image.network(
+                          post.userId.anhDaiDien!,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.account_circle,
+                              size: 40,
+                            ); // Default icon if image fails to load
+                          },
+                        ),
+                      )
+                    : const Icon(
+                        Icons.account_circle,
+                        size: 40,
+                      ),
+                title: Text(
+                  userId == post.userId.id
+                      ? '${post.userId.tenNguoiDung} (bạn)'
+                      : '${post.userId.tenNguoiDung}',
+                  style: const TextStyle(fontSize: 13),
+                ),
+                subtitle: Row(
+                  children: [
+                    Text(
+                      _formatDate(post.createdAt),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                    if (post.isUpdate == true)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          '(Đã chỉnh sửa)',
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                       ),
-                    );
-            },
-            child: ListTile(
-              leading: post.userId.anhDaiDien != null
-                  ? ClipOval(
-                      child: Image.network(
-                        post.userId.anhDaiDien!,
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.account_circle,
-                            size: 40,
-                          ); // Default icon if image fails to load
-                        },
-                      ),
-                    )
-                  : const Icon(
-                      Icons.account_circle,
-                      size: 40,
-                    ),
-              title: Text(
-                userId == post.userId.id
-                    ? '${post.userId.tenNguoiDung} (bạn)'
-                    : '${post.userId.tenNguoiDung}',
-                style: const TextStyle(fontSize: 13),
-              ),
-              subtitle: Row(
-                children: [
-                  Text(
-                    _formatDate(post.createdAt),
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                  if (post.isUpdate == true)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        '(Đã chỉnh sửa)',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          // Post content
-          Padding(
-            padding: const EdgeInsets.only(top: 10, left: 20, bottom: 20),
-            child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(post.noidung ?? '')),
-          ),
-          // Post image
-          if (post.image.isNotEmpty)
-            SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: () {
-                  showFullScreenImages(context, post.image, 0);
-                },
-                child: post.image.length == 1
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(
-                            post.image[0],
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'lib/assets/avt2.jpg',
-                                width: double.infinity,
-                                fit: BoxFit.contain,
+            // Post content
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 27, right: 27),
+                child: ReadMoreText(
+                  post.noidung,
+                  trimLines: 3,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: "Xem Thêm",
+                  trimExpandedText: "Ẩn",
+                  moreStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  lessStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+
+            const SizedBox(
+              height: 10,
+            ),
+            // Post image
+            if (post.image.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: () {
+                    showFullScreenImages(context, post.image, 0);
+                  },
+                  child: post.image.length == 1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.network(
+                              post.image[0],
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'lib/assets/avt2.jpg',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height: 200,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: post.image.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  showFullScreenImages(
+                                      context, post.image, index);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.network(
+                                      post.image[index],
+                                      width: 220,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'lib/assets/avt2.jpg',
+                                          width: 220,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
                               );
                             },
                           ),
                         ),
-                      )
-                    : SizedBox(
-                        height: 200,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: post.image.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                showFullScreenImages(
-                                    context, post.image, index);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  child: Image.network(
-                                    post.image[index],
-                                    width: 220,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Image.asset(
-                                        'lib/assets/avt2.jpg',
-                                        width: 220,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-              ),
-            ),
-          SizedBox(height: 20),
-                   const Divider(thickness: 1),
-          // Likes and comments section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => _toggleLike(post.id),
-                      child: Row(
-                        children: [
-                          Icon(
-                            size: 20,
-                            post.isLiked == true
-                                ? Icons.thumb_up
-                                : Icons.thumb_up_outlined,
-                            color: post.isLiked == true
-                                ? Colors.blue
-                                : Colors.black,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              "${post.likes.length}",
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
-                const SizedBox(width: 20),
-                GestureDetector(
-                  onTap: () {
-                    _showComments(
-                      context,
-                      post,
-                      () {
-                        setState(() {});
-                      },
-                    );
-                  },
-                  child: Row(
+              ),
+            const SizedBox(height: 20),
+            const Divider(thickness: 1),
+            // Likes and comments section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Row(
                     children: [
-                      const Icon(size: 20, Icons.comment_outlined),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          "${post.binhluan.length}",
-                          style: const TextStyle(fontSize: 12),
+                      GestureDetector(
+                        onTap: () => _toggleLike(post.id),
+                        child: Row(
+                          children: [
+                            Icon(
+                              size: 20,
+                              post.isLiked == true
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined,
+                              color: post.isLiked == true
+                                  ? Colors.blue
+                                  : Colors.black,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                "${post.likes.length}",
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(width: 20),
+                  GestureDetector(
+                    onTap: () {
+                      _showComments(
+                        context,
+                        post,
+                        () {
+                          setState(() {});
+                        },
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(size: 20, Icons.comment_outlined),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            "${post.binhluan.length}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-   
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

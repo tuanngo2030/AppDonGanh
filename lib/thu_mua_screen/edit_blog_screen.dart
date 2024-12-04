@@ -4,6 +4,7 @@ import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -23,6 +24,9 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
   List<File> _selectedImages = [];
   bool _isLoading = false;
   String? userId;
+  bool _isFormValid = false;
+  String? tenNguoiDung;
+  String? anhDaiDien;
 
   final BlogApiService _blogApiService = BlogApiService();
 
@@ -33,9 +37,25 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
     _titleController.text = widget.blog.tieude;
     _contentController.text = widget.blog.noidung;
     _tagsController.text = widget.blog.tags.join(', ');
+    _loadUserData();
 
     // Load existing images from the network
     _loadImagesFromNetwork();
+  }
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _titleController.text.isNotEmpty &&
+          _contentController.text.isNotEmpty;
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tenNguoiDung = prefs.getString('tenNguoiDung') ?? 'Tên người dùng';
+      anhDaiDien = prefs.getString('anhDaiDien') ?? 'lib/assets/avatar2.png';
+    });
   }
 
   // Function to load images from network URLs
@@ -134,6 +154,42 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
     }
   }
 
+  Future<void> _checkPermissions() async {
+    PermissionStatus cameraPermission = await Permission.camera.status;
+    if (cameraPermission.isDenied) {
+      await Permission.camera.request();
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    // Check and request camera permission
+    PermissionStatus status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          _selectedImages.add(File(image.path));
+        });
+      }
+    } else if (status.isDenied) {
+      // Permission is denied, show a message or ask the user to enable it
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Camera permission is required to take a photo")),
+      );
+    } else if (status.isPermanentlyDenied) {
+      // User has permanently denied permission, open settings
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                "Camera permission is permanently denied. Please enable it in settings.")),
+      );
+      openAppSettings();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -214,24 +270,24 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                 padding: const EdgeInsets.all(15),
                 child: Column(
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 25,
                           backgroundImage: AssetImage('lib/assets/avatar2.png'),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Trần Đức A",
-                              style: TextStyle(
+                              tenNguoiDung ?? 'Tên người dùng',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
-                            Text("Trần Đức A"),
+                            Text(tenNguoiDung ?? 'Tên người dùng'),
                           ],
                         ),
                       ],
@@ -246,12 +302,19 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                     ),
 
                     const SizedBox(height: 15),
-                    TextField(
-                      controller: _contentController,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        hintText: "Đăng bài viết của bạn.",
-                        border: InputBorder.none,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: TextField(
+                          controller: _contentController,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: "Đăng bài viết của bạn.",
+                            border: InputBorder.none,
+                          ),
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                        ),
                       ),
                     ),
                   ],
@@ -291,7 +354,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
 
             // Bottom action bar
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(top: BorderSide(color: Colors.grey)),
@@ -299,25 +362,42 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildActionButton(
-                    icon: Icons.photo_library,
-                    label: "Ảnh/video",
-                    onPressed: _pickImages,
+                  Expanded(
+                    child: _buildActionButton(
+                      imagePath:
+                          "lib/assets/anhvideo.png", // Replace with your image path
+                      label: "Ảnh/video",
+                      onPressed: _pickImages,
+                    ),
                   ),
-                  _buildActionButton(
-                    icon: Icons.camera_alt,
-                    label: "Chụp",
-                    onPressed: () {
-                      print("Chụp ảnh");
-                    },
+                  Container(
+                    width: 1, // Thickness of the line
+                    color: Colors.grey, // Color of the line
+                    height: 50, // Adjust the height
                   ),
-                  _buildActionButton(
-                    icon: Icons.tag,
-                    label: "Tag",
-                    onPressed: () {
-                      print("Thêm tag");
-                    },
+                  Expanded(
+                    child: _buildActionButton(
+                      imagePath:
+                          "lib/assets/chupanhicon.png", // Replace with your image path
+                      label: "Chụp",
+                      onPressed: _takePhoto,
+                    ),
                   ),
+                  // Container(
+                  //   width: 1,
+                  //   color: Colors.grey,
+                  //   height: 50,
+                  // ),
+                  // Expanded(
+                  //   child: _buildActionButton(
+                  //     imagePath:
+                  //         "lib/assets/tagicon.png", // Replace with your image path
+                  //     label: "Tag",
+                  //     onPressed: () {
+                  //       print("Thêm tag");
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -327,16 +407,31 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
     );
   }
 
-  Widget _buildActionButton(
-      {required IconData icon,
-      required String label,
-      required VoidCallback onPressed}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(onPressed: onPressed, icon: Icon(icon)),
-        Text(label),
-      ],
+  Widget _buildActionButton({
+    required String imagePath, // Path to the image
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            width: 20, // Adjust the icon size
+            height: 20,
+          ),
+          const SizedBox(width: 8), // Space between icon and text
+          Text(
+            label,
+            style: const TextStyle(
+                fontSize: 14,
+                color: Color.fromARGB(
+                    255, 0, 0, 0)), // Customize font size and color
+          ),
+        ],
+      ),
     );
   }
 }

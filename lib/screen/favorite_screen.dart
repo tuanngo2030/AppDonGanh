@@ -23,87 +23,115 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     _fetchFavorites();
   }
 
-  // Function to toggle the favorite status of a product
- Future<void> _toggleFavorite(BuildContext context, String productId) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getString('userId');
-
-  if (userId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User is not logged in.')),
+  void _showConfirmationDialog(BuildContext context, String productId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hủy yêu thích'),
+          content: const Text('Bạn có chắc chắn muốn hủy yêu thích sản phẩm này?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng hộp thoại
+              },
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng hộp thoại
+                _toggleFavorite(context, productId); // Thực hiện hành động
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
     );
-    return;
   }
 
-  final favoriteService = FavoriteApiService();
+  // Function to toggle the favorite status of a product
+  Future<void> _toggleFavorite(BuildContext context, String productId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
 
-  try {
-    // Kiểm tra nếu sản phẩm đã được yêu thích
-    ProductModel product = favorites.firstWhere((item) => item.id == productId);
-    bool isCurrentlyFavorite = product.isFavorited;
-
-    // Nếu sản phẩm đang được yêu thích, xóa khỏi danh sách yêu thích
-    if (!isCurrentlyFavorite) {
-       favoriteService.addToFavorites(userId, productId);
-
-      // Cập nhật lại UI: Xóa sản phẩm khỏi danh sách yêu thích
-      setState(() {
-        favorites.removeWhere((item) => item.id == productId);
-      });
-
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã xóa sản phẩm khỏi danh sách yêu thích')),
+        const SnackBar(content: Text('User is not logged in.')),
       );
-    } else {
-      // Nếu sản phẩm chưa được yêu thích, thêm vào danh sách yêu thích
-       favoriteService.addToFavorites(userId, productId);
+      return;
+    }
 
-      // Cập nhật lại trạng thái isFavorited của sản phẩm trong danh sách favorites
-      setState(() {
-        product.isFavorited = true;
-      });
+    final favoriteService = FavoriteApiService();
 
+    try {
+      // Kiểm tra nếu sản phẩm đã được yêu thích
+      ProductModel product =
+          favorites.firstWhere((item) => item.id == productId);
+      bool isCurrentlyFavorite = product.isFavorited;
+
+      // Nếu sản phẩm đang được yêu thích, xóa khỏi danh sách yêu thích
+      if (!isCurrentlyFavorite) {
+        favoriteService.addToFavorites(userId, productId);
+
+        // Cập nhật lại UI: Xóa sản phẩm khỏi danh sách yêu thích
+        setState(() {
+          favorites.removeWhere((item) => item.id == productId);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Đã xóa sản phẩm khỏi danh sách yêu thích')),
+        );
+      } else {
+        // Nếu sản phẩm chưa được yêu thích, thêm vào danh sách yêu thích
+        favoriteService.addToFavorites(userId, productId);
+
+        // Cập nhật lại trạng thái isFavorited của sản phẩm trong danh sách favorites
+        setState(() {
+          product.isFavorited = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Added to favorites')),
+        );
+      }
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Added to favorites')),
+        SnackBar(content: Text('Error: $error')),
       );
     }
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $error')),
-    );
   }
-}
 
   Future<void> _fetchFavorites() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getString('userId');
-  print(userId!);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+    print(userId!);
 
-  try {
-    final favoriteList = await FavoriteApiService().getFavorites(userId);
-    if (mounted) {
-      setState(() {
-        favorites = favoriteList;
-        isLoading = false;
-      });
+    try {
+      final favoriteList = await FavoriteApiService().getFavorites(userId);
+      if (mounted) {
+        setState(() {
+          favorites = favoriteList;
+          isLoading = false;
+        });
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading favorites: $error')),
+      );
     }
-  } catch (error) {
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error loading favorites: $error')),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         leading: const Padding(
           padding: EdgeInsets.all(10.0),
         ),
@@ -145,8 +173,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => DetailProductScreen(
-                                    product: product,
-                                    isfavorited: true),
+                                    product: product, isfavorited: true),
                               ),
                             );
                           },
@@ -204,9 +231,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                       right: 5,
                                       child: GestureDetector(
                                         onTap: () {
-                                          _toggleFavorite(
-                                              context,
-                                              product.id); // Toggle the favorite status
+                                          _showConfirmationDialog(context,
+                                              product.id);
                                         },
                                         child: Container(
                                           height: 35,
@@ -221,14 +247,15 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                           ),
                                           child: Center(
                                             child: Icon(
-                                                product.isFavorited
-                                                    ? Icons
-                                                        .favorite_border_outlined
-                                                    : Icons.favorite,
-                                                color: product.isFavorited
-                                                    ? const Color.fromRGBO(
-                                                        142, 198, 65, 1)
-                                                    : Colors.white),
+                                              product.isFavorited
+                                                  ? Icons
+                                                      .favorite_border_outlined
+                                                  : Icons.favorite,
+                                              color: product.isFavorited
+                                                  ? const Color.fromRGBO(
+                                                      142, 198, 65, 1)
+                                                  : Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ),

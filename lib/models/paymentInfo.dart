@@ -3,7 +3,7 @@ import 'package:don_ganh_app/models/order_model.dart';
 import 'package:flutter/material.dart';
 
 class PaymentInfo with ChangeNotifier {
-   List<OrderModel> _orders = [];
+  List<OrderModel> _orders = [];
   String order_id = '';
   String hoTen = '';
   String soDienThoai = '';
@@ -15,7 +15,7 @@ class PaymentInfo with ChangeNotifier {
   String duongThonXom = '';
   String ghiChu = '';
   int transitionID = 0;
-  late CartModel selectedItems;
+  CartModel? selectedItems;
   double totalPrice = 0;
   String assetPath = '';
   String title = '';
@@ -34,7 +34,7 @@ class PaymentInfo with ChangeNotifier {
     String? phuongXa,
     required String duongThonXom,
     required String ghiChu,
-    required CartModel selectedItems,
+    CartModel? selectedItems,
     required double totalPrice,
   }) {
     this.order_id = order_id;
@@ -47,7 +47,9 @@ class PaymentInfo with ChangeNotifier {
     this.phuongXa = phuongXa;
     this.duongThonXom = duongThonXom;
     this.ghiChu = ghiChu;
-    this.selectedItems = selectedItems;
+   if (selectedItems != null) {
+      this.selectedItems = selectedItems;
+    }
     this.totalPrice = totalPrice;
 
     // Call notifyListeners() safely
@@ -60,13 +62,13 @@ class PaymentInfo with ChangeNotifier {
     required String assetPath,
     required String title,
     required String? subtitle,
-    required String payment_url,
+    // required String payment_url,
     required int giaTriGiam,
   }) {
     this.assetPath = assetPath;
     this.title = title;
     this.subtitle = subtitle;
-    this.payment_url = payment_url;
+    // this.payment_url = payment_url;
     this.giaTriGiam = giaTriGiam;
 
     // Call notifyListeners() safely

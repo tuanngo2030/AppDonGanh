@@ -245,7 +245,27 @@ void _handleDeleteRequest(WithdrawalRequest request) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lịch sử rút tiền'),
+        leading: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Image.asset(
+                'lib/assets/arrow_back.png',
+                width: 30,
+                height: 30,
+                color: const Color.fromRGBO(41, 87, 35, 1),
+              ),
+            ),
+          ),
+        centerTitle: true,
+        title: const Text(
+            'Lịch sử rút tiền',
+            style: TextStyle(
+                color: Color.fromRGBO(41, 87, 35, 1),
+                fontWeight: FontWeight.bold),
+          ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

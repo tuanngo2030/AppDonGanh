@@ -162,11 +162,31 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Đăng ký hộ kinh doanh'),
-        elevation: 0,
-      ),
+     appBar: AppBar(
+          leading: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Image.asset(
+                'lib/assets/arrow_back.png',
+                width: 30,
+                height: 30,
+                color: const Color.fromRGBO(41, 87, 35, 1),
+              ),
+            ),
+          ),
+          title: const Text(
+            'Đăng ký hộ kinh doanh',
+            style: TextStyle(
+                color: Color.fromRGBO(41, 87, 35, 1),
+                fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(24),

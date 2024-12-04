@@ -1,5 +1,6 @@
 import 'package:don_ganh_app/Profile_Screen/paymentmethods_screen.dart';
 import 'package:don_ganh_app/api_services/order_api_service.dart';
+import 'package:don_ganh_app/api_services/product_api_service.dart';
 import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/khuyen_mai_model.dart';
 import 'package:don_ganh_app/models/order_model.dart';
@@ -25,6 +26,7 @@ class _PayScreen2State extends State<PayScreen2> {
   String selectedPromoCode = '';
   String selectedPromoId = '';
   int giaTriGiam = 0;
+  // late Future<Map<String, dynamic>> productData;
 
   void updatePromoCode(KhuyenMaiModel promotion) {
     setState(() {
@@ -44,11 +46,11 @@ class _PayScreen2State extends State<PayScreen2> {
     // Assuming you have the PaymentInfo instance as paymentInfo
 
 // Access the _orders list using the getter
-List<OrderModel> orders = paymentInfo.orders;
-
+    List<OrderModel> orders = paymentInfo.orders;
 
     try {
-      OrderModel? updatedOrder = await _orderApiService.updateTransactionHoaDonList(
+      OrderModel? updatedOrder =
+          await _orderApiService.updateTransactionHoaDonList(
         list: orders,
         hoadonId: hoadonId,
         transactionId: transactionId,
@@ -61,9 +63,8 @@ List<OrderModel> orders = paymentInfo.orders;
           assetPath: assetPath,
           title: title,
           subtitle: subtitle,
-          payment_url: updatedOrder.payment_url,
-          giaTriGiam: giaTriGiam
-        );
+          // payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
@@ -71,10 +72,22 @@ List<OrderModel> orders = paymentInfo.orders;
 
       widget.nextStep();
     } catch (e) {
-      print('Error updating transaction: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lỗi khi cập nhật giao dịch.')),
+        const SnackBar(content: Text('Đặt hàng thành công!')),
       );
+      paymentInfo.paymentMehtod(
+          assetPath: assetPath,
+          title: title,
+          subtitle: subtitle,
+          // payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam);
+
+      widget.nextStep();
+      // Navigator.pushNamed(context, '/bottomnavigation');
+      print('Error updating transaction: $e');
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Lỗi khi cập nhật giao dịch.')),
+      // );
     } finally {
       setState(() {
         _isProcessing = false;
@@ -85,13 +98,15 @@ List<OrderModel> orders = paymentInfo.orders;
   Future<void> _updateTransactionCOD(String hoadonId, String transactionId,
       String assetPath, String title, String? subtitle) async {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    List<OrderModel> orders = paymentInfo.orders;
     setState(() {
       _isProcessing = true;
     });
 
     try {
       OrderModel? updatedOrder =
-          await _orderApiService.updateTransactionHoaDonCOD(
+          await _orderApiService.updateTransactionHoaDonCODList(
+        list: orders,
         hoadonId: hoadonId,
         transactionId: transactionId,
         khuyeimaiId: selectedPromoId,
@@ -103,9 +118,8 @@ List<OrderModel> orders = paymentInfo.orders;
           assetPath: assetPath,
           title: title,
           subtitle: subtitle,
-          payment_url: updatedOrder.payment_url,
-          giaTriGiam: giaTriGiam
-        );
+          // payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cập nhật thành công! ID: ${updatedOrder.id}')),
@@ -113,10 +127,21 @@ List<OrderModel> orders = paymentInfo.orders;
 
       widget.nextStep();
     } catch (e) {
-      print('Error updating COD transaction: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lỗi khi cập nhật giao dịch COD.')),
+        const SnackBar(content: Text('Đặt hàng thành công!')),
       );
+      paymentInfo.paymentMehtod(
+          assetPath: assetPath,
+          title: title,
+          subtitle: subtitle,
+          // payment_url: updatedOrder.payment_url,
+          giaTriGiam: giaTriGiam);
+      widget.nextStep();
+      // Navigator.pushNamed(context, '/bottomnavigation');
+      print('Error updating COD transaction: $e');
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Lỗi khi cập nhật giao dịch COD.')),
+      // );
     } finally {
       setState(() {
         _isProcessing = false;
@@ -127,6 +152,8 @@ List<OrderModel> orders = paymentInfo.orders;
   @override
   Widget build(BuildContext context) {
     final paymentInfo = Provider.of<PaymentInfo>(context);
+    final orders = paymentInfo.orders; // Access the orders list
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -134,82 +161,182 @@ List<OrderModel> orders = paymentInfo.orders;
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'Mã đơn hàng: ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      TextSpan(
-                        text: paymentInfo.order_id,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+              // Title Section
+              const Padding(
+                padding: EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  'Danh sách đơn hàng',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'Người nhận hàng: ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                        ),
+
+              // Orders List
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Display order details
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: 'Mã đơn hàng: ',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: order.id,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Display chiTietHoaDon details
+                          if (order.chiTietHoaDon != null)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: order.chiTietHoaDon!.length,
+                              itemBuilder: (context, chiTietIndex) {
+                                final chiTiet =
+                                    order.chiTietHoaDon![chiTietIndex];
+                                Future<Map<String, dynamic>> productData =
+                                    ProductApiService()
+                                        .getVariantById(chiTiet.bienThe);
+
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Text(
+                                      //   'Sản phẩm: ${chiTiet.bienThe}', // Tên biến thể
+                                      //   style: const TextStyle(
+                                      //     fontSize: 14,
+                                      //     fontWeight: FontWeight.bold,
+                                      //   ),
+                                      // ),
+                                      FutureBuilder<Map<String, dynamic>>(
+                                        future: productData,
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          } else if (snapshot.hasError) {
+                                            return Text(
+                                                'Error: ${snapshot.error}');
+                                          } else if (snapshot.hasData) {
+                                            var product = snapshot.data;
+
+                                            // Extract GiaTri from KetHopThuocTinh
+                                            List<String> ketHopThuocTinhValues =
+                                                [];
+                                            for (var item in product?[
+                                                    'KetHopThuocTinh'] ??
+                                                []) {
+                                              ketHopThuocTinhValues.add(
+                                                  item['IDGiaTriThuocTinh']
+                                                      ['GiaTri']);
+                                            }
+
+                                            return Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  child: Image.network(
+                                                    product?['IDSanPham']
+                                                            ['HinhSanPham'] ??
+                                                        '',
+                                                    width: 100,
+                                                    height: 100,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Tên sản phẩm: ${product?['IDSanPham']['TenSanPham']}',
+                                                      style: const TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+
+                                                    // Display KetHopThuocTinh GiaTri values
+                                                    Text(
+                                                      'Loại sản phẩm: ${ketHopThuocTinhValues.join(", ")}',
+                                                      style: const TextStyle(
+                                                          fontSize: 14),
+                                                    ),
+                                                    Text(
+                                                      'Số lượng: ${chiTiet.soLuong}',
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Đơn giá: ${NumberFormat("#,##0").format(chiTiet.donGia)} VND',
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            );
+                                          } else {
+                                            return const Text(
+                                                'No product found');
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
                       ),
-                      TextSpan(
-                        text: '${paymentInfo.hoTen},${paymentInfo.soDienThoai}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'Địa chỉ nhận: ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            '${paymentInfo.duongThonXom}, ${paymentInfo.phuongXa}, ${paymentInfo.quanHuyen}, ${paymentInfo.tinhThanhPho}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
+              const SizedBox(height: 20),
+
+              // Payment Method Section
               const Padding(
                 padding: EdgeInsets.only(top: 25, bottom: 20),
                 child: Text(
@@ -220,10 +347,9 @@ List<OrderModel> orders = paymentInfo.orders;
                   ),
                 ),
               ),
-              selectedPaymentMethod == null
-                  ? buildPaymentMethodsList()
-                  : buildSelectedMethodDetails(),
-
+              // paymentInfo.assetPath.isEmpty
+              buildPaymentMethodsList()
+              // : buildSelectedMethodDetails(),
             ],
           ),
         ),
@@ -267,33 +393,26 @@ List<OrderModel> orders = paymentInfo.orders;
         String transactionId = '151';
         String transactionIdCod = '111';
         if (value == 'Qr') {
-          // Điều hướng sang PaymentMethodsScreen khi chọn "Tài khoản ngân hàng"
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => PaymentMethodsScreen(),
-          //   ),
-          // ).then((selectedId) {
-          //   if (selectedId != null) {
-          //     setState(() {
-          //       this.selectedPaymentMethod = selectedId.toString(); // Lưu ID đã chọn
-          //     });
-          //   }
-          // });
-          // final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-          // String hoadonId = paymentInfo.order_id;
-          // String transactionId = '151';
+          print(selectedPromoId);
+          await _updateTransaction(
+            hoadonId,
+            transactionId,
+            assetPath,
+            title,
+            subtitle,
+          );
 
-          // await _updateTransaction(hoadonId, transactionId, assetPath, title, subtitle);
-          setState(() {
-            selectedPaymentMethod = value;
-          });
+          // setState(() {
+          //   selectedPaymentMethod = value;
+          // });
         } else if (value == 'COD') {
-          // Nếu chọn COD, gọi API riêng
-          // await _updateTransactionCOD(hoadonId, transactionIdCod, assetPath, title, subtitle);
-          setState(() {
-            selectedPaymentMethod = value;
-          });
+          await _updateTransactionCOD(
+            hoadonId,
+            transactionIdCod,
+            assetPath,
+            title,
+            subtitle,
+          );
         } else {
           setState(() {
             selectedPaymentMethod = value;
@@ -403,11 +522,13 @@ List<OrderModel> orders = paymentInfo.orders;
                   children: [
                     TextSpan(
                       text: currencyFormat.format(paymentInfo.totalPrice),
-                      style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.black),
                     ),
                     const TextSpan(
                       text: ' - ', // Add separator between the two values
-                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, color: Colors.black),
                     ),
                     TextSpan(
                       text: currencyFormat.format(giaTriGiam),

@@ -6,6 +6,7 @@ import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostItem extends StatefulWidget {
@@ -548,13 +549,34 @@ class _PostItemState extends State<PostItem> {
               ),
             ),
             // Post content
-            Padding(
-              padding: const EdgeInsets.only(top: 10, left: 20, bottom: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(widget.post.noidung ?? ''),
+           Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 27, right: 27),
+                child: ReadMoreText(
+                  widget.post.noidung,
+                  trimLines: 3,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: "Xem Thêm",
+                  trimExpandedText: "Ẩn",
+                  moreStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  lessStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
             ),
+
+            const SizedBox(height: 10,),
             // Post image (only if it exists)
             if (widget.post.image.isNotEmpty)
               SizedBox(

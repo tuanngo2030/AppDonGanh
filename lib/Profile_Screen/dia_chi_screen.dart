@@ -171,11 +171,11 @@ Widget build(BuildContext context) {
                   return ListTile(
                     title: Text(
                       'Họ và tên: ${address.name} \nSố điện thoại: ${address.soDienThoai}',
-                      style: TextStyle(fontFamily: 'Roboto'),
+                      style: const TextStyle(fontFamily: 'Roboto'),
                     ),
                     subtitle: Text(
                       'Địa chỉ: ${address.duongThon}, ${address.phuongXa}, ${address.quanHuyen}, ${address.tinhThanhPho}',
-                      style: TextStyle(fontFamily: 'Roboto'),
+                      style: const TextStyle(fontFamily: 'Roboto'),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

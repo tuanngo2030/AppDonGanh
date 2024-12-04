@@ -3,10 +3,12 @@ import 'dart:ffi';
 import 'package:device_preview/device_preview.dart';
 import 'package:don_ganh_app/CreatPassword/sendotpcreatPw.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
+import 'package:don_ganh_app/screen/ho_tro_khach_hang_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/dang_ky_thu_mua_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/doanh_thu_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/lich_su_rut_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/quan_ly_don_hang_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/so_du_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
 import 'package:flutter/material.dart';
@@ -122,10 +124,11 @@ class MyApp extends StatelessWidget {
         '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
         '/so_du_screen': (context) => const SoDuScreen(),
         '/yeu_cau_rut_screen': (context) => const LichSuRutScreen(),
-         '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
-          '/so_du_screen': (context) => const SoDuScreen(),
-          '/sendotpcreate_screen': (context) => Sendotpcreatpw(),
-         '/doanh_thu_screen': (context) => const DoanhThuScreen(),
+        '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
+        '/so_du_screen': (context) => const SoDuScreen(),
+        '/sendotpcreate_screen': (context) => Sendotpcreatpw(),
+        '/quan_ly_don_hang_screen': (context) => const QuanLyDonHangScreen(),
+        '/ho_tro_khach_hang_screen': (context) => const HoTroKhachHangScreen(),
         // '/other_profile_screen': (context) => const O(),
       },
       onGenerateRoute: (settings) {

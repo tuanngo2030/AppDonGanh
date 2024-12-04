@@ -26,10 +26,9 @@ class _OState extends State<O> {
   int _currentPage = 0;
   bool _isFollowing = false;
   String? userId;
-  
+
   bool _isLoading = false;
   String? token;
-
 
   Future<List<BlogModel>>? _userBlogs;
   Future<List<Map<String, dynamic>>>? _userProducts;
@@ -45,9 +44,8 @@ class _OState extends State<O> {
       });
     });
   }
-  
 
-   void _onChat() async {
+  void _onChat() async {
     setState(() {
       _isLoading = true; // Start loading state
     });
@@ -69,6 +67,8 @@ class _OState extends State<O> {
 
         if (response != null && response['_id'] != null) {
           String conversationId = response['_id'];
+          bool isCurrentUserSender =
+              (receiverId == response['sender_id']['_id']);
 
           print('conversationId: $conversationId');
 
@@ -80,9 +80,11 @@ class _OState extends State<O> {
                 title: conversationId,
                 userId: userId!,
                 conversationId: conversationId,
-                receiverData:
-                    response['receiver_id'] ?? {},
-               
+                receiverData: isCurrentUserSender
+                    ? response['sender_id'] ??
+                        {} // Nếu là sender, hiển thị receiver
+                    : response['receiver_id'] ??
+                        {}, // Nếu không, hiển thị sender
               ),
             ),
           );
@@ -101,7 +103,7 @@ class _OState extends State<O> {
     });
   }
 
-    void _showSnackBar(String message) {
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
@@ -111,20 +113,21 @@ class _OState extends State<O> {
     userId = prefs.getString('userId');
     String SetuserId = widget.nguoiDung.id!;
     final response = await UserApiService().fetchUserData(SetuserId, userId!);
-if (mounted) {
-    setState(() {
-      final sanPhamData = response['sanPham']['list'];
-      if (sanPhamData is List) {
-        _userProducts =
-            Future(() => List<Map<String, dynamic>>.from(sanPhamData));
-      } else if (sanPhamData is Map) {
-        _userProducts = Future(() => [sanPhamData as Map<String, dynamic>]);
-      } else {
-        _userProducts = Future.value([]);
-      }
-    });
+    if (mounted) {
+      setState(() {
+        final sanPhamData = response['sanPham']['list'];
+        if (sanPhamData is List) {
+          _userProducts =
+              Future(() => List<Map<String, dynamic>>.from(sanPhamData));
+        } else if (sanPhamData is Map) {
+          _userProducts = Future(() => [sanPhamData as Map<String, dynamic>]);
+        } else {
+          _userProducts = Future.value([]);
+        }
+      });
+    }
   }
-}
+
   Future<void> _initializeFollowStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
@@ -137,38 +140,39 @@ if (mounted) {
     }
   }
 
- Future<void> _loadUserBlogs() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  userId = prefs.getString('userId');
-  String SetuserId = widget.nguoiDung.id!;
+  Future<void> _loadUserBlogs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    String SetuserId = widget.nguoiDung.id!;
 
-  try {
-    final response = await UserApiService().fetchUserData(SetuserId, userId!);
+    try {
+      final response = await UserApiService().fetchUserData(SetuserId, userId!);
 
-    // Check if the widget is still mounted before calling setState
-    if (mounted) {
-      setState(() {
-        final blogData = response['baiViet']['list']; // Adjust based on actual JSON key
-        if (blogData is List) {
-          _userBlogs = Future(() => blogData.map((json) => BlogModel.fromJson(json)).toList());
-        } else {
-          _userBlogs = Future.value([]);
-        }
-      });
+      // Check if the widget is still mounted before calling setState
+      if (mounted) {
+        setState(() {
+          final blogData =
+              response['baiViet']['list']; // Adjust based on actual JSON key
+          if (blogData is List) {
+            _userBlogs = Future(() =>
+                blogData.map((json) => BlogModel.fromJson(json)).toList());
+          } else {
+            _userBlogs = Future.value([]);
+          }
+        });
+      }
+    } catch (e) {
+      // Handle any exceptions, such as network errors
+      print('Error loading user blogs: $e');
     }
-  } catch (e) {
-    // Handle any exceptions, such as network errors
-    print('Error loading user blogs: $e');
   }
-}
-
 
   Future<void> _toggleFollow() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? followingList = prefs.getStringList('following') ?? [];
 
     String action = _isFollowing ? 'unfollow' : 'follow';
-     _followApiService.toggleFollowUser(
+    _followApiService.toggleFollowUser(
       userId: userId!,
       targetId: widget.nguoiDung.id!,
       action: action,
@@ -353,7 +357,7 @@ if (mounted) {
                   ),
                 ),
                 SizedBox(
-                  height: 550,
+                  height: 530,
                   width: 500,
                   child: PageView(
                     controller: _pageController,

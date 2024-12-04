@@ -68,9 +68,8 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
-              
             );
-                   _loadUserDetails();
+            _loadUserDetails();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
@@ -103,13 +102,13 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             GestureDetector(
               onTap: _pickImage,
               child: Container(
-                width: 110, 
+                width: 110,
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: const Color.fromRGBO(41, 87, 35, 1),
-                       border: Border.all(
-                    color: const  Color.fromRGBO(41, 87, 35, 1), // Màu viền
+                  border: Border.all(
+                    color: const Color.fromRGBO(41, 87, 35, 1), // Màu viền
                     width: 1.5, // Độ dày viền
                   ),
                 ),
@@ -176,9 +175,18 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
             const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/trungtamhotro_icon.png"),
-              title: const Text('Đăng ký hộ kinh doanh'),
+              title: const Text('Hỗ trợ khách hàng'),
               onTap: () {
-                 Navigator.pushNamed(context, '/dang_ky_thu_mua_screen');
+                Navigator.pushNamed(context, '/ho_tro_khach_hang_screen');
+              },
+            ),
+            const Divider(thickness: 1, height: 1),
+            ListTile(
+              contentPadding: const EdgeInsets.only(left: 30),
+              leading: Image.asset("lib/assets/dangkyhothumua_icon.png"),
+              title: const Text('  Đăng ký hộ kinh doanh'),
+              onTap: () {
+                Navigator.pushNamed(context, '/dang_ky_thu_mua_screen');
               },
             ),
             const Divider(thickness: 1, height: 1),

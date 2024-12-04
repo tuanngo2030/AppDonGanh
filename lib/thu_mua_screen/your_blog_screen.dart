@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YourBlogScreen extends StatefulWidget {
@@ -619,65 +620,65 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '45',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              'Bài viết',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '$followerCount',
-                              style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            const Text(
-                              'Người theo dõi',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '$followingCount',
-                              style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            const Text(
-                              'Đang theo dõi',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 30),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       const Expanded(
+                //         flex: 1,
+                //         child: Column(
+                //           children: [
+                //             Text(
+                //               '45',
+                //               style: TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //             Text(
+                //               'Bài viết',
+                //               style: TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //       Expanded(
+                //         flex: 1,
+                //         child: Column(
+                //           children: [
+                //             Text(
+                //               '$followerCount',
+                //               style: const TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //             const Text(
+                //               'Người theo dõi',
+                //               style: TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //       Expanded(
+                //         flex: 1,
+                //         child: Column(
+                //           children: [
+                //             Text(
+                //               '$followingCount',
+                //               style: const TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //             const Text(
+                //               'Đang theo dõi',
+                //               style: TextStyle(
+                //                   fontSize: 13, fontWeight: FontWeight.w700),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -764,14 +765,35 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
             ),
 
             // Post content
-            Padding(
-              padding: const EdgeInsets.only(top: 10, left: 20, bottom: 20),
-              child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(post.noidung ?? '')),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 27, right: 27),
+                child: ReadMoreText(
+                  post.noidung,
+                  trimLines: 5,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: "Xem Thêm",
+                  trimExpandedText: "Ẩn",
+                  moreStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  lessStyle: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color.fromRGBO(248, 158, 25, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(248, 158, 25, 1)),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
             ),
-
-            // Post image (only if it exists)
+              const SizedBox(
+                  height: 10,
+                ),
             // Post image (only if it exists)
             if (post.image.isNotEmpty)
               SizedBox(

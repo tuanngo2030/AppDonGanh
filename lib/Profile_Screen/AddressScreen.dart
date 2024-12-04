@@ -21,8 +21,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   final TextEditingController _duongThonController = TextEditingController();
   final TextEditingController _tenController = TextEditingController();
   final TextEditingController _soDienThoaiController = TextEditingController();
-  final TextEditingController _kinhDoController = TextEditingController(); // Kinh độ
-  final TextEditingController _viDoController = TextEditingController(); // Vĩ độ
+  final TextEditingController _kinhDoController =
+      TextEditingController(); // Kinh độ
+  final TextEditingController _viDoController =
+      TextEditingController(); // Vĩ độ
 
   String? _selectedTinhThanhPho; // Tỉnh/Thành phố
   String? _selectedQuanHuyen; // Quận/Huyện
@@ -142,8 +144,19 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
         child: Column(
           children: [
             TextField(
+              maxLength: 50,
               controller: _tenController,
-              decoration: const InputDecoration(labelText: 'Họ và tên'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Họ và tên',
+                contentPadding: const EdgeInsets.all(16),
+                counter: Text(
+                  '${_duongThonController.text.length}/50', // Hiển thị số ký tự hiện tại
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -224,8 +237,19 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
 
             // TextField cho Đường/Thôn
             TextField(
+              maxLength: 100,
               controller: _duongThonController,
-              decoration: const InputDecoration(labelText: 'Đường/Thôn'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Đường/thôn',
+                contentPadding: const EdgeInsets.all(16),
+                counter: Text(
+                  '${_duongThonController.text.length}/100', // Hiển thị số ký tự hiện tại
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             // Hiển thị Kinh độ và Vĩ độ
@@ -396,14 +420,16 @@ class _MapScreenState extends State<MapScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog without doing anything
+                Navigator.pop(
+                    context); // Close the dialog without doing anything
               },
               child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
-                Navigator.pop(context, _currentLocation); // Return the selected location
+                Navigator.pop(
+                    context, _currentLocation); // Return the selected location
               },
               child: const Text('Xác nhận'),
             ),
@@ -461,8 +487,8 @@ class _MapScreenState extends State<MapScreen> {
         },
         child: Icon(
           _currentLocation == widget.initialLocation
-              ? Icons.my_location 
-              : Icons.check, 
+              ? Icons.my_location
+              : Icons.check,
         ),
       ),
     );

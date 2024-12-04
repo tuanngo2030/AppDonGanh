@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:don_ganh_app/api_services/bank_api_service.dart';
 import 'package:don_ganh_app/api_services/rut_tien_api_service.dart';
+import 'package:don_ganh_app/api_services/user_api_service.dart';
 import 'package:don_ganh_app/models/bank_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,145 +69,243 @@ class _SoDuScreenState extends State<SoDuScreen> {
     return '${formatter.format(soDu)} VNĐ';
   }
 
-  // Handle Withdraw Modal
+  Future<bool> showPasswordConfirmationDialog(
+      BuildContext context, String email) async {
+    final TextEditingController passwordController = TextEditingController();
+    bool isLoading = false;
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedUserId = prefs.getString('userId');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Xác nhận mật khẩu'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration:
+                        const InputDecoration(labelText: 'Nhập mật khẩu'),
+                  ),
+                  if (isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(
+                        context, false); // Return `false` when cancelled
+                  },
+                  child: const Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    final response = await UserApiService().loginXacMinh(
+                      email,
+                      passwordController.text,
+                      storedUserId!,
+                    );
+                    setState(() {
+                      isLoading = false;
+                    });
+                    if (response['error'] == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${response['message']}')),
+                      );
+                    } else {
+                      Navigator.pop(
+                          context, true); // Return `true` when success
+                    }
+                  },
+                  child: const Text('Xác nhận'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    return result ?? false; // Ensure a `bool` value is always returned
+  }
+
+  Future<String?> getEmailFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('gmail'); // Replace 'userEmail' with your key
+  }
+
   void _handleWithdraw(BuildContext context) async {
     showModalBottomSheet(
+      isScrollControlled: true, // Cho phép điều chỉnh chiều cao theo bàn phím
       context: context,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                'Chọn tài khoản',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<Bank>(
-                value: tenNganHangDaChon,
-                items: danhSachNganHang
-                    .map((bank) => DropdownMenuItem<Bank>(
-                          value: bank,
-                          child: Row(
-                            children: [
-                              Image.network(
-                                bank.logo, // Hiển thị logo từ API
-                                height: 50,
-                                width: 50,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 24,
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom, // Đẩy theo bàn phím
+          ),
+          child: SingleChildScrollView(
+            // Đảm bảo cuộn được khi nội dung vượt quá chiều cao
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Chọn tài khoản',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<Bank>(
+                  value: tenNganHangDaChon,
+                  items: danhSachNganHang
+                      .map((bank) => DropdownMenuItem<Bank>(
+                            value: bank,
+                            child: Row(
+                              children: [
+                                Image.network(
+                                  bank.logo,
+                                  height: 50,
+                                  width: 50,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                    Icons.broken_image,
+                                    color: Colors.grey,
+                                    size: 24,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(bank.shortName),
-                            ],
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (Bank? value) {
-                  setState(() {
+                                const SizedBox(width: 8),
+                                Text(bank.shortName),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (Bank? value) {
                     tenNganHangDaChon = value;
-                  });
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Tên ngân hàng',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Số tài khoản',
-                  border: OutlineInputBorder(),
-                ),
-                controller: soTaiKhoanController,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Tổng tiền rút',
-                  border: OutlineInputBorder(),
-                ),
-                controller: soTienController,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Ghi chú',
-                  border: OutlineInputBorder(),
-                ),
-                controller: ghiChuController,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      tenNganHangDaChon = null;
-                      soTaiKhoanController.clear();
-                      soTienController.clear();
-                      ghiChuController.clear();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Hủy'),
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Tên ngân hàng',
+                    border: OutlineInputBorder(),
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (tenNganHangDaChon == null ||
-                          soTaiKhoanController.text.isEmpty ||
-                          soTienController.text.isEmpty ||
-                          double.tryParse(soTienController.text) == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Vui lòng điền đầy đủ thông tin')),
-                        );
-                        return;
-                      }
-
-                      double enteredSoTien =
-                          double.tryParse(soTienController.text) ?? 0;
-                      final response =
-                          await YeuCauRutTienApi().createYeuCauRutTien(
-                        userId: userId ?? '',
-                        tenNganHang: tenNganHangDaChon!
-                            .shortName, // Truyền tên ngân hàng
-                        soTaiKhoan: soTaiKhoanController.text,
-                        soTien: enteredSoTien,
-                        ghiChu: ghiChuController.text,
-                      );
-
-                      if (response['success']) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  '${response['message']}')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  '${response['message']}')),
-                        );
-                      }
-
-                      tenNganHangDaChon = null;
-                      soTaiKhoanController.clear();
-                      soTienController.clear();
-                      ghiChuController.clear();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Xác nhận'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Số tài khoản',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
-            ],
+                  controller: soTaiKhoanController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Tổng tiền rút',
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: soTienController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Ghi chú',
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: ghiChuController,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        tenNganHangDaChon = null;
+                        soTaiKhoanController.clear();
+                        soTienController.clear();
+                        ghiChuController.clear();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Hủy'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (tenNganHangDaChon == null ||
+                            soTaiKhoanController.text.isEmpty ||
+                            soTienController.text.isEmpty ||
+                            double.tryParse(soTienController.text) == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Vui lòng điền đầy đủ thông tin')),
+                          );
+                          return;
+                        }
+
+                        // Retrieve email from SharedPreferences
+                        final email = await getEmailFromSharedPreferences();
+                        if (email == null || email.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Email không tồn tại. Vui lòng đăng nhập lại.')),
+                          );
+                          return;
+                        }
+
+                        // Show password confirmation dialog
+                        bool isConfirmed = await showPasswordConfirmationDialog(
+                          context,
+                          email, // Pass the retrieved email
+                        );
+
+                        if (!isConfirmed) {
+                          return;
+                        }
+
+                        // Proceed with the withdrawal process
+                        double enteredSoTien =
+                            double.tryParse(soTienController.text) ?? 0;
+                        final response =
+                            await YeuCauRutTienApi().createYeuCauRutTien(
+                          userId: userId ?? '',
+                          tenNganHang: tenNganHangDaChon!.shortName,
+                          soTaiKhoan: soTaiKhoanController.text,
+                          soTien: enteredSoTien,
+                          ghiChu: ghiChuController.text,
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${response['message']}')),
+                        );
+
+                        // Clear inputs and navigate back
+                        tenNganHangDaChon = null;
+                        soTaiKhoanController.clear();
+                        soTienController.clear();
+                        ghiChuController.clear();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Xác nhận'),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

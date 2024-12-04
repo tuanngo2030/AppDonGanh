@@ -1,18 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BanLa extends StatelessWidget {
   const BanLa({super.key});
-// thanh
+
+  Future<String?> _getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role'); // Lấy role từ SharedPreferences
+  }
+
+  void _navigateToBusiness(BuildContext context) async {
+    final role = await _getUserRole();
+
+    if (role != 'hokinhdoanh') {
+      // Nếu không phải là hộ kinh doanh, hiển thị SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng đăng ký Hộ kinh doanh ở trang cá nhân.'),
+        ),
+      );
+    } else {
+      // Nếu vai trò là hộ kinh doanh, chuyển hướng
+      Navigator.pushNamed(context, "/bottomThumua");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 41, 87, 35),
       body: SingleChildScrollView(
         child: Padding(
-       padding: const EdgeInsets.only(top: 80, left: 16.0, right: 16.0), 
+          padding: const EdgeInsets.only(top: 80, left: 16.0, right: 16.0),
           child: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start  ,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Image.asset("lib/assets/logo_xinchao.png"),
                 const Text(
@@ -43,20 +65,18 @@ class BanLa extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                  const SizedBox(height: 20),
-              UserOption(
-                text: 'Khách mua hàng',
-                onTap: () {
-                  Navigator.pushNamed((context), "/bottom");
-                },
-              ),
-              const SizedBox(height: 20),
-              UserOption(
-                text: 'Hộ kinh doanh',
-                onTap: () {
-                  Navigator.pushNamed((context), "/bottomThumua");
-                },
-              ),
+                const SizedBox(height: 20),
+                UserOption(
+                  text: 'Khách mua hàng',
+                  onTap: () {
+                    Navigator.pushNamed(context, "/bottom");
+                  },
+                ),
+                const SizedBox(height: 20),
+                UserOption(
+                  text: 'Hộ kinh doanh',
+                  onTap: () => _navigateToBusiness(context), // Gọi hàm kiểm tra vai trò
+                ),
               ],
             ),
           ),
@@ -65,11 +85,6 @@ class BanLa extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
 
 class UserOption extends StatelessWidget {
   final String text;
@@ -88,8 +103,8 @@ class UserOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(17),
-          boxShadow: [
-            const BoxShadow(
+          boxShadow: const [
+            BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
               offset: Offset(0, 5),

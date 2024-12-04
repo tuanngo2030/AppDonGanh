@@ -1,11 +1,7 @@
-// ignore_for_file: unused_import
-
 import 'package:don_ganh_app/screen/favorite_screen.dart';
 import 'package:don_ganh_app/screen/home_screen.dart';
 import 'package:don_ganh_app/screen/manageraccount_screen.dart';
 import 'package:don_ganh_app/screen/notification_screen.dart';
-import 'package:don_ganh_app/screen/notifition_screen.dart';
-import 'package:don_ganh_app/screen/shop_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/home_thumua.dart';
 import 'package:flutter/material.dart';
 
@@ -25,96 +21,59 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     });
   }
 
-  final List screens = [
+  final List<Widget> screens = [
     const HomeScreen(),
     const HomeThumua(),
     const FavoriteScreen(),
     const NotificationScreen(),
-    const ManageraccountScreen()
+    const ManageraccountScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: screens[selectedIndex],
-      bottomNavigationBar: ClipRRect(
-         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-          topRight: Radius.circular(10.0),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(41, 87, 35, 1),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
         ),
         child: BottomNavigationBar(
-          type: BottomNavigationBarType.shifting,
-          iconSize: 30,
-          showSelectedLabels: false,
-          unselectedItemColor: Colors.white,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white.withOpacity(0.6),
           currentIndex: selectedIndex,
-          backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
           onTap: _onItemTapped,
-          items: [
+          items: const [
             BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.home_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
-              ),
-              label: "Home",
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home, size: 28),
+              label: "Trang chủ",
             ),
             BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.shopping_cart_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.shopping_cart_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
-              ),
-              label: "Home",
+              icon: Icon(Icons.article_outlined),
+              activeIcon: Icon(Icons.article, size: 28),
+              label: "Bài viết",
             ),
             BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.favorite_outline),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.favorite_outline, color: Color.fromRGBO(41, 87, 35, 1)),
-              ),
-              label: "Home",
+              icon: Icon(Icons.favorite_outline),
+              activeIcon: Icon(Icons.favorite, size: 28),
+              label: "Yêu thích",
             ),
             BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.chat_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.chat_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
-              ),
-              label: "Home",
+              icon: Icon(Icons.notifications_on_outlined),
+              activeIcon: Icon(Icons.notifications_on, size: 28),
+              label: "Thông báo",
             ),
             BottomNavigationBarItem(
-              backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-              icon: const Icon(Icons.person_pin_outlined),
-              activeIcon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.person_pin_outlined, color: Color.fromRGBO(41, 87, 35, 1)),
-              ),
-              label: "Home",
+              icon: Icon(Icons.person_2_outlined),
+              activeIcon: Icon(Icons.person_2, size: 28),
+              label: "Bạn",
             ),
           ],
         ),

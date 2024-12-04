@@ -193,4 +193,39 @@ class UserApiService {
       throw Exception('Error: $e');
     }
   }
+
+
+  Future<Map<String, dynamic>> loginXacMinh(String email, String password, String userId) async {
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/loginXacMinh/$userId');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'gmail': email,
+          'matKhau': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful
+        return json.decode(response.body);
+      } else {
+        // Handle error responses
+        final error = json.decode(response.body);
+        return {
+          'error': true,
+          'message': error['message'] ?? 'Unknown error',
+        };
+      }
+    } catch (e) {
+      // Handle unexpected errors
+      return {
+        'error': true,
+        'message': 'Failed to connect to the server',
+      };
+    }
+  }
 }

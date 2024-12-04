@@ -64,8 +64,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      height: 100,
-                      width: 100,
+                      height: 120,
+                      width: 120,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100.0),
                         border: const Border.fromBorderSide(
@@ -132,7 +132,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                         'Tên người dùng', // Use 'Tên người dùng' if tenNguoiDung is null
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 18,
+                      fontSize: 20,
                       color: Color.fromRGBO(47, 88, 42, 1),
                     ),
                   ),
@@ -149,12 +149,12 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                             Text(
                               '45',
                               style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
+                                  fontSize: 15, fontWeight: FontWeight.w700),
                             ),
                             Text(
                               'Bài viết',
                               style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w700),
+                                  fontSize: 18, fontWeight: FontWeight.w700),
                             ),
                           ],
                         ),
@@ -171,12 +171,12 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                               Text(
                                 '$followerCount',
                                 style: TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700),
+                                    fontSize: 15, fontWeight: FontWeight.w700),
                               ),
                               Text(
                                 'Người theo dõi',
                                 style: TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700),
+                                    fontSize: 18, fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
@@ -194,12 +194,12 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                               Text(
                                 '$followingCount',
                                 style: TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700),
+                                    fontSize: 15, fontWeight: FontWeight.w700),
                               ),
                               Text(
                                 'Đang theo dõi',
                                 style: TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700),
+                                    fontSize: 18, fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
@@ -313,7 +313,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       crossAxisCount: 2,
                       children: [
                         MainFuntion(
-                          icon: Icon(Icons.person),
+                          icon: Icon(Icons.person_2_outlined , size: 30),
                           title: 'Thông tin tài khoản',
                           subtitle: 'Bao gồm thông tin cá nhân:',
                           onTap: () {
@@ -321,16 +321,16 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           },
                         ),
                         MainFuntion(
-                          icon: Icon(Icons.person),
-                          title: 'Đăng ký thu mua',
-                          subtitle: 'Đăng ký bán nông sản:',
+                          icon: Icon(Icons.fact_check_outlined, size: 30),
+                          title: 'Quản lý đơn hàng',
+                          subtitle: 'Quản lý đơn hàng của bạn:',
                           onTap: () {
                             Navigator.pushNamed(
-                                context, '/dang_ky_thu_mua_screen');
+                                context, '/quan_ly_don_hang_screen');
                           },
                         ),
                         MainFuntion(
-                          icon: Icon(Icons.person),
+                          icon: Icon(Icons.account_balance_wallet_outlined, size: 30),
                           title: 'Số dư',
                           subtitle: 'Số dư trong ví của bạn:',
                           onTap: () {
@@ -338,7 +338,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           },
                         ),
                         MainFuntion(
-                          icon: Icon(Icons.person),
+                          icon: Icon(Icons.featured_play_list_outlined, size: 30),
                           title: 'Bài viết',
                           subtitle: 'Bao gồm các bài viết của bạn:',
                           onTap: () {
@@ -408,7 +408,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     title,
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                   ),
                 ),
                 Padding(
@@ -416,7 +416,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   child: Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 15,
                     ),
                   ),
                 )
