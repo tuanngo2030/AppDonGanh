@@ -189,13 +189,48 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
           MaterialPageRoute(
             builder: (context) => EditBlogScreen(blog: post),
           ),
-        );
+        ).then((result) {
+          if (result == true) {
+            // Nếu cập nhật thành công, tải lại dữ liệu
+            _fetchBlogPosts();
+          }
+        });
         break;
       case 'delete':
-        _deletePost(baivietId);
-        break;
+       _showDeletePostConfirmationDialog(baivietId);
+      break;
     }
   }
+  
+  void _showDeletePostConfirmationDialog(String baivietId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: const Text('Bạn có chắc chắn muốn xóa bài viết này không?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Đóng dialog mà không làm gì
+              Navigator.of(context).pop();
+            },
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Xóa bài viết và đóng dialog
+              Navigator.of(context).pop(); // Đóng dialog trước
+              _deletePost(baivietId); // Gọi hàm xóa bài viết
+            },
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   void _showComments(
       BuildContext context, BlogModel post, Function() onCommentAdded) {
@@ -791,9 +826,9 @@ class _YourBlogScreenState extends State<YourBlogScreen> {
                 ),
               ),
             ),
-              const SizedBox(
-                  height: 10,
-                ),
+            const SizedBox(
+              height: 10,
+            ),
             // Post image (only if it exists)
             if (post.image.isNotEmpty)
               SizedBox(

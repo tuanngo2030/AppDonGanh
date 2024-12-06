@@ -67,6 +67,20 @@ class _FollowersScreenState extends State<FollowersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+         leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pop(context, true);
+            },
+            child: Image.asset(
+              'lib/assets/arrow_back.png',
+              width: 30,
+              height: 30,
+              color: const Color.fromRGBO(41, 87, 35, 1),
+            ),
+          ),
+        ),
         centerTitle: true,
         title: Text(widget.title),
       ),
@@ -95,7 +109,8 @@ class _FollowersScreenState extends State<FollowersScreen> {
                           ),
                     ..._buildUserList(widget.chucNang == 'followers'
                         ? userData!['followers']
-                        : userData!['followings']),
+                        : userData!['followings']
+                      ),
                   ],
                 ),
     );

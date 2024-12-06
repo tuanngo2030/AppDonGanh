@@ -130,30 +130,30 @@ class _Tenscreen extends State<Tenscreen> {
                   },
                   decoration: InputDecoration(
                     labelText: 'Nhập họ và tên',
-                    labelStyle: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                    labelStyle: const TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Colors.grey), // Màu viền khi không được chọn
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                           color: Color.fromRGBO(41, 87, 35, 1)), // Màu viền khi được chọn
                     ),
                     filled: true,
                     fillColor: Colors.white,
                     hintText: _tenNguoiDung,
-                    counterText: 'Tối đa 100 ký tự',
+                    counterText: '${_tenNguoiDung.length}/30',
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 20),
                   ),
                   keyboardType: TextInputType.name,
-                  maxLength: 100,
+                  maxLength: 30,
                 )
               ],
             ),

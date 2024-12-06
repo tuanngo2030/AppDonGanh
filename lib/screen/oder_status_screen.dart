@@ -229,6 +229,9 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
       };
     } else if (status == 4) {
       buttonText = "Mua lại đơn hàng";
+       buttonAction = () {
+        // Navigator.pushNamed(context, '/oder_review_screen');
+      };
     }
 
     return SafeArea(

@@ -9,6 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreen createState() => _ProfileScreen();
 }
@@ -74,12 +76,12 @@ class _ProfileScreen extends State<ProfileScreen> {
 
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
+              const SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
             );
             _loadUserDetails();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
+              const SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
             );
           }
         } catch (e) {
@@ -89,12 +91,12 @@ class _ProfileScreen extends State<ProfileScreen> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không tìm thấy userId.')),
+          const SnackBar(content: Text('Không tìm thấy userId.')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bạn chưa chọn ảnh.')),
+        const SnackBar(content: Text('Bạn chưa chọn ảnh.')),
       );
     }
   }
@@ -113,11 +115,11 @@ class _ProfileScreen extends State<ProfileScreen> {
               'lib/assets/arrow_back.png',
               width: 30,
               height: 30,
-              color: Color.fromRGBO(41, 87, 35, 1),
+              color: const Color.fromRGBO(41, 87, 35, 1),
             ),
           ),
         ),
-        title: Text(
+        title: const Text(
           'Hồ sơ',
           style: TextStyle(
               color: Color.fromRGBO(41, 87, 35, 1),
@@ -130,7 +132,7 @@ class _ProfileScreen extends State<ProfileScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: _pickImage,
               child: Container(
@@ -146,14 +148,14 @@ class _ProfileScreen extends State<ProfileScreen> {
                 ),
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundColor: Color.fromRGBO(41, 87, 35, 1),
+                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
                   backgroundImage: _image != null
                       ? FileImage(_image!)
                       : _profileImageUrl != null
                           ? NetworkImage(_profileImageUrl!)
                           : null,
                   child: _image == null && _profileImageUrl == null
-                      ? Icon(
+                      ? const Icon(
                           Icons.camera_alt,
                           color: Colors.white,
                           size: 50,
@@ -162,29 +164,29 @@ class _ProfileScreen extends State<ProfileScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               _tenNguoiDung,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color.fromRGBO(41, 87, 35, 1),
               ),
             ),
-            SizedBox(height: 20),
-            Divider(thickness: 1, height: 1),
+            const SizedBox(height: 20),
+            const Divider(thickness: 1, height: 1),
             _buildProfileItem('Tên', _tenNguoiDung),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             _buildProfileItem('Giới tính', _gioiTinh),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             _buildProfileItem('Ngày sinh', _ngaySinh),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
             _buildProfileItem('Điện thoại', _soDienThoai),
-            Divider(thickness: 1, height: 1),
-            _buildProfileItem('Email', _gmail),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
+            // _buildProfileItem('Email', _gmail),
+            // const Divider(thickness: 1, height: 1),
             _buildDiaChiItems(),
-            Divider(thickness: 1, height: 1),
+            const Divider(thickness: 1, height: 1),
           ],
         ),
       ),

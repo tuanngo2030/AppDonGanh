@@ -14,7 +14,7 @@ class ProfileThumua extends StatefulWidget {
 class _ProfileThumuaState extends State<ProfileThumua> {
   String? tenNguoiDung;
   String? anhDaiDien;
-   String? userId;
+  String? userId;
   int followerCount = 0;
   int followingCount = 0;
   @override
@@ -38,7 +38,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(),
@@ -162,9 +162,21 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       Expanded(
                         flex: 1,
                         child: GestureDetector(
-                          onTap: (){
-                             print('following');
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowersScreen(title: tenNguoiDung!, userId: userId!, chucNang: 'followers',)));
+                          onTap: () {
+                            print('following');
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => FollowersScreen(
+                                          title: tenNguoiDung!,
+                                          userId: userId!,
+                                          chucNang: 'followers',
+                                        ))).then((result) {
+                              if (result == true) {
+                                // Gọi hàm để tải lại dữ liệu
+                                _loadUserData();
+                              }
+                            });
                           },
                           child: Column(
                             children: [
@@ -185,9 +197,23 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       Expanded(
                         flex: 1,
                         child: GestureDetector(
-                          onTap: (){
+                          onTap: () {
                             print('following');
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => FollowersScreen(title: tenNguoiDung!, userId: userId!, chucNang: 'followings',)));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FollowersScreen(
+                                  title: tenNguoiDung!,
+                                  userId: userId!,
+                                  chucNang: 'followings',
+                                ),
+                              ),
+                            ).then((result) {
+                              if (result == true) {
+                                // Gọi hàm để tải lại dữ liệu
+                                _loadUserData();
+                              }
+                            });
                           },
                           child: Column(
                             children: [
@@ -313,7 +339,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                       crossAxisCount: 2,
                       children: [
                         MainFuntion(
-                          icon: Icon(Icons.person_2_outlined , size: 30),
+                          icon: Icon(Icons.person_2_outlined, size: 30),
                           title: 'Thông tin tài khoản',
                           subtitle: 'Bao gồm thông tin cá nhân:',
                           onTap: () {
@@ -330,7 +356,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           },
                         ),
                         MainFuntion(
-                          icon: Icon(Icons.account_balance_wallet_outlined, size: 30),
+                          icon: Icon(Icons.account_balance_wallet_outlined,
+                              size: 30),
                           title: 'Số dư',
                           subtitle: 'Số dư trong ví của bạn:',
                           onTap: () {
@@ -338,7 +365,8 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           },
                         ),
                         MainFuntion(
-                          icon: Icon(Icons.featured_play_list_outlined, size: 30),
+                          icon:
+                              Icon(Icons.featured_play_list_outlined, size: 30),
                           title: 'Bài viết',
                           subtitle: 'Bao gồm các bài viết của bạn:',
                           onTap: () {

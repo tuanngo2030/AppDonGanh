@@ -29,7 +29,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Hủy yêu thích'),
-          content: const Text('Bạn có chắc chắn muốn hủy yêu thích sản phẩm này?'),
+          content:
+              const Text('Bạn có chắc chắn muốn hủy yêu thích sản phẩm này?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -202,37 +203,43 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                       ),
                                     ),
                                     // Discount Badge
-                                    Positioned(
-                                      top: 15,
-                                      child: Container(
-                                        width: 50,
-                                        height: 25,
-                                        decoration: const BoxDecoration(
-                                          borderRadius: BorderRadius.only(
+                                    Visibility(
+                                      visible: product.phanTramGiamGia > 0,
+                                      child: Positioned(
+                                        top: 15,
+                                        child: Container(
+                                          width: 50,
+                                          height: 25,
+                                          decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10)),
-                                          color:
-                                              Color.fromRGBO(142, 198, 65, 1),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            "- ${product.phanTramGiamGia}%",
-                                            style: const TextStyle(
+                                              bottomRight: Radius.circular(10),
+                                            ),
+                                            color:
+                                                Color.fromRGBO(142, 198, 65, 1),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "- ${product.phanTramGiamGia}%",
+                                              style: const TextStyle(
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.w500),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
+
                                     // Favorite Icon
                                     Positioned(
                                       top: 10,
                                       right: 5,
                                       child: GestureDetector(
                                         onTap: () {
-                                          _showConfirmationDialog(context,
-                                              product.id);
+                                          _showConfirmationDialog(
+                                              context, product.id);
                                         },
                                         child: Container(
                                           height: 35,
@@ -293,13 +300,41 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 padding: const EdgeInsets.only(top: 7.0),
                                 child: Row(
                                   children: [
-                                    Text(
-                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
+                                    if (product.phanTramGiamGia > 0) ...[
+                                      // Hiển thị giá gốc, gạch ngang, màu mờ
+                                      Text(
+                                        '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          color: Colors.grey, // Màu mờ
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(
+                                          width:
+                                              5), // Khoảng cách giữa giá cũ và giá giảm
+                                      // Hiển thị giá giảm
+                                      Text(
+                                        '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan * (1 - product.phanTramGiamGia / 100))} đ/kg',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors
+                                              .red, // Màu nổi bật cho giá giảm
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      // Hiển thị giá bình thường nếu không giảm giá
+                                      Text(
+                                        '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

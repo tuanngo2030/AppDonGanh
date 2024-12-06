@@ -45,15 +45,42 @@ class _ReviewItemState extends State<ReviewItem> {
     switch (value) {
       case 'edit':
         _showEditDialog();
-
         break;
       case 'delete':
-        _deleteReview();
+        _showDeleteConfirmationDialog(); // Hiển thị dialog xác nhận
         break;
       case 'report':
-        // Handle report action
+        // Xử lý hành động báo cáo
         break;
     }
+  }
+
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content:
+              const Text('Bạn có chắc chắn muốn xóa bài đánh giá này không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog
+              },
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog trước
+                _deleteReview(); // Thực hiện xóa bài đánh giá
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showEditDialog() {

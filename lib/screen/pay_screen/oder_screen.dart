@@ -274,7 +274,7 @@ class _OderScreenState extends State<OderScreen> {
                             ),
                           ),
                           child: const Text(
-                            'Detail',
+                            'Chi tiết',
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),

@@ -585,7 +585,13 @@ class _HomeThumuaState extends State<HomeThumua> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/creat_blog_screen');
+                    Navigator.pushNamed(context, '/creat_blog_screen')
+                        .then((result) {
+                      if (result == true) {
+                        // Gọi hàm để tải lại dữ liệu
+                        _fetchBlogPosts();
+                      }
+                    });
                   },
                   child: Padding(
                     padding:

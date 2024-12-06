@@ -69,18 +69,19 @@ class _PayScreen3State extends State<PayScreen3> {
   Widget build(BuildContext context) {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
 
-    return Scaffold(
-      body: _buildSuccessScreen()
-      // isOrderExpired
-      //     ? _buildExpiredMessage()
-      //     : isPaymentSuccessful
-      //         ? _buildSuccessScreen()
-      //         : _buildPaymentScreen(paymentInfo),
-    );
+    return Scaffold(body: _buildSuccessScreen()
+        // isOrderExpired
+        //     ? _buildExpiredMessage()
+        //     : isPaymentSuccessful
+        //         ? _buildSuccessScreen()
+        //         : _buildPaymentScreen(paymentInfo),
+        );
   }
 
   Widget _buildSuccessScreen() {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    String formattedNgayTao =
+        DateFormat('dd/MM/yyyy').format(paymentInfo.orders.first.NgayTao);
     return Center(
       child: Column(
         children: [
@@ -105,38 +106,38 @@ class _PayScreen3State extends State<PayScreen3> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Thời gian giao dịch:',
                           style: TextStyle(
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          'Mã đơn hàng:',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Mã đơn hàng:',
-                          style: TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          paymentInfo.order_id,
+                          formattedNgayTao,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
-                        )
+                        ),
                       ],
                     ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     const Text(
+                    //       'Mã đơn hàng:',
+                    //       style: TextStyle(
+                    //         fontSize: 16,
+                    //       ),
+                    //     ),
+                    //     Text(
+                    //       paymentInfo.order_id,
+                    //       style: const TextStyle(
+                    //           fontSize: 16, fontWeight: FontWeight.w600),
+                    //     )
+                    //   ],
+                    // ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -240,7 +241,7 @@ class _PayScreen3State extends State<PayScreen3> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
@@ -248,14 +249,13 @@ class _PayScreen3State extends State<PayScreen3> {
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
-                         Text(
+                        Text(
                           currencyFormat.format(paymentInfo.totalPrice),
                           style: const TextStyle(fontSize: 14),
                         )
                       ],
                     ),
-
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
@@ -263,13 +263,12 @@ class _PayScreen3State extends State<PayScreen3> {
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
-                         Text(
+                        Text(
                           currencyFormat.format(paymentInfo.giaTriGiam),
                           style: const TextStyle(fontSize: 14),
                         )
                       ],
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -279,12 +278,12 @@ class _PayScreen3State extends State<PayScreen3> {
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          currencyFormat.format(paymentInfo.totalPrice - paymentInfo.giaTriGiam),
+                          currencyFormat.format(
+                              paymentInfo.totalPrice - paymentInfo.giaTriGiam),
                           style: const TextStyle(fontSize: 14),
                         )
                       ],
                     ),
-                   
                   ],
                 ),
               ),

@@ -289,12 +289,16 @@ class _PayScreen2State extends State<PayScreen2> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Tên sản phẩm: ${product?['IDSanPham']['TenSanPham']}',
+                                                      '${product?['IDSanPham']['TenSanPham']}',
                                                       style: const TextStyle(
                                                           fontSize: 16),
+                                                      overflow: TextOverflow
+                                                          .ellipsis, 
+                                                      maxLines:
+                                                          1,
                                                     ),
 
-                                                    // Display KetHopThuocTinh GiaTri values
+                                                    
                                                     Text(
                                                       'Loại sản phẩm: ${ketHopThuocTinhValues.join(", ")}',
                                                       style: const TextStyle(

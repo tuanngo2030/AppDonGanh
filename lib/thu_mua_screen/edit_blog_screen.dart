@@ -37,6 +37,8 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
     _titleController.text = widget.blog.tieude;
     _contentController.text = widget.blog.noidung;
     _tagsController.text = widget.blog.tags.join(', ');
+    _titleController.addListener(_validateForm);
+    _contentController.addListener(_validateForm);
     _loadUserData();
 
     // Load existing images from the network
@@ -141,7 +143,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
       );
 
       // Optionally, navigate back
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -241,7 +243,8 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _submitPost,
+                      onPressed:
+                          _isFormValid && !_isLoading ? _submitPost : null,
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -251,11 +254,14 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                       ),
                       child: _isLoading
                           ? const CircularProgressIndicator()
-                          : const Text(
-                              "Cập nhật",
+                          : Text(
+                              "Đăng",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
+                                color: _isFormValid && !_isLoading
+                                    ? const Color.fromRGBO(59, 99, 53, 1)
+                                    : Colors.white, // Đặt màu chữ trực tiếp
                               ),
                             ),
                     ),
@@ -322,34 +328,40 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
               ),
             ),
 
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _selectedImages.map((image) {
-                int index = _selectedImages.indexOf(image);
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Image.file(image, width: 100, height: 100),
-                    Positioned(
-                      top: -5,
-                      right: -5,
-                      child: GestureDetector(
-                        onTap: () => _removeImage(index),
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.red,
-                          radius: 12,
-                          child: Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Colors.white,
+            SizedBox(
+              height: 200, // Giới hạn chiều cao cuộn
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _selectedImages.map((image) {
+                    int index = _selectedImages.indexOf(image);
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Image.file(image,
+                            width: 100, height: 100, fit: BoxFit.cover),
+                        Positioned(
+                          // top: -5,
+                          // right: -5,
+                          child: GestureDetector(
+                            onTap: () => _removeImage(index),
+                            child: const CircleAvatar(
+                              backgroundColor: Colors.red,
+                              radius: 12,
+                              child: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
 
             // Bottom action bar

@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   int productsPerPage = 10;
   String? userId;
-   String? IDYeuThich;
+  String? IDYeuThich;
   Map<String, bool> favorites = {};
   List<String> favoriteIds = [];
   @override
@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       if (!isCurrentlyFavorite) {
         favoriteService.addToFavorites(userId, productId);
-        
+
         setState(() {
           favorites[productId] = true;
         });
@@ -125,7 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
     final IDYeuThich = prefs.getString('IDYeuThich');
-   
 
     if (!mounted) return; // Check if the widget is still mounted
     setState(() {
@@ -133,9 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-       print(IDYeuThich);
-      final response = await ProductApiService().getProducts(page,
-          userId: userId!, yeuthichId: IDYeuThich!);
+      print(IDYeuThich);
+      final response = await ProductApiService()
+          .getProducts(page, userId: userId!, yeuthichId: IDYeuThich!);
       List<ProductModel> products = response['sanphams']
           .map<ProductModel>((json) => ProductModel.fromJSON(json))
           .where((product) => product.tinhTrang != 'Đã xóa')
@@ -451,30 +450,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   // Discount Badge
-                                  Positioned(
-                                    top: 15,
-                                    child: Container(
-                                      width: 50,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(5),
-                                          topRight: Radius.circular(10),
-                                          bottomRight: Radius.circular(10),
+                                  Visibility(
+                                    visible: product.phanTramGiamGia > 0,
+                                    child: Positioned(
+                                      top: 15,
+                                      child: Container(
+                                        width: 50,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(5),
+                                            topRight: Radius.circular(10),
+                                            bottomRight: Radius.circular(10),
+                                          ),
+                                          color: const Color.fromRGBO(
+                                              142, 198, 65, 1),
                                         ),
-                                        color: Color.fromRGBO(142, 198, 65, 1),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "- ${product.phanTramGiamGia}%",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
+                                        child: Center(
+                                          child: Text(
+                                            "- ${product.phanTramGiamGia}%",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
+
                                   // Favorite Icon
                                   Positioned(
                                     top: 10,
@@ -547,16 +551,44 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.only(top: 7.0),
                               child: Row(
                                 children: [
-                                  Text(
-                                    '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
+                                  if (product.phanTramGiamGia > 0) ...[
+                                    // Hiển thị giá gốc, gạch ngang, màu mờ
+                                    Text(
+                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey, // Màu mờ
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(
+                                        width:
+                                            5), // Khoảng cách giữa giá cũ và giá giảm
+                                    // Hiển thị giá giảm
+                                    Text(
+                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan * (1 - product.phanTramGiamGia / 100))} đ/kg',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors
+                                            .red, // Màu nổi bật cho giá giảm
+                                      ),
+                                    ),
+                                  ] else ...[
+                                    // Hiển thị giá bình thường nếu không giảm giá
+                                    Text(
+                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
+
                             // 'Mua Ngay' Button
                             Padding(
                               padding: const EdgeInsets.only(top: 8.0),
@@ -572,8 +604,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           isfavorited: product.isFavorited),
                                     ),
                                   );
-
-                                  
                                 },
                                 child: Container(
                                   height: 35,
