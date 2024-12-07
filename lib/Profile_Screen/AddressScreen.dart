@@ -25,16 +25,21 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       TextEditingController(); // Kinh độ
   final TextEditingController _viDoController =
       TextEditingController(); // Vĩ độ
-
-  String? _selectedTinhThanhPho; // Tỉnh/Thành phố
-  String? _selectedQuanHuyen; // Quận/Huyện
-  String? _selectedPhuongXa; // Phường/Xã
-
-  List<String> _tinhThanhPhoList = [];
-  List<String> _quanHuyenList = [];
-  List<String> _phuongXaList = [];
-
   final DcApiService _dcApiService = DcApiService();
+
+  List<dynamic> _tinhThanhPhoList = [];
+  List<dynamic> _quanHuyenList = [];
+  List<dynamic> _phuongXaList = [];
+
+  String? _selectedTinhThanhPhoCode; // Lưu code của tỉnh/thành phố
+  String? _selectedTinhThanhPho; // Lưu name của tỉnh/thành phố
+
+  String? _selectedQuanHuyenCode; // Lưu code của quận/huyện
+  String? _selectedQuanHuyen; // Lưu name của quận/huyện
+
+  String? _selectedPhuongXaCode; // Lưu code của phường/xã
+  String? _selectedPhuongXa; // Lưu name của phường/xã
+
   LatLng _currentLocation =
       const LatLng(21.035965, 105.834747); // Default location: Hanoi
   final MapController _mapController = MapController();
@@ -52,10 +57,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       _kinhDoController.text = widget.address!.kinhdo ?? '';
       _viDoController.text = widget.address!.vido ?? '';
     }
-
     _loadTinhThanhPho();
-    _loadQuanHuyen();
-    _loadPhuongXa();
   }
 
   Future<void> _loadTinhThanhPho() async {
@@ -69,22 +71,26 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     }
   }
 
-  Future<void> _loadQuanHuyen() async {
+  Future<void> _loadQuanHuyen(String cityCode) async {
     try {
-      final districts = await _dcApiService.getQuanHuyen();
+      final districts = await _dcApiService.getQuanHuyen(cityCode);
       setState(() {
         _quanHuyenList = districts;
+        _phuongXaList = [];
+        _selectedQuanHuyen = null;
+        _selectedPhuongXa = null;
       });
     } catch (e) {
       print('Error loading districts: $e');
     }
   }
 
-  Future<void> _loadPhuongXa() async {
+  Future<void> _loadPhuongXa(String districtCode) async {
     try {
-      final wards = await _dcApiService.getPhuongXa();
+      final wards = await _dcApiService.getPhuongXa(districtCode);
       setState(() {
         _phuongXaList = wards;
+        _selectedPhuongXa = null;
       });
     } catch (e) {
       print('Error loading wards: $e');
@@ -160,80 +166,94 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
             ),
             const SizedBox(height: 10),
             TextField(
+              maxLength: 10,
               controller: _soDienThoaiController,
-              decoration: const InputDecoration(labelText: 'Số điện thoại'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Số điện thoại',
+                contentPadding: const EdgeInsets.all(16),
+              ),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 10),
-
-            // Dropdown cho Tỉnh/Thành phố
-            DropdownSearch<String>(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-              ),
-              items: _tinhThanhPhoList,
-              filterFn: (item, filter) =>
-                  item.toLowerCase().contains(filter.toLowerCase()),
-              onChanged: (newValue) {
-                setState(() {
-                  _selectedTinhThanhPho = newValue;
-                });
-              },
-              selectedItem: _selectedTinhThanhPho,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Tỉnh/Thành phố',
-                  border: OutlineInputBorder(),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              value: _selectedTinhThanhPhoCode,
+              decoration: InputDecoration(
+                labelText: "Chọn Tỉnh/Thành phố",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-
-            // Dropdown cho Quận/Huyện
-            DropdownSearch<String>(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-              ),
-              items: _quanHuyenList,
-              filterFn: (item, filter) =>
-                  item.toLowerCase().contains(filter.toLowerCase()),
-              onChanged: (newValue) {
+              items: _tinhThanhPhoList.map((province) {
+                return DropdownMenuItem<String>(
+                  value: province['code'].toString(), // Dùng code để chọn
+                  child: Text(province['name']), // Hiển thị name
+                );
+              }).toList(),
+              onChanged: (value) {
                 setState(() {
-                  _selectedQuanHuyen = newValue;
+                  _selectedTinhThanhPhoCode = value; // Lưu code
+                  _selectedTinhThanhPho = _tinhThanhPhoList.firstWhere(
+                      (province) =>
+                          province['code'].toString() == value)['name'];
+                  _loadQuanHuyen(value!); // Gọi hàm để tải danh sách quận/huyện
                 });
               },
-              selectedItem: _selectedQuanHuyen,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Quận/Huyện',
-                  border: OutlineInputBorder(),
+            ),
+            const SizedBox(height: 30),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              value: _selectedQuanHuyenCode,
+              decoration: InputDecoration(
+                labelText: "Chọn Quận/Huyện",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-
-            // Dropdown cho Phường/Xã
-            DropdownSearch<String>(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-              ),
-              items: _phuongXaList,
-              filterFn: (item, filter) =>
-                  item.toLowerCase().contains(filter.toLowerCase()),
-              onChanged: (newValue) {
+              items: _quanHuyenList.map((district) {
+                return DropdownMenuItem<String>(
+                  value: district['code'].toString(), // Dùng code để chọn
+                  child: Text(district['name']), // Hiển thị name
+                );
+              }).toList(),
+              onChanged: (value) {
                 setState(() {
-                  _selectedPhuongXa = newValue;
+                  _selectedQuanHuyenCode = value; // Lưu code
+                  _selectedQuanHuyen = _quanHuyenList.firstWhere((district) =>
+                      district['code'].toString() == value)['name'];
+                  _loadPhuongXa(value!); // Gọi hàm để tải danh sách phường/xã
                 });
               },
-              selectedItem: _selectedPhuongXa,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Phường/Xã',
-                  border: OutlineInputBorder(),
+            ),
+            const SizedBox(height: 30),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              value: _selectedPhuongXaCode,
+              decoration: InputDecoration(
+                labelText: "Chọn Phường/Xã",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
+              items: _phuongXaList.map((ward) {
+                return DropdownMenuItem<String>(
+                  value: ward['code'].toString(), // Dùng code để chọn
+                  child: Text(ward['name']), // Hiển thị name
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedPhuongXaCode = value; // Lưu code
+                  _selectedPhuongXa = _phuongXaList.firstWhere(
+                      (ward) => ward['code'].toString() == value)['name'];
+                });
+              },
             ),
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 30),
 
             // TextField cho Đường/Thôn
             TextField(
@@ -252,17 +272,26 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Hiển thị Kinh độ và Vĩ độ
             TextField(
               controller: _kinhDoController,
-              decoration: const InputDecoration(labelText: 'Kinh độ'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Kinh độ',
+              ),
             ),
             const SizedBox(height: 20),
-            TextField(
+               TextField(
               controller: _viDoController,
-              decoration: const InputDecoration(labelText: 'Vĩ độ'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Vĩ độ',
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             // Nút mở bản đồ
             ElevatedButton(

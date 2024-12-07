@@ -124,7 +124,6 @@ class MyApp extends StatelessWidget {
         '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
         '/so_du_screen': (context) => const SoDuScreen(),
         '/yeu_cau_rut_screen': (context) => const LichSuRutScreen(),
-        '/dang_ky_thu_mua_screen': (context) => const DangKyThuMuaScreen(),
         '/so_du_screen': (context) => const SoDuScreen(),
         '/sendotpcreate_screen': (context) => Sendotpcreatpw(),
         '/quan_ly_don_hang_screen': (context) => const QuanLyDonHangScreen(),
