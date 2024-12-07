@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:don_ganh_app/CreatPassword/sendotpcreatPw.dart';
 import 'package:don_ganh_app/screen/checkbot.dart';
 import 'package:don_ganh_app/screen/ho_tro_khach_hang_screen.dart';
+import 'package:don_ganh_app/service/notification_service.dart';
 import 'package:don_ganh_app/thu_mua_screen/dang_ky_thu_mua_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/doanh_thu_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/lich_su_rut_screen.dart';
@@ -11,6 +12,8 @@ import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/quan_ly_don_hang_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/so_du_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -69,6 +72,9 @@ import 'package:don_ganh_app/screen/trang_xin_chao.dart';
 //   );
 // }
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await NotificationService.instance.initialize();
   await dotenv.load(fileName: "lib/.env");
   runApp(
     ChangeNotifierProvider(
@@ -100,7 +106,7 @@ class MyApp extends StatelessWidget {
         '/manageraccount_screen': (context_) => const ManageraccountScreen(),
         '/bottomnavigation': (context_) => const BottomnavigationMenu(),
         '/cart_screen': (context_) => const CartScreen(),
-        '/ProfileScreen': (context) => ProfileScreen(),
+        '/ProfileScreen': (context) => const ProfileScreen(),
         '/ten': (context) => const Tenscreen(),
         '/NgaySinh': (context) => const NgaySinh(),
         '/sodienthoai': (context) => const SodienthoaiScreen(),

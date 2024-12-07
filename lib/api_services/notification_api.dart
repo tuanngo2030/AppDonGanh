@@ -65,5 +65,44 @@ class NotificationApi {
       throw Exception("Lỗi khi xóa tất cả thông báo: ${response.statusCode}");
     }
   }
+
+   Future<Map<String, dynamic>> saveFcmTokenFirebase({
+    required String userId,
+    required String fcmToken,
+  }) async {
+    final url = Uri.parse('$baseUrl/saveFcmTokenFireBase');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': userId,
+          'fcmToken': fcmToken,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': responseData['message'],
+        };
+      } else {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Something went wrong',
+        };
+      }
+    } catch (error) {
+      print('Error while saving FCM token: $error');
+      return {
+        'success': false,
+        'message': 'An error occurred while saving the FCM token',
+      };
+    }
+  }
   
 }

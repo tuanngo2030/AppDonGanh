@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1045702062901",
+    "firebase_url": "https://don-ganh-default-rtdb.firebaseio.com",
+    "project_id": "don-ganh",
+    "storage_bucket": "don-ganh.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1045702062901:android:b2692b7840ad8e647d527c",
+        "android_client_info": {
+          "package_name": "com.example.don_ganh_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANsYxtDg3PDpkBkgI-uqgOgD189W5zjQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
