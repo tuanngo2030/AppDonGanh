@@ -49,9 +49,11 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
 
   Future<void> _checkPermissions() async {
     PermissionStatus cameraPermission = await Permission.camera.status;
-    if (cameraPermission.isDenied) {
-      await Permission.camera.request();
-    }
+   if (cameraPermission.isDenied) {
+    await Permission.camera.request();
+  } else if (cameraPermission.isPermanentlyDenied) {
+    openAppSettings(); // Mở cài đặt để người dùng bật quyền.
+  }
   }
 
   Future<void> _takePhoto() async {
