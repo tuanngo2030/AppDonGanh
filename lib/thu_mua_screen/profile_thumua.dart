@@ -372,7 +372,16 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           onTap: () {
                             Navigator.pushNamed(context, '/your_blog_screen');
                           },
-                        )
+                        ),
+                        //     MainFuntion(
+                        //   icon:
+                        //       Icon(Icons.featured_play_list_outlined, size: 30),
+                        //   title: 'Địa chỉ',
+                        //   subtitle: 'Bao gồm các bài viết của bạn:',
+                        //   onTap: () {
+                        //     Navigator.pushNamed(context, '/your_blog_screen');
+                        //   },
+                        // )
                       ],
                     ),
                   ),

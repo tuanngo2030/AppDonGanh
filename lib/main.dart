@@ -135,6 +135,8 @@ class MyApp extends StatelessWidget {
         '/quan_ly_don_hang_screen': (context) => const QuanLyDonHangScreen(),
         '/ho_tro_khach_hang_screen': (context) => const HoTroKhachHangScreen(),
         // '/other_profile_screen': (context) => const O(),
+        
+        
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/otpxacminhtk') {

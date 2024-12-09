@@ -232,6 +232,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
             Expanded(
               flex: 6,
               child: TextField(
+                      maxLength: 30,
                 controller: hoTenController,
                 decoration: InputDecoration(
                   labelText: 'Họ và tên',
@@ -247,6 +248,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
             Expanded(
               flex: 4,
               child: TextField(
+                maxLength: 10,
                 controller: soDienThoaiController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(

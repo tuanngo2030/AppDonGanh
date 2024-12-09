@@ -40,4 +40,56 @@ class YeuCauDangKyService {
       rethrow;
     }
   }
+  Future<Map<String, dynamic>> getYeuCauDangKyDiaChiByUserId(String userId) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/yeucaudangky/getYeuCauDangKyDiaChiByUserId/$userId');
+  
+  try {
+    final response = await http.get(url, headers: {
+      "Content-Type": "application/json",
+    });
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      throw Exception("Không tìm thấy yêu cầu đăng ký");
+    } else {
+      throw Exception("Lỗi khi lấy yêu cầu đăng ký: ${response.body}");
+    }
+  } catch (error) {
+    print("Error in getYeuCauDangKyDiaChiByUserId: $error");
+    rethrow;
+  }
+}
+Future<Map<String, dynamic>> updateDiaChiHoKinhDoanh({
+  required String yeucaudangkyId,
+  required String diaChiMoi,
+}) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/yeucaudangky/updateDiaChiHoKinhDoanh/$yeucaudangkyId');
+  
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "diachimoi": diaChiMoi,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      throw Exception("Không tìm thấy yêu cầu đăng ký");
+    } else if (response.statusCode == 400) {
+      throw Exception("Địa chỉ mới không hợp lệ");
+    } else {
+      throw Exception("Lỗi khi cập nhật địa chỉ: ${response.body}");
+    }
+  } catch (error) {
+    print("Error in updateDiaChiHoKinhDoanh: $error");
+    rethrow;
+  }
+}
+
 }
