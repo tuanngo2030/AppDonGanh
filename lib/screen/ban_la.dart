@@ -9,6 +9,11 @@ class BanLa extends StatelessWidget {
     return prefs.getString('role'); // Lấy role từ SharedPreferences
   }
 
+  Future<void> _setChooseRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('chooseRole', role); // Lưu vai trò vào SharedPreferences
+  }
+
   void _navigateToBusiness(BuildContext context) async {
     final role = await _getUserRole();
 
@@ -20,7 +25,8 @@ class BanLa extends StatelessWidget {
         ),
       );
     } else {
-      // Nếu vai trò là hộ kinh doanh, chuyển hướng
+      // Lưu vai trò và chuyển hướng
+      await _setChooseRole('hokinhdoanh');
       Navigator.pushNamed(context, "/bottomThumua");
     }
   }
@@ -68,7 +74,9 @@ class BanLa extends StatelessWidget {
                 const SizedBox(height: 20),
                 UserOption(
                   text: 'Khách mua hàng',
-                  onTap: () {
+                  onTap: () async {
+                    // Lưu vai trò và chuyển hướng
+                    await _setChooseRole('khachmuahang');
                     Navigator.pushNamed(context, "/bottom");
                   },
                 ),
@@ -85,7 +93,6 @@ class BanLa extends StatelessWidget {
     );
   }
 }
-
 class UserOption extends StatelessWidget {
   final String text;
   final VoidCallback onTap;

@@ -439,7 +439,6 @@ class _PayScreen1State extends State<PayScreen1> {
 
         // print('hoadonList ${hoadonList.toString()}');
 
-        
         widget.nextStep();
       }
     } catch (e) {
@@ -590,7 +589,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                     child: SizedBox(
                                       width: double.infinity,
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           const Text(
                                             'Khuyến mãi của shop',
@@ -599,23 +599,38 @@ class _PayScreen1State extends State<PayScreen1> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Text('- ${NumberFormat("#,##0").format(giaTriGiam)} đ'),
+                                          Text(
+                                              '- ${NumberFormat("#,##0").format(giaTriGiam)} đ'),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 16),
-                                  child: Text(
-                                    'Tổng số tiền ($totalProducts sản phẩm): ${NumberFormat("#,###").format(userTotal)} VND',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 16),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text:
+                                            'Tổng số tiền ($totalProducts sản phẩm): ',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors
+                                              .black, // Default color for the main text
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                '${NumberFormat("#,###").format(userTotal)} VND',
+                                            style: const TextStyle(
+                                              color: Colors
+                                                  .red, // Red color for the specific part
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
                                 const Divider(),
                               ],
                             );

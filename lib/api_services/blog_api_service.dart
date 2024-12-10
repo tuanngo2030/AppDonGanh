@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:don_ganh_app/models/blog_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class BlogApiService {
   // Replace with actual URL
@@ -43,53 +44,70 @@ class BlogApiService {
       rethrow;
     }
   }
+Future<String> createBaiViet({
+  required String userId,
+  String? tieude,
+  required String noidung,
+  List<String>? tags,
+  List<File>? imageFiles,
+}) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/baiviet/createBaiViet');
+  var request = http.MultipartRequest('POST', url);
 
-  Future<String> createBaiViet({
-    required String userId,
-    required String tieude,
-    required String noidung,
-    List<String>? tags,
-    List<File>? imageFiles,
-  }) async {
-    final url = Uri.parse('${dotenv.env['API_URL']}/baiviet/createBaiViet');
-    var request = http.MultipartRequest('POST', url);
+  // Adding text fields
+  request.fields['userId'] = userId;
+  if (tieude != null) {
+    request.fields['tieude'] = tieude;  // Only add tieude if it's not null
+  }
+  request.fields['noidung'] = noidung;
 
-    // Adding text fields
-    request.fields['userId'] = userId;
-    request.fields['tieude'] = tieude;
-    request.fields['noidung'] = noidung;
+  if (tags != null && tags.isNotEmpty) {
+    request.fields['tags'] = tags.join(',');
+  }
 
-    if (tags != null && tags.isNotEmpty) {
-      request.fields['tags'] = tags.join(',');
-    }
+  // Adding image files with content type if not null
+  if (imageFiles != null) {
+    for (var file in imageFiles) {
+      var fileExtension = file.path.split('.').last.toLowerCase();
+      var mimeType = 'image/jpeg'; // Default to jpeg
 
-    // Adding image files if not null
-    if (imageFiles != null) {
-      for (var file in imageFiles) {
-        request.files
-            .add(await http.MultipartFile.fromPath('files', file.path));
+      // Set MIME type based on file extension
+      if (fileExtension == 'png') {
+        mimeType = 'image/png';
+      } else if (fileExtension == 'gif') {
+        mimeType = 'image/gif';
       }
-    }
 
-    try {
-      var response = await request.send();
-
-      if (response.statusCode == 201) {
-        // Decode the response body into a string (since the response is now just text)
-        var responseData = await http.Response.fromStream(response);
-        var data = responseData.body;
-
-        // Return the response text (e.g., "Blog post created successfully")
-        return data;
-      } else {
-        throw Exception(
-            'Failed to create blog post, status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error creating blog post: $e');
-      rethrow;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'files', 
+          file.path,
+          contentType: MediaType.parse(mimeType), // Set content type based on file extension
+        ),
+      );
     }
   }
+
+  try {
+    var response = await request.send();
+
+    if (response.statusCode == 201) {
+      // Decode the response body into a string (since the response is now just text)
+      var responseData = await http.Response.fromStream(response);
+      var data = responseData.body;
+
+      // Return the response text (e.g., "Blog post created successfully")
+      return data;
+    } else {
+      throw Exception(
+          'Failed to create blog post, status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error creating blog post: $e');
+    rethrow;
+  }
+}
+
 
   Future<void> updateLike(String baivietId, String userId) async {
     final url = Uri.parse(
@@ -122,40 +140,58 @@ class BlogApiService {
     }
   }
 
-  Future<void> updateBaiViet({
-    required String baivietId,
-    required String tieude,
-    required String tags,
-    required String noidung,
-    required String userId,
-    List<File>? files,
-  }) async {
-    final url =
-        Uri.parse('${dotenv.env['API_URL']}/baiviet/updateBaiViet/$baivietId');
-    var request = http.MultipartRequest('PUT', url);
+ Future<void> updateBaiViet({
+  required String baivietId,
+  String? tieude,
+  required String tags,
+  required String noidung,
+  required String userId,
+  List<File>? files,
+}) async {
+  final url =
+      Uri.parse('${dotenv.env['API_URL']}/baiviet/updateBaiViet/$baivietId');
+  var request = http.MultipartRequest('PUT', url);
 
-    request.fields['tieude'] = tieude;
-    request.fields['tags'] = tags;
-    request.fields['noidung'] = noidung;
-    request.fields['userId'] = userId;
+  // Adding text fields
+  request.fields['tieude'] = tieude!;
+  request.fields['tags'] = tags;
+  request.fields['noidung'] = noidung;
+  request.fields['userId'] = userId;
 
-    if (files != null) {
-      for (var file in files) {
-        request.files
-            .add(await http.MultipartFile.fromPath('files', file.path));
+  // Adding image files with content type if not null
+  if (files != null) {
+    for (var file in files) {
+      var fileExtension = file.path.split('.').last.toLowerCase();
+      var mimeType = 'image/jpeg'; // Default MIME type (JPEG)
+
+      // Set MIME type based on file extension
+      if (fileExtension == 'png') {
+        mimeType = 'image/png';
+      } else if (fileExtension == 'gif') {
+        mimeType = 'image/gif';
       }
-    }
 
-    try {
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        print('Update successful');
-      } else {
-        print('Failed to update: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error updating post: $e');
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'files', 
+          file.path,
+          contentType: MediaType.parse(mimeType), // Set content type based on file extension
+        ),
+      );
     }
   }
+
+  try {
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('Update successful');
+    } else {
+      print('Failed to update: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error updating post: $e');
+  }
+}
+
 }
