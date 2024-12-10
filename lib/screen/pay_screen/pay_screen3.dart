@@ -66,18 +66,17 @@ class _PayScreen3State extends State<PayScreen3> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+  Widget build(BuildContext context) {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
 
-  return Scaffold(body: _buildSuccessScreen()
-    // body: isOrderExpired 
-    //     ? _buildExpiredMessage()
-    //     : isPaymentSuccessful
-    //         ? _buildSuccessScreen()
-    //         : _buildPaymentScreen(paymentInfo),
-  );
-}
-
+    return Scaffold(body: _buildSuccessScreen()
+        // body: isOrderExpired
+        //     ? _buildExpiredMessage()
+        //     : isPaymentSuccessful
+        //         ? _buildSuccessScreen()
+        //         : _buildPaymentScreen(paymentInfo),
+        );
+  }
 
   Widget _buildSuccessScreen() {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
@@ -86,10 +85,11 @@ Widget build(BuildContext context) {
     return Center(
       child: Column(
         children: [
+          const SizedBox(height: 60),
           Image.asset('lib/assets/img_success.png'),
           const SizedBox(height: 20),
           const Text(
-            'Thanh toán thành công!',
+            'Tạo đơn thành công!',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Padding(
@@ -149,7 +149,7 @@ Widget build(BuildContext context) {
                           ),
                         ),
                         Text(
-                          '${paymentInfo.totalPrice}',
+                          '${NumberFormat("#,##0").format(paymentInfo.totalPrice)} đ',
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         )
@@ -178,13 +178,13 @@ Widget build(BuildContext context) {
           ),
           ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/bottomnavigation');
+                Navigator.pushNamed(context, '/oder_screen');
                 Provider.of<PaymentInfo>(context, listen: false).reset();
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                   foregroundColor: Colors.white),
-              child: const Text('Trở về'))
+              child: const Text('Xem đơn hàng của bạn'))
         ],
       ),
     );

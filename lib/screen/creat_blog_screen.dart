@@ -26,7 +26,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController.addListener(_validateForm);
+    // _titleController.addListener(_validateForm);
     _contentController.addListener(_validateForm);
     _loadUserData();
     _checkPermissions();
@@ -34,7 +34,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
+    // _titleController.dispose();
     _contentController.dispose();
     _tagsController.dispose();
     super.dispose();
@@ -42,7 +42,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = _titleController.text.isNotEmpty &&
+      _isFormValid = 
           _contentController.text.isNotEmpty;
     });
   }
@@ -270,13 +270,13 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
                       ],
                     ),
                     // Title input field
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: "Nhập tiêu đề",
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                    ),
+                    // TextFormField(
+                    //   controller: _titleController,
+                    //   decoration: const InputDecoration(
+                    //     hintText: "Nhập tiêu đề",
+                    //     contentPadding: EdgeInsets.all(15),
+                    //   ),
+                    // ),
 
                     const SizedBox(height: 15),
                     Expanded(

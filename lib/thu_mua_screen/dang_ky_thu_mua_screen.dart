@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:don_ganh_app/api_services/address_api.dart';
 import 'package:don_ganh_app/api_services/yeu_cau_dang_ky_thu_mua_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DangKyThuMuaScreen extends StatefulWidget {
@@ -20,6 +23,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   final TextEditingController soluongLoaiController = TextEditingController();
   final TextEditingController soluongSanPhamController =
       TextEditingController();
+  TextEditingController maSoThueController = TextEditingController();
   List<dynamic> _tinhThanhPhoList = [];
   List<dynamic> _quanHuyenList = [];
   List<dynamic> _phuongXaList = [];
@@ -43,6 +47,8 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   String? userId;
   bool isSucces = false;
 
+  File? _image;
+
   final _yeuCauDangKyService = YeuCauDangKyService();
   final DcApiService _dcApiService = DcApiService();
 
@@ -52,6 +58,16 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   void initState() {
     super.initState();
     _loadTinhThanhPho();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Lưu đường dẫn hình ảnh
+      });
+    }
   }
 
   Future<void> _loadTinhThanhPho() async {
@@ -104,7 +120,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
         // (selectedTinh ?? '').isEmpty || // Đảm bảo selectedTinh không phải null
         // (selectedQuan ?? '').isEmpty || // Đảm bảo selectedQuan không phải null
         // (selectedPhuong ?? '').isEmpty || // Đảm bảo selectedPhuong không phải null
-        
+
         duongThonController.text.isEmpty) {
       _showSnackbar("Vui lòng điền đầy đủ thông tin.");
       return;
@@ -115,9 +131,9 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
     });
 
     diaChiList newAddress = diaChiList(
-         tinhThanhPho: _selectedTinhThanhPho,
-                  quanHuyen: _selectedQuanHuyen,
-                  phuongXa: _selectedPhuongXa,
+      tinhThanhPho: _selectedTinhThanhPho,
+      quanHuyen: _selectedQuanHuyen,
+      phuongXa: _selectedPhuongXa,
       duongThon: duongThon!,
       name: hoTen,
       soDienThoai: soDienThoai,
@@ -125,6 +141,8 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
 
     try {
       final response = await _yeuCauDangKyService.createYeuCauDangKy(
+        maSoThue: maSoThueController.text,
+        file: _image,
         userId: userId!, // Replace with actual userId
         ghiChu: hoTenController.text,
         soluongloaisanpham: int.parse(soluongLoaiController.text),
@@ -227,12 +245,39 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
         ),
         const SizedBox(height: 16),
+        TextField(
+          controller: maSoThueController,
+          decoration: InputDecoration(
+            labelText: 'Mã số thuế',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        TextButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.image, color: Color.fromRGBO(41, 87, 35, 1)),
+          label: const Text(
+            "Chọn ảnh",
+            style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+          ),
+        ),
+
+// Display selected image (if any)
+        _image != null
+            ? Image.file(
+                _image!,
+                height: 150,
+                width: 150,
+                fit: BoxFit.cover,
+              )
+            : const Text("No image selected"),
         Row(
           children: [
             Expanded(
               flex: 6,
               child: TextField(
-                      maxLength: 30,
+                maxLength: 30,
                 controller: hoTenController,
                 decoration: InputDecoration(
                   labelText: 'Họ và tên',

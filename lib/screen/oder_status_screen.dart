@@ -229,7 +229,7 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
       };
     } else if (status == 4) {
       buttonText = "Mua lại đơn hàng";
-       buttonAction = () {
+      buttonAction = () {
         // Navigator.pushNamed(context, '/oder_review_screen');
       };
     }
@@ -307,7 +307,7 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ExprireScreen(
-                                    title: 'Gia hạn',
+                                      title: 'Gia hạn',
                                       orderModel: widget.orderModel,
                                       paymentUrl:
                                           widget.orderModel.payment_url),

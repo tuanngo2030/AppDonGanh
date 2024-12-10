@@ -6,14 +6,22 @@ import 'package:don_ganh_app/thu_mua_screen/home_thumua.dart';
 import 'package:flutter/material.dart';
 
 class BottomnavigationMenu extends StatefulWidget {
-  const BottomnavigationMenu({super.key});
+  final int initialIndex;
+
+  const BottomnavigationMenu({super.key, this.initialIndex = 0}); // Mặc định là tab đầu tiên.
 
   @override
   State<BottomnavigationMenu> createState() => _BottomnavigationMenuState();
 }
 
 class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
-  int selectedIndex = 0;
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex; // Lấy giá trị tab từ tham số.
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -81,3 +89,4 @@ class _BottomnavigationMenuState extends State<BottomnavigationMenu> {
     );
   }
 }
+

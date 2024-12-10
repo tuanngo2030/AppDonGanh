@@ -145,7 +145,12 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
               leading: Image.asset("lib/assets/hoso_icon.png"),
               title: const Text('Hồ sơ'),
               onTap: () {
-                Navigator.pushNamed(context, '/ProfileScreen');
+                Navigator.pushNamed(context, '/ProfileScreen').then((result) {
+                      if (result == true) {
+                        // Gọi hàm để tải lại dữ liệu
+                        _loadUserDetails();
+                      }
+                    });
               },
             ),
             const Divider(thickness: 1, height: 1),

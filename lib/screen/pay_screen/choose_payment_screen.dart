@@ -180,10 +180,23 @@ class _ChoosePaymentScreenState extends State<ChoosePaymentScreen> {
           value: 'COD',
         ),
         buildPaymentMethod(
+          assetPath: 'lib/assets/ic_vietqr.png',
+          title: 'VietQR',
+          subtitle:
+              'Ghi nhận giao dịch tức thì. QR được chấp nhận bởi 40+ Ngân hàng và ví điện tử ',
+          value: 'VietQR',
+        ),
+        buildPaymentMethod(
           assetPath: 'lib/assets/Baokim-logo.png',
-          title: 'Bảo Kim',
+          title: 'ATM Card',
           subtitle: 'Chuyển tiền nhanh chóng',
           value: 'Qr',
+        ),
+        buildPaymentMethod(
+          assetPath: 'lib/assets/ic_vnpay.png',
+          title: 'VNPAY QR',
+          subtitle: 'Ghi nhận giao dịch tức thì',
+          value: 'VNPAY',
         ),
       ],
     );
