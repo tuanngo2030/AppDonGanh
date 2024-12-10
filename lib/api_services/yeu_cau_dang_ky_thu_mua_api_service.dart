@@ -62,7 +62,7 @@ class YeuCauDangKyService {
 }
 Future<Map<String, dynamic>> updateDiaChiHoKinhDoanh({
   required String yeucaudangkyId,
-  required String diaChiMoi,
+  required diaChiList diaChiMoi,
 }) async {
   final url = Uri.parse('${dotenv.env['API_URL']}/yeucaudangky/updateDiaChiHoKinhDoanh/$yeucaudangkyId');
   
@@ -73,7 +73,7 @@ Future<Map<String, dynamic>> updateDiaChiHoKinhDoanh({
         "Content-Type": "application/json",
       },
       body: jsonEncode({
-        "diachimoi": diaChiMoi,
+        "diachimoi": diaChiMoi.toJson(),
       }),
     );
 

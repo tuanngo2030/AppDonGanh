@@ -343,7 +343,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                           title: 'Thông tin tài khoản',
                           subtitle: 'Bao gồm thông tin cá nhân:',
                           onTap: () {
-                            Navigator.pushNamed(context, '/your_blog_screen');
+                            Navigator.pushNamed(context, '/thong_tin_tai_khoan_screen');
                           },
                         ),
                         MainFuntion(

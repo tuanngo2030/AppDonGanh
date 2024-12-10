@@ -11,6 +11,7 @@ import 'package:don_ganh_app/thu_mua_screen/lich_su_rut_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/other_profile_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/quan_ly_don_hang_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/so_du_screen.dart';
+import 'package:don_ganh_app/thu_mua_screen/thong_tin_tai_khoan_screen.dart';
 import 'package:don_ganh_app/thu_mua_screen/your_blog_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -134,6 +135,7 @@ class MyApp extends StatelessWidget {
         '/sendotpcreate_screen': (context) => Sendotpcreatpw(),
         '/quan_ly_don_hang_screen': (context) => const QuanLyDonHangScreen(),
         '/ho_tro_khach_hang_screen': (context) => const HoTroKhachHangScreen(),
+        '/thong_tin_tai_khoan_screen': (context) => const ThongTinTaiKhoanScreen(),
         // '/other_profile_screen': (context) => const O(),
         
         

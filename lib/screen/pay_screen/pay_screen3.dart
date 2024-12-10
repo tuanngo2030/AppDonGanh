@@ -38,45 +38,46 @@ class _PayScreen3State extends State<PayScreen3> {
         ),
       );
 
-    // _checkOrderStatus();
+    _checkOrderStatus();
   }
 
-  // Future<void> _checkOrderStatus() async {
-  //   final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-
-  //   // Chỉ kiểm tra trạng thái đơn hàng nếu phương thức thanh toán là QR
-  //   if (paymentInfo.title == 'Bảo Kim') {
-  //     try {
-  //       final data = await OrderApiService()
-  //           .checkDonHangBaoKim(orderId: paymentInfo.order_id);
-  //       setState(() {
-  //         isOrderExpired = data['isExpired'] ?? false;
-  //       });
-
-  //       if (!isOrderExpired) {
-  //         _webViewController.loadRequest(Uri.parse(paymentInfo.payment_url));
-  //       }
-  //     } catch (e) {
-  //       print('Lỗi khi kiểm tra đơn hàng: $e');
-  //       setState(() {
-  //         isOrderExpired = true;
-  //       });
-  //     }
-  //   }
-  // }
-
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _checkOrderStatus() async {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
 
-    return Scaffold(body: _buildSuccessScreen()
-        // isOrderExpired
-        //     ? _buildExpiredMessage()
-        //     : isPaymentSuccessful
-        //         ? _buildSuccessScreen()
-        //         : _buildPaymentScreen(paymentInfo),
-        );
+    // Chỉ kiểm tra trạng thái đơn hàng nếu phương thức thanh toán là QR
+    if (paymentInfo.title == 'Bảo Kim') {
+      try {
+        final data = await OrderApiService()
+            .checkDonHangBaoKim(orderId: paymentInfo.order_id);
+        setState(() {
+          isOrderExpired = data['isExpired'] ?? false;
+        });
+
+        if (!isOrderExpired) {
+          _webViewController.loadRequest(Uri.parse(paymentInfo.payment_url));
+        }
+      } catch (e) {
+        print('Lỗi khi kiểm tra đơn hàng: $e');
+        setState(() {
+          isOrderExpired = true;
+        });
+      }
+    }
   }
+
+  @override
+Widget build(BuildContext context) {
+  final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+
+  return Scaffold(body: _buildSuccessScreen()
+    // body: isOrderExpired 
+    //     ? _buildExpiredMessage()
+    //     : isPaymentSuccessful
+    //         ? _buildSuccessScreen()
+    //         : _buildPaymentScreen(paymentInfo),
+  );
+}
+
 
   Widget _buildSuccessScreen() {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
