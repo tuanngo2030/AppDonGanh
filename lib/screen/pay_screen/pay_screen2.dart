@@ -584,10 +584,9 @@ class _PayScreen2State extends State<PayScreen2> {
                 'Phí dịch vụ',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              Text(
-                currencyFormat
-                    .format(paymentInfo.totalPrice), // Format service fee
-                style: const TextStyle(fontSize: 14),
+              const Text(
+                'Tạm thời phí dịch vụ sẽ tính riêng ',
+                style: TextStyle(fontSize: 14),
               ),
               const Text(
                 'Tổng giá trị thanh toán',

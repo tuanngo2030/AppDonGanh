@@ -15,6 +15,7 @@ Future<Map<String, dynamic>> createYeuCauDangKy({
   required diaChiList diaChiMoi,
   required String hinhthucgiaohang,
   required String maSoThue,
+  required String gmail,
   required File? file, // Make file nullable
 }) async {
   final url = Uri.parse('${dotenv.env['API_URL']}/yeucaudangky/createYeuCauDangKy');
@@ -22,6 +23,7 @@ Future<Map<String, dynamic>> createYeuCauDangKy({
   try {
     var request = http.MultipartRequest('POST', url);
     request.fields['userId'] = userId;
+    request.fields['gmail'] = gmail;
     request.fields['ghiChu'] = ghiChu;
     request.fields['soluongloaisanpham'] = soluongloaisanpham.toString();
     request.fields['soluongsanpham'] = soluongsanpham.toString();

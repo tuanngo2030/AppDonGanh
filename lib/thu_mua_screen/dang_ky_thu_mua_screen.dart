@@ -117,6 +117,8 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
         soDienThoaiController.text.isEmpty ||
         soluongLoaiController.text.isEmpty ||
         soluongSanPhamController.text.isEmpty ||
+        maSoThueController.text.isEmpty ||
+        _image == null ||
         // (selectedTinh ?? '').isEmpty || // Đảm bảo selectedTinh không phải null
         // (selectedQuan ?? '').isEmpty || // Đảm bảo selectedQuan không phải null
         // (selectedPhuong ?? '').isEmpty || // Đảm bảo selectedPhuong không phải null
@@ -144,6 +146,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
         maSoThue: maSoThueController.text,
         file: _image,
         userId: userId!, // Replace with actual userId
+        gmail: emailController.text,
         ghiChu: hoTenController.text,
         soluongloaisanpham: int.parse(soluongLoaiController.text),
         soluongsanpham: int.parse(soluongSanPhamController.text),
@@ -153,6 +156,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
 
       if (response.isNotEmpty) {
         _showSnackbar("Đăng ký thành công!");
+        maSoThueController.clear();
         // Optionally reset form
         hoTenController.clear();
         soDienThoaiController.clear();
@@ -166,6 +170,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           _selectedQuanHuyen = "";
           _selectedPhuongXa = "";
           groupValueRequest = "Đòn gánh tới lấy";
+          _image = null;
         });
       }
     } catch (error) {
@@ -254,24 +259,67 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
             ),
           ),
         ),
-        TextButton.icon(
-          onPressed: _pickImage,
-          icon: const Icon(Icons.image, color: Color.fromRGBO(41, 87, 35, 1)),
-          label: const Text(
-            "Chọn ảnh",
-            style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+
+        const SizedBox(
+          height: 10,
+        ),
+
+        RichText(
+          text: const TextSpan(
+            children: [
+              TextSpan(
+                text: 'Giấy chứng nhận hộ kinh doanh',
+                style: TextStyle(
+                  color: Colors.black, // Màu chữ chính
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+              TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red, // Màu đỏ cho dấu sao
+                  fontSize: 16, // Kích thước chữ
+                ),
+              ),
+            ],
           ),
         ),
 
-// Display selected image (if any)
-        _image != null
-            ? Image.file(
-                _image!,
-                height: 150,
-                width: 150,
-                fit: BoxFit.cover,
-              )
-            : const Text("No image selected"),
+        const SizedBox(
+          height: 5,
+        ),
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            height: 170, // Chiều cao của Container
+            width: double.infinity, // Chiều rộng toàn màn hình
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color.fromRGBO(41, 87, 35, 1)),
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[200], // Màu nền của Container
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10), // Bo góc cho hình ảnh
+              child: _image != null
+                  ? Image.file(
+                      _image!,
+                      fit: BoxFit.cover,
+                    )
+                  : const Center(
+                      child: Text(
+                        "No image selected",
+                        style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+
+        const SizedBox(
+          height: 30,
+        ),
+
         Row(
           children: [
             Expanded(

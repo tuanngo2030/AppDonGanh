@@ -67,7 +67,7 @@ class ReviewApiService {
     var response = await request.send();
 
     // Get the response status code
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print('Review created successfully');
     } else {
       print('Failed to create review: ${response.statusCode}');

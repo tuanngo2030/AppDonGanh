@@ -6,6 +6,7 @@ import 'package:don_ganh_app/api_services/cart_api_service.dart';
 import 'package:don_ganh_app/api_services/chat_api_service.dart';
 import 'package:don_ganh_app/api_services/review_api_service.dart';
 import 'package:don_ganh_app/api_services/variant_api_service.dart';
+import 'package:don_ganh_app/models/cart_model.dart';
 import 'package:don_ganh_app/models/product_model.dart';
 import 'package:don_ganh_app/models/review_model.dart';
 import 'package:don_ganh_app/models/variant_model.dart';
@@ -54,6 +55,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
   final FocusNode _quantityFocusNode = FocusNode();
 
   bool _isLoading = false;
+  GlobalKey<BadgeWidgetState> badgeKey = GlobalKey<BadgeWidgetState>();
+  int _cartItemCount = 0;
 
   @override
   void initState() {
@@ -67,7 +70,28 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     //     widget.product.ImgBoSung.map((img) => img.url).toList();
     // variantModel = VariantApiService().getVariant(widget.product.id);
     _startHideTimer();
+    _fetchCartItemCount();
   }
+
+   void _fetchCartItemCount() async {
+    try {
+      List<CartModel> carts = await CartApiService().getGioHangByUserId();
+      int itemCount = 0;
+      for (var cart in carts) {
+        for (var item in cart.mergedCart) {
+          for (var product in item.sanPhamList) {
+            itemCount += product.chiTietGioHangs.length;
+          }
+        }
+      }
+      setState(() {
+        _cartItemCount = itemCount;
+      });
+    } catch (e) {
+      print("Lỗi khi lấy giỏ hàng: $e");
+    }
+  }
+
 
   void _initializeProductData() {
     donGia = widget.product.donGiaBan;
@@ -121,7 +145,8 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
     });
   }
 
-  Future<void> addToCart(String variantId, int donGia) async {
+  Future<void> addToCart(
+      String variantId, int donGia, VoidCallback? refreshBadge) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
 
@@ -144,6 +169,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
       );
     } catch (e) {
+      _fetchCartItemCount();
       print('Error adding to cart: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
@@ -326,6 +352,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+     print("badgeKey.currentState: ${badgeKey.currentState}");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -351,10 +378,40 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
               fontWeight: FontWeight.bold),
         ),
         actions: [
+          
           Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: BadgeWidget(),
-          )
+              padding: const EdgeInsets.only(right: 15),
+              child:  badges.Badge(
+      badgeContent: Text(
+        _cartItemCount.toString(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      badgeStyle: const badges.BadgeStyle(
+        badgeColor: Color.fromRGBO(255, 0, 0, 1),
+        borderSide: BorderSide(color: Colors.white),
+        padding: EdgeInsets.all(8),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, '/cart_screen');
+        },
+        child: Container(
+          width: 45,
+          height: 45,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromRGBO(41, 87, 35, 1),
+          ),
+          child: const Icon(
+            Icons.shopping_bag,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ))
         ],
       ),
       body: Stack(
@@ -851,29 +908,32 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                             padding: const EdgeInsets.all(10),
                                             child: Center(
                                               child: ElevatedButton(
-                                                onPressed:
-                                                    selectedVariantId.isEmpty ||
-                                                            _isLoading
-                                                        ? null
-                                                        : () async {
-                                                            setState(() {
-                                                              quantity = int.tryParse(
-                                                                      _quantityController
-                                                                          .text) ??
-                                                                  1; // Chuyển đổi giá trị từ TextEditingController
-                                                              _isLoading =
-                                                                  true; // Bắt đầu trạng thái loading khi bấm nút
-                                                            });
+                                                onPressed: selectedVariantId
+                                                            .isEmpty ||
+                                                        _isLoading
+                                                    ? null
+                                                    : () async {
+                                                        setState(() {
+                                                          quantity = int.tryParse(
+                                                                  _quantityController
+                                                                      .text) ??
+                                                              1; // Chuyển đổi giá trị từ TextEditingController
+                                                          _isLoading =
+                                                              true; // Bắt đầu trạng thái loading khi bấm nút
+                                                        });
 
-                                                            await addToCart(
-                                                                selectedVariantId,
-                                                                donGia);
+                                                        await addToCart(
+                                                            selectedVariantId,
+                                                            donGia, () {
+                                                          badgeKey.currentState
+                                                              ?.refreshCartItemCount();
+                                                        });
 
-                                                            setState(() {
-                                                              _isLoading =
-                                                                  false; // Kết thúc trạng thái loading sau khi thêm vào giỏ hàng
-                                                            });
-                                                          },
+                                                        setState(() {
+                                                          _isLoading =
+                                                              false; // Kết thúc trạng thái loading sau khi thêm vào giỏ hàng
+                                                        });
+                                                      },
                                                 style: ElevatedButton.styleFrom(
                                                   minimumSize:
                                                       const Size.fromHeight(60),

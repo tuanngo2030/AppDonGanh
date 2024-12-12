@@ -40,7 +40,7 @@ class childCategories {
      return childCategories(
         id: data['IDDanhMucCon'],
         ten_danh_muc_con: data['TenDanhMucCon'],
-        mo_ta: data['MieuTa'],
+        mo_ta: data['MieuTa']?? '',
       );
   }
   }
