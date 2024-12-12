@@ -199,7 +199,15 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   _selectedTinhThanhPho = _tinhThanhPhoList.firstWhere(
                       (province) =>
                           province['code'].toString() == value)['name'];
-                  _loadQuanHuyen(value!); // Gọi hàm để tải danh sách quận/huyện
+                  _quanHuyenList = []; // Đặt lại danh sách quận/huyện
+                  _phuongXaList = []; // Đặt lại danh sách phường/xã
+                  _selectedQuanHuyenCode =
+                      null; // Đặt lại giá trị được chọn cho quận/huyện
+                  _selectedPhuongXaCode =
+                      null; // Đặt lại giá trị được chọn cho phường/xã
+                  if (value != null) {
+                    _loadQuanHuyen(value); // Tải danh sách quận/huyện
+                  }
                 });
               },
             ),
@@ -282,7 +290,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
               ),
             ),
             const SizedBox(height: 20),
-               TextField(
+            TextField(
               controller: _viDoController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(

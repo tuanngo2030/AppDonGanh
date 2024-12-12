@@ -40,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? IDYeuThich;
   Map<String, bool> favorites = {};
   List<String> favoriteIds = [];
+  final GlobalKey<BadgeWidgetState> badgeKey = GlobalKey<BadgeWidgetState>();
   @override
   void initState() {
     super.initState();
@@ -271,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )),
                     SizedBox(width: 8),
-                    BadgeWidget(),
+                    BadgeWidget(badgeKey: badgeKey,),
                   ],
                 ),
                 SizedBox(height: 15),

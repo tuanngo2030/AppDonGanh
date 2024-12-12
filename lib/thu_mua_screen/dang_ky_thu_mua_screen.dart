@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:don_ganh_app/api_services/address_api.dart';
 import 'package:don_ganh_app/api_services/yeu_cau_dang_ky_thu_mua_api_service.dart';
 import 'package:don_ganh_app/models/dia_chi_model.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DangKyThuMuaScreen extends StatefulWidget {
@@ -20,6 +23,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   final TextEditingController soluongLoaiController = TextEditingController();
   final TextEditingController soluongSanPhamController =
       TextEditingController();
+  TextEditingController maSoThueController = TextEditingController();
   List<dynamic> _tinhThanhPhoList = [];
   List<dynamic> _quanHuyenList = [];
   List<dynamic> _phuongXaList = [];
@@ -43,6 +47,8 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   String? userId;
   bool isSucces = false;
 
+  File? _image;
+
   final _yeuCauDangKyService = YeuCauDangKyService();
   final DcApiService _dcApiService = DcApiService();
 
@@ -52,6 +58,16 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
   void initState() {
     super.initState();
     _loadTinhThanhPho();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Lưu đường dẫn hình ảnh
+      });
+    }
   }
 
   Future<void> _loadTinhThanhPho() async {
@@ -101,10 +117,12 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
         soDienThoaiController.text.isEmpty ||
         soluongLoaiController.text.isEmpty ||
         soluongSanPhamController.text.isEmpty ||
+        maSoThueController.text.isEmpty ||
+        _image == null ||
         // (selectedTinh ?? '').isEmpty || // Đảm bảo selectedTinh không phải null
         // (selectedQuan ?? '').isEmpty || // Đảm bảo selectedQuan không phải null
         // (selectedPhuong ?? '').isEmpty || // Đảm bảo selectedPhuong không phải null
-        
+
         duongThonController.text.isEmpty) {
       _showSnackbar("Vui lòng điền đầy đủ thông tin.");
       return;
@@ -115,9 +133,9 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
     });
 
     diaChiList newAddress = diaChiList(
-         tinhThanhPho: _selectedTinhThanhPho,
-                  quanHuyen: _selectedQuanHuyen,
-                  phuongXa: _selectedPhuongXa,
+      tinhThanhPho: _selectedTinhThanhPho,
+      quanHuyen: _selectedQuanHuyen,
+      phuongXa: _selectedPhuongXa,
       duongThon: duongThon!,
       name: hoTen,
       soDienThoai: soDienThoai,
@@ -125,7 +143,10 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
 
     try {
       final response = await _yeuCauDangKyService.createYeuCauDangKy(
+        maSoThue: maSoThueController.text,
+        file: _image,
         userId: userId!, // Replace with actual userId
+        gmail: emailController.text,
         ghiChu: hoTenController.text,
         soluongloaisanpham: int.parse(soluongLoaiController.text),
         soluongsanpham: int.parse(soluongSanPhamController.text),
@@ -135,6 +156,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
 
       if (response.isNotEmpty) {
         _showSnackbar("Đăng ký thành công!");
+        maSoThueController.clear();
         // Optionally reset form
         hoTenController.clear();
         soDienThoaiController.clear();
@@ -148,6 +170,7 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           _selectedQuanHuyen = "";
           _selectedPhuongXa = "";
           groupValueRequest = "Đòn gánh tới lấy";
+          _image = null;
         });
       }
     } catch (error) {
@@ -227,12 +250,81 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
         ),
         const SizedBox(height: 16),
+        TextField(
+          controller: maSoThueController,
+          decoration: InputDecoration(
+            labelText: 'Mã số thuế',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+
+        const SizedBox(
+          height: 10,
+        ),
+
+        RichText(
+          text: const TextSpan(
+            children: [
+              TextSpan(
+                text: 'Giấy chứng nhận hộ kinh doanh',
+                style: TextStyle(
+                    color: Colors.black, // Màu chữ chính
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
+              ),
+              TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red, // Màu đỏ cho dấu sao
+                  fontSize: 16, // Kích thước chữ
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(
+          height: 5,
+        ),
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            height: 170, // Chiều cao của Container
+            width: double.infinity, // Chiều rộng toàn màn hình
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color.fromRGBO(41, 87, 35, 1)),
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[200], // Màu nền của Container
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10), // Bo góc cho hình ảnh
+              child: _image != null
+                  ? Image.file(
+                      _image!,
+                      fit: BoxFit.cover,
+                    )
+                  : const Center(
+                      child: Text(
+                        "No image selected",
+                        style: TextStyle(color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+
+        const SizedBox(
+          height: 30,
+        ),
+
         Row(
           children: [
             Expanded(
               flex: 6,
               child: TextField(
-                      maxLength: 30,
+                maxLength: 30,
                 controller: hoTenController,
                 decoration: InputDecoration(
                   labelText: 'Họ và tên',
@@ -305,12 +397,19 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    _selectedTinhThanhPhoCode = value; // Lưu code
+                    _selectedTinhThanhPhoCode = value;
                     _selectedTinhThanhPho = _tinhThanhPhoList.firstWhere(
                         (province) =>
                             province['code'].toString() == value)['name'];
-                    _loadQuanHuyen(
-                        value!); // Gọi hàm để tải danh sách quận/huyện
+                    _quanHuyenList = []; // Đặt lại danh sách quận/huyện
+                    _phuongXaList = []; // Đặt lại danh sách phường/xã
+                    _selectedQuanHuyenCode =
+                        null; // Đặt lại giá trị được chọn cho quận/huyện
+                    _selectedPhuongXaCode =
+                        null; // Đặt lại giá trị được chọn cho phường/xã
+                    if (value != null) {
+                      _loadQuanHuyen(value); // Tải danh sách quận/huyện
+                    }
                   });
                 },
               ),

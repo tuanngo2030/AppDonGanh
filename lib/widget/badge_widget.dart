@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 
 class BadgeWidget extends StatefulWidget {
-  const BadgeWidget({super.key});
+  final GlobalKey<BadgeWidgetState> badgeKey;
+
+  const BadgeWidget({super.key, required this.badgeKey});
 
   @override
-  State<BadgeWidget> createState() => _BadgeWidgetState();
+  State<BadgeWidget> createState() => BadgeWidgetState();
 }
 
-class _BadgeWidgetState extends State<BadgeWidget> {
-  final int _currentIndex = 0;
+class BadgeWidgetState extends State<BadgeWidget> {
   int _cartItemCount = 0;
 
   @override
@@ -20,26 +21,28 @@ class _BadgeWidgetState extends State<BadgeWidget> {
     _fetchCartItemCount();
   }
 
- void _fetchCartItemCount() async {
-  try {
-    List<CartModel> carts = await CartApiService().getGioHangByUserId();
-    int itemCount = 0;
-    for (var cart in carts) {
-      for (var item in cart.mergedCart) {
-        for (var product in item.sanPhamList) {
-          itemCount += product.chiTietGioHangs.length;
+  void _fetchCartItemCount() async {
+    try {
+      List<CartModel> carts = await CartApiService().getGioHangByUserId();
+      int itemCount = 0;
+      for (var cart in carts) {
+        for (var item in cart.mergedCart) {
+          for (var product in item.sanPhamList) {
+            itemCount += product.chiTietGioHangs.length;
+          }
         }
       }
+      setState(() {
+        _cartItemCount = itemCount;
+      });
+    } catch (e) {
+      print("Lỗi khi lấy giỏ hàng: $e");
     }
-    setState(() {
-      _cartItemCount = itemCount;
-    });
-  } catch (e) {
-    print("Lỗi khi lấy giỏ hàng: $e");
   }
-}
 
-
+   void refreshCartItemCount() {
+    _fetchCartItemCount(); // Fetch the latest cart item count
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +61,6 @@ class _BadgeWidgetState extends State<BadgeWidget> {
       ),
       child: InkWell(
         onTap: () {
-          print("Đi đến giỏ hàng của tôi");
           Navigator.pushNamed(context, '/cart_screen');
         },
         child: Container(

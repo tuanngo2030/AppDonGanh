@@ -292,13 +292,10 @@ class _PayScreen2State extends State<PayScreen2> {
                                                       '${product?['IDSanPham']['TenSanPham']}',
                                                       style: const TextStyle(
                                                           fontSize: 16),
-                                                      overflow: TextOverflow
-                                                          .ellipsis, 
-                                                      maxLines:
-                                                          1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
                                                     ),
-
-                                                    
                                                     Text(
                                                       'Loại sản phẩm: ${ketHopThuocTinhValues.join(", ")}',
                                                       style: const TextStyle(
@@ -374,10 +371,23 @@ class _PayScreen2State extends State<PayScreen2> {
           value: 'COD',
         ),
         buildPaymentMethod(
+          assetPath: 'lib/assets/ic_vietqr.png',
+          title: 'VietQR',
+          subtitle:
+              'Ghi nhận giao dịch tức thì. QR được chấp nhận bởi 40+ Ngân hàng và ví điện tử ',
+          value: 'VietQR',
+        ),
+        buildPaymentMethod(
           assetPath: 'lib/assets/Baokim-logo.png',
-          title: 'Bảo Kim',
+          title: 'ATM Card',
           subtitle: 'Chuyển tiền nhanh chóng',
           value: 'Qr',
+        ),
+        buildPaymentMethod(
+          assetPath: 'lib/assets/ic_vnpay.png',
+          title: 'VNPAY QR',
+          subtitle: 'Ghi nhận giao dịch tức thì',
+          value: 'VNPAY',
         ),
       ],
     );
@@ -396,6 +406,8 @@ class _PayScreen2State extends State<PayScreen2> {
         String hoadonId = paymentInfo.order_id;
         String transactionId = '151';
         String transactionIdCod = '111';
+        String transactionIdVietQR = '295';
+        String transactionIdVNPAY = '297';
         if (value == 'Qr') {
           print(selectedPromoId);
           await _updateTransaction(
@@ -413,6 +425,22 @@ class _PayScreen2State extends State<PayScreen2> {
           await _updateTransactionCOD(
             hoadonId,
             transactionIdCod,
+            assetPath,
+            title,
+            subtitle,
+          );
+        } else if (value == 'VietQR') {
+          await _updateTransaction(
+            hoadonId,
+            transactionIdVietQR,
+            assetPath,
+            title,
+            subtitle,
+          );
+        }else if (value == 'VNPAY') {
+          await _updateTransaction(
+            hoadonId,
+            transactionIdVNPAY,
             assetPath,
             title,
             subtitle,
@@ -556,10 +584,9 @@ class _PayScreen2State extends State<PayScreen2> {
                 'Phí dịch vụ',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              Text(
-                currencyFormat
-                    .format(paymentInfo.totalPrice), // Format service fee
-                style: const TextStyle(fontSize: 14),
+              const Text(
+                'Tạm thời phí dịch vụ sẽ tính riêng ',
+                style: TextStyle(fontSize: 14),
               ),
               const Text(
                 'Tổng giá trị thanh toán',

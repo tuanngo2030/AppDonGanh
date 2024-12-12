@@ -1,4 +1,5 @@
 import 'package:don_ganh_app/api_services/order_api_service.dart';
+import 'package:don_ganh_app/bottomnavigation.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/screen/oder_status_screen.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,14 @@ class _OderScreenState extends State<OderScreen> {
               padding: const EdgeInsets.all(10.0),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const BottomnavigationMenu(initialIndex: 4),
+                    ),
+                    (route) => false,
+                  );
                 },
                 child: Image.asset(
                   'lib/assets/arrow_back.png',
@@ -61,6 +69,7 @@ class _OderScreenState extends State<OderScreen> {
                 ),
               ),
             ),
+
 //
             title: const Text(
               'Đơn hàng',
@@ -259,7 +268,16 @@ class _OderScreenState extends State<OderScreen> {
                       Padding(
                         padding: const EdgeInsets.only(left: 20),
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OderStatusScreen(
+                                  orderModel: orders[index],
+                                ),
+                              ),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 const Color.fromRGBO(41, 87, 35, 1),

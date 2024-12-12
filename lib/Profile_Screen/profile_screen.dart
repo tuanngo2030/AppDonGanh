@@ -61,45 +61,68 @@ class _ProfileScreen extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+ bool _isDisposed = false;
 
-    if (pickedFile != null) {
+@override
+void dispose() {
+  _isDisposed = true;
+  super.dispose();
+}
+
+Future<void> _pickImage() async {
+  final XFile? pickedFile =
+      await ImagePicker().pickImage(source: ImageSource.gallery);
+
+  if (_isDisposed) return;
+
+  if (pickedFile != null) {
+    if (mounted) {
       setState(() {
         _image = File(pickedFile.path);
       });
+    }
 
-      if (_userId.isNotEmpty) {
-        try {
-          bool success = await _uploadService.uploadImage(_image!, _userId);
+    if (_userId.isNotEmpty) {
+      try {
+        bool success = await _uploadService.uploadImage(_image!, _userId);
 
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Ảnh đã được tải lên thành công!')),
-            );
+        if (!_isDisposed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  success ? 'Ảnh đã được tải lên thành công!' : 'Lỗi khi tải ảnh lên.'),
+            ),
+          );
+        }
+
+        if (success) {
+          if (!_isDisposed) {
             _loadUserDetails();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Lỗi khi tải ảnh lên.')),
-            );
           }
-        } catch (e) {
+        }
+      } catch (e) {
+        if (!_isDisposed) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Đã xảy ra lỗi: $e')),
           );
         }
-      } else {
+      }
+    } else {
+      if (!_isDisposed) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Không tìm thấy userId.')),
         );
       }
-    } else {
+    }
+  } else {
+    if (!_isDisposed) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bạn chưa chọn ảnh.')),
       );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +132,7 @@ class _ProfileScreen extends State<ProfileScreen> {
           padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.pop(context);
+              Navigator.pop(context, true);
             },
             child: Image.asset(
               'lib/assets/arrow_back.png',
@@ -234,9 +257,9 @@ class _ProfileScreen extends State<ProfileScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    // Hủy bỏ tất cả các tác vụ cần thiết ở đây nếu có
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // Hủy bỏ tất cả các tác vụ cần thiết ở đây nếu có
+  //   super.dispose();
+  // }
 }

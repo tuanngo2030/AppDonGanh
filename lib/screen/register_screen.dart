@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final _apiService = ApiService();
-  bool _agreedToTerms = false;
+  final bool _agreedToTerms = false;
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -75,7 +75,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 // Tạo CAPTCHA ngẫu nhiên
   void _generateCaptcha() {
     final random = Random();
-    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     setState(() {
       _captcha =
           List.generate(6, (_) => characters[random.nextInt(characters.length)])
@@ -110,13 +111,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
       return;
     }
-    if (!_agreedToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
-      );
-      return;
-    }
+    // if (!_agreedToTerms) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //         content: Text('Bạn cần đồng ý với điều khoản và chính sách')),
+    //   );
+    //   return;
+    // }
 
     _showCaptchaDialog();
   }
@@ -151,7 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng ký thất bại')),
+        const SnackBar(content: Text('')),
       );
     }
   }
@@ -377,8 +378,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide:
-                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "example",
                       errorText: _usernameError,
@@ -414,8 +415,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide:
-                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "abc@gmail.com",
                       errorText: _emailError,
@@ -452,8 +453,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide:
-                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "********",
                       errorText: _passwordError, // Hiển thị lỗi nếu có
@@ -485,7 +486,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const Padding(
                     padding: EdgeInsets.all(5.0),
                     child: Text(
-                      "Mật khẩu nhập lại",
+                      "Xác nhận mật khẩu",
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -505,8 +506,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                        borderSide:
-                            const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
                       ),
                       hintText: "********",
                       errorText: _confirmPasswordError, // Hiển thị lỗi nếu có
@@ -530,64 +531,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
             ),
-            Padding(
-                padding: const EdgeInsets.only(top: 8.0, left: 15),
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: _agreedToTerms,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  _agreedToTerms = value ?? false;
-                                });
-                              },
-                              activeColor: const Color.fromRGBO(41, 87, 35, 1),
-                              visualDensity: const VisualDensity(horizontal: -4.0),
-                            ),
-                            const Text(
-                              "Tôi đồng ý với ",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black),
-                            ),
-                            const Text(
-                              "Điều khoản ",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color.fromRGBO(248, 158, 25, 1)),
-                            ),
-                            const Text(
-                              "& ",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black),
-                            ),
-                            const Text(
-                              "Chính sách bảo mật ",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color.fromRGBO(248, 158, 25, 1)),
-                            ),
-                          ],
-                        )))),
+            // Padding(
+            //     padding: const EdgeInsets.only(top: 8.0, left: 15),
+            //     child: Align(
+            //         alignment: Alignment.centerLeft,
+            //         child: Padding(
+            //             padding: const EdgeInsets.all(1.0),
+            //             child: Row(
+            //               children: [
+            //                 Checkbox(
+            //                   value: _agreedToTerms,
+            //                   onChanged: (bool? value) {
+            //                     setState(() {
+            //                       _agreedToTerms = value ?? false;
+            //                     });
+            //                   },
+            //                   activeColor: const Color.fromRGBO(41, 87, 35, 1),
+            //                   visualDensity: const VisualDensity(horizontal: -4.0),
+            //                 ),
+            //                 const Text(
+            //                   "Tôi đồng ý với ",
+            //                   textAlign: TextAlign.end,
+            //                   style: TextStyle(
+            //                       fontSize: 12,
+            //                       fontWeight: FontWeight.w400,
+            //                       color: Colors.black),
+            //                 ),
+            //                 const Text(
+            //                   "Điều khoản ",
+            //                   textAlign: TextAlign.end,
+            //                   style: TextStyle(
+            //                       fontSize: 12,
+            //                       fontWeight: FontWeight.w400,
+            //                       color: Color.fromRGBO(248, 158, 25, 1)),
+            //                 ),
+            //                 const Text(
+            //                   "& ",
+            //                   textAlign: TextAlign.end,
+            //                   style: TextStyle(
+            //                       fontSize: 12,
+            //                       fontWeight: FontWeight.w400,
+            //                       color: Colors.black),
+            //                 ),
+            //                 const Text(
+            //                   "Chính sách bảo mật ",
+            //                   textAlign: TextAlign.end,
+            //                   style: TextStyle(
+            //                       fontSize: 12,
+            //                       fontWeight: FontWeight.w400,
+            //                       color: Color.fromRGBO(248, 158, 25, 1)),
+            //                 ),
+            //               ],
+            //             )))),
             Padding(
               padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
               child: ElevatedButton(
-                onPressed: () {
-                  _confirmRegister();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        _confirmRegister();
+                      },
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(395, 55),
                   backgroundColor: const Color.fromRGBO(41, 87, 35, 1),

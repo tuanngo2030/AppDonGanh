@@ -38,39 +38,39 @@ class _PayScreen3State extends State<PayScreen3> {
         ),
       );
 
-    // _checkOrderStatus();
+    _checkOrderStatus();
   }
 
-  // Future<void> _checkOrderStatus() async {
-  //   final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+  Future<void> _checkOrderStatus() async {
+    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
 
-  //   // Chỉ kiểm tra trạng thái đơn hàng nếu phương thức thanh toán là QR
-  //   if (paymentInfo.title == 'Bảo Kim') {
-  //     try {
-  //       final data = await OrderApiService()
-  //           .checkDonHangBaoKim(orderId: paymentInfo.order_id);
-  //       setState(() {
-  //         isOrderExpired = data['isExpired'] ?? false;
-  //       });
+    // Chỉ kiểm tra trạng thái đơn hàng nếu phương thức thanh toán là QR
+    if (paymentInfo.title == 'Bảo Kim') {
+      try {
+        final data = await OrderApiService()
+            .checkDonHangBaoKim(orderId: paymentInfo.order_id);
+        setState(() {
+          isOrderExpired = data['isExpired'] ?? false;
+        });
 
-  //       if (!isOrderExpired) {
-  //         _webViewController.loadRequest(Uri.parse(paymentInfo.payment_url));
-  //       }
-  //     } catch (e) {
-  //       print('Lỗi khi kiểm tra đơn hàng: $e');
-  //       setState(() {
-  //         isOrderExpired = true;
-  //       });
-  //     }
-  //   }
-  // }
+        if (!isOrderExpired) {
+          _webViewController.loadRequest(Uri.parse(paymentInfo.payment_url));
+        }
+      } catch (e) {
+        print('Lỗi khi kiểm tra đơn hàng: $e');
+        setState(() {
+          isOrderExpired = true;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
 
     return Scaffold(body: _buildSuccessScreen()
-        // isOrderExpired
+        // body: isOrderExpired
         //     ? _buildExpiredMessage()
         //     : isPaymentSuccessful
         //         ? _buildSuccessScreen()
@@ -85,10 +85,11 @@ class _PayScreen3State extends State<PayScreen3> {
     return Center(
       child: Column(
         children: [
+          const SizedBox(height: 60),
           Image.asset('lib/assets/img_success.png'),
           const SizedBox(height: 20),
           const Text(
-            'Thanh toán thành công!',
+            'Tạo đơn thành công!',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Padding(
@@ -148,7 +149,7 @@ class _PayScreen3State extends State<PayScreen3> {
                           ),
                         ),
                         Text(
-                          '${paymentInfo.totalPrice}',
+                          '${NumberFormat("#,##0").format(paymentInfo.totalPrice)} đ',
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         )
@@ -177,13 +178,13 @@ class _PayScreen3State extends State<PayScreen3> {
           ),
           ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/bottomnavigation');
+                Navigator.pushNamed(context, '/oder_screen');
                 Provider.of<PaymentInfo>(context, listen: false).reset();
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(59, 99, 53, 1),
                   foregroundColor: Colors.white),
-              child: const Text('Trở về'))
+              child: const Text('Xem đơn hàng của bạn'))
         ],
       ),
     );

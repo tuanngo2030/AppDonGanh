@@ -37,7 +37,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
     _titleController.text = widget.blog.tieude;
     _contentController.text = widget.blog.noidung;
     _tagsController.text = widget.blog.tags.join(', ');
-    _titleController.addListener(_validateForm);
+    // _titleController.addListener(_validateForm);
     _contentController.addListener(_validateForm);
     _loadUserData();
 
@@ -47,7 +47,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = _titleController.text.isNotEmpty &&
+      _isFormValid = 
           _contentController.text.isNotEmpty;
     });
   }
@@ -255,7 +255,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                       child: _isLoading
                           ? const CircularProgressIndicator()
                           : Text(
-                              "Đăng",
+                              "Chỉnh sửa",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
