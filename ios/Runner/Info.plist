@@ -100,5 +100,7 @@
 		<key>Location</key>
 		<string>Ứng dụng cần quyền vị trí để cung cấp các tính năng dựa trên vị trí.</string>
 	</dict>
+	<string>googlechrome</string>
+<string>comgooglemaps</string>
 </dict>
 </plist>

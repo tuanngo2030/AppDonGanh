@@ -268,6 +268,9 @@ void _handleDeleteRequest(WithdrawalRequest request) async {
           ),
         bottom: TabBar(
           controller: _tabController,
+              indicatorColor: Color.fromARGB(255, 41, 87, 35),
+              labelColor: Color.fromARGB(255, 41, 87, 35),
+              unselectedLabelColor: Color.fromARGB(255, 0, 0, 0),
           tabs: const [
             Tab(text: 'Chưa xử lý'),
             Tab(text: 'Đã hoàn thành'),

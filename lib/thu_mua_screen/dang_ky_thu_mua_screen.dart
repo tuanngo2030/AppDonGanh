@@ -270,10 +270,9 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
               TextSpan(
                 text: 'Giấy chứng nhận hộ kinh doanh',
                 style: TextStyle(
-                  color: Colors.black, // Màu chữ chính
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600
-                ),
+                    color: Colors.black, // Màu chữ chính
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
               ),
               TextSpan(
                 text: ' *',
@@ -398,12 +397,19 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    _selectedTinhThanhPhoCode = value; // Lưu code
+                    _selectedTinhThanhPhoCode = value;
                     _selectedTinhThanhPho = _tinhThanhPhoList.firstWhere(
                         (province) =>
                             province['code'].toString() == value)['name'];
-                    _loadQuanHuyen(
-                        value!); // Gọi hàm để tải danh sách quận/huyện
+                    _quanHuyenList = []; // Đặt lại danh sách quận/huyện
+                    _phuongXaList = []; // Đặt lại danh sách phường/xã
+                    _selectedQuanHuyenCode =
+                        null; // Đặt lại giá trị được chọn cho quận/huyện
+                    _selectedPhuongXaCode =
+                        null; // Đặt lại giá trị được chọn cho phường/xã
+                    if (value != null) {
+                      _loadQuanHuyen(value); // Tải danh sách quận/huyện
+                    }
                   });
                 },
               ),
