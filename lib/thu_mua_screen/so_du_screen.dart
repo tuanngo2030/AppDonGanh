@@ -18,7 +18,7 @@ class _SoDuScreenState extends State<SoDuScreen> {
   int? soDu;
   String? name;
   String? userId;
-
+  String? errorText; // Biến lưu thông báo lỗi
   // TextEditingController variables for other fields
   TextEditingController soTaiKhoanController = TextEditingController();
   TextEditingController soTienController = TextEditingController();
@@ -73,7 +73,7 @@ class _SoDuScreenState extends State<SoDuScreen> {
       BuildContext context, String email) async {
     final TextEditingController passwordController = TextEditingController();
     bool isLoading = false;
-     SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedUserId = prefs.getString('userId');
 
     final result = await showDialog<bool>(
@@ -82,15 +82,41 @@ class _SoDuScreenState extends State<SoDuScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Xác nhận mật khẩu'),
+              title: Center(
+                child: const Text(
+                  'Xác nhận mật khẩu',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Nhập mật khẩu'),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(20.0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
+                      labelText: 'Nhập mật khẩu',
+                      labelStyle: TextStyle(
+                        color: Color.fromRGBO(41, 87, 35, 1),
+                      ),
+                      errorText: errorText,
+                    ),
                   ),
                   if (isLoading)
                     const Padding(
@@ -105,12 +131,24 @@ class _SoDuScreenState extends State<SoDuScreen> {
                     Navigator.pop(
                         context, false); // Return `false` when cancelled
                   },
-                  child: const Text('Hủy'),
+                  child: const Text(
+                    'Hủy',
+                    style: TextStyle(
+                      color: Colors.red, // Thay đổi màu chữ ở đây
+                    ),
+                  ),
                 ),
                 TextButton(
                   onPressed: () async {
+                    if (passwordController.text.isEmpty) {
+                      setState(() {
+                        errorText = 'Vui lòng nhập mật khẩu'; // Thông báo lỗi
+                      });
+                      return;
+                    }
                     setState(() {
                       isLoading = true;
+                      errorText = null; // Xóa lỗi khi gửi
                     });
                     final response = await UserApiService().loginXacMinh(
                       email,
@@ -121,15 +159,20 @@ class _SoDuScreenState extends State<SoDuScreen> {
                       isLoading = false;
                     });
                     if (response['error'] == true) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${response['message']}')),
-                      );
+                      setState(() {
+                        errorText = response['message']; // Hiển thị lỗi từ API
+                      });
                     } else {
                       Navigator.pop(
                           context, true); // Return `true` when success
                     }
                   },
-                  child: const Text('Xác nhận'),
+                  child: const Text(
+                    'Xác nhận',
+                    style: TextStyle(
+                      color: Color.fromRGBO(41, 87, 35, 1),
+                    ),
+                  ),
                 ),
               ],
             );
@@ -147,6 +190,9 @@ class _SoDuScreenState extends State<SoDuScreen> {
   }
 
   void _handleWithdraw(BuildContext context) async {
+    String? errorSoTaiKhoan;
+    String? errorSoTien;
+
     showModalBottomSheet(
       isScrollControlled: true, // Cho phép điều chỉnh chiều cao theo bàn phím
       context: context,
@@ -197,34 +243,88 @@ class _SoDuScreenState extends State<SoDuScreen> {
                   onChanged: (Bank? value) {
                     tenNganHangDaChon = value;
                   },
-                  decoration: const InputDecoration(
-                    labelText: 'Tên ngân hàng',
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(20.0),
                     border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: const BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
+                    labelText: 'Tên ngân hàng',
+                    labelStyle: TextStyle(
+                      color: Color.fromRGBO(41, 87, 35, 1),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Số tài khoản',
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(20.0),
                     border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: const BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
+                    labelText: 'Số tài khoản',
+                    labelStyle: TextStyle(
+                      color: Color.fromRGBO(41, 87, 35, 1),
+                    ),
+                    errorText: errorSoTaiKhoan,
                   ),
                   controller: soTaiKhoanController,
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Tổng tiền rút',
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(20.0),
                     border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: const BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
+                    labelText: 'Tổng tiền rút',
+                    labelStyle: TextStyle(
+                      color: Color.fromRGBO(41, 87, 35, 1),
+                    ),
+                    errorText: errorSoTien,
                   ),
                   controller: soTienController,
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Ghi chú',
+                    labelStyle: TextStyle(
+                      color: Color.fromRGBO(41, 87, 35, 1),
+                    ),
+                    contentPadding: const EdgeInsets.all(20.0),
                     border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: const BorderSide(
+                          color: Color.fromRGBO(41, 87, 35, 1)),
+                    ),
                   ),
                   controller: ghiChuController,
                 ),
@@ -240,7 +340,12 @@ class _SoDuScreenState extends State<SoDuScreen> {
                         ghiChuController.clear();
                         Navigator.pop(context);
                       },
-                      child: const Text('Hủy'),
+                      child: const Text(
+                        'Hủy',
+                        style: TextStyle(
+                          color: Colors.red, // Thay đổi màu chữ ở đây
+                        ),
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () async {
@@ -300,7 +405,13 @@ class _SoDuScreenState extends State<SoDuScreen> {
                         ghiChuController.clear();
                         Navigator.pop(context);
                       },
-                      child: const Text('Xác nhận'),
+                      child: const Text(
+                        'Xác nhận',
+                        style: TextStyle(
+                          color: Color.fromRGBO(
+                              41, 87, 35, 1), // Thay đổi màu chữ ở đây
+                        ),
+                      ),
                     )
                   ],
                 ),
