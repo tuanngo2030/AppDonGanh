@@ -153,14 +153,14 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
                     });
               },
             ),
-            const Divider(thickness: 1, height: 1),
-            ListTile(
-              leading: Image.asset("lib/assets/lienketthu_icon.png"),
-              title: const Text('Liên kết thẻ'),
-              onTap: () {
-                Navigator.pushNamed(context, '/CardLinkScreen');
-              },
-            ),
+            // const Divider(thickness: 1, height: 1),
+            // ListTile(
+            //   leading: Image.asset("lib/assets/lienketthu_icon.png"),
+            //   title: const Text('Liên kết thẻ'),
+            //   onTap: () {
+            //     Navigator.pushNamed(context, '/CardLinkScreen');
+            //   },
+            // ),
             const Divider(thickness: 1, height: 1),
             ListTile(
               leading: Image.asset("lib/assets/donhang_icon.png"),

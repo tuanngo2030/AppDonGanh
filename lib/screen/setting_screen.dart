@@ -75,10 +75,22 @@ class _SettingScreenState extends State<SettingScreen> {
                 title: Text('Cho phép Đòn Gánh truy cập vị trí'),
                 value: quyenVT,
                 onChanged: (bool value) async {
-                  setState(() {
-                    quyenVT = value;
-                  });
-                  _savePermissionState('quyenVT', value);
+                  // Yêu cầu quyền vị trí
+                  PermissionStatus status = await Permission.location.request();
+
+                  if (status.isGranted) {
+                    // Nếu quyền được cấp, cập nhật trạng thái và lưu vào SharedPreferences
+                    setState(() {
+                      quyenVT = value;
+                    });
+                    _savePermissionState('quyenVT', value);
+                  } else if (status.isDenied) {
+                    // Nếu quyền bị từ chối, yêu cầu người dùng mở cài đặt
+                    await openAppSettings();
+                  } else if (status.isPermanentlyDenied) {
+                    // Nếu quyền bị từ chối vĩnh viễn, yêu cầu mở cài đặt
+                    await openAppSettings();
+                  }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),
                 inactiveThumbColor: const Color.fromARGB(255, 255, 255, 255),
@@ -113,6 +125,12 @@ class _SettingScreenState extends State<SettingScreen> {
                       quyenMic = value;
                     });
                     _savePermissionState('quyenMic', value);
+                  } else if (status.isDenied) {
+                    // Nếu quyền bị từ chối, yêu cầu người dùng mở cài đặt
+                    await openAppSettings();
+                  } else if (status.isPermanentlyDenied) {
+                    // Nếu quyền bị từ chối vĩnh viễn, yêu cầu mở cài đặt
+                    await openAppSettings();
                   }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),
@@ -148,7 +166,11 @@ class _SettingScreenState extends State<SettingScreen> {
                     });
                     _savePermissionState('quyenLibra', value);
                   } else if (status.isDenied) {
-                    // Hiển thị thông báo hoặc hành động khác nếu người dùng từ chối quyền
+                    // Nếu quyền bị từ chối, yêu cầu người dùng mở cài đặt
+                    await openAppSettings();
+                  } else if (status.isPermanentlyDenied) {
+                    // Nếu quyền bị từ chối vĩnh viễn, yêu cầu mở cài đặt
+                    await openAppSettings();
                   }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),
@@ -177,17 +199,18 @@ class _SettingScreenState extends State<SettingScreen> {
                 title: Text('Cho phép Đòn Gánh truy cập máy ảnh'),
                 value: quyenCam,
                 onChanged: (bool value) async {
-                  // PermissionStatus status = await Permission.camera.request();
-                  // if (status == PermissionStatus.granted) {
-                  //   setState(() {
-                  //     quyenCam = value;
-                  //   });
-                  //   _savePermissionState('quyenCam', value);
-                  // }
-                  PermissionStatus statusCam = await Permission.camera.status;
-                  if (statusCam.isDenied) {
-                    // Nếu quyền bị từ chối, yêu cầu lại quyền
-                    await Permission.camera.request();
+                  PermissionStatus status = await Permission.camera.request();
+                  if (status.isGranted) {
+                    setState(() {
+                      quyenCam = value;
+                    });
+                    _savePermissionState('quyenCam', value);
+                  } else if (status.isDenied) {
+                    // Nếu quyền bị từ chối, yêu cầu người dùng mở cài đặt
+                    await openAppSettings();
+                  } else if (status.isPermanentlyDenied) {
+                    // Nếu quyền bị từ chối vĩnh viễn, yêu cầu mở cài đặt
+                    await openAppSettings();
                   }
                 },
                 activeColor: const Color.fromARGB(255, 255, 255, 255),

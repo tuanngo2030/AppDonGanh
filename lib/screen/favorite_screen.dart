@@ -148,7 +148,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       ),
       body: SingleChildScrollView(
         child: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+                ),
+              )
             : favorites.isEmpty
                 ? const Center(child: Text('Không có sản phẩm yêu thích nào'))
                 : Padding(

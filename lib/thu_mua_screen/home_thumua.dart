@@ -29,17 +29,19 @@ class _HomeThumuaState extends State<HomeThumua> {
   void initState() {
     super.initState();
     _fetchBlogPosts();
-     _loadChooseRole();
+    _loadChooseRole();
   }
 
-   Future<void> _loadChooseRole() async {
+  Future<void> _loadChooseRole() async {
+      setState(() {
+      isLoading = true; // Hiển thị trạng thái loading
+    });
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       chooseRole = prefs.getString('chooseRole');
       isLoading = false; // Đã tải xong
     });
   }
-
 
 // Hàm tải lại dữ liệu
   Future<void> _refreshData() async {
@@ -233,153 +235,203 @@ class _HomeThumuaState extends State<HomeThumua> {
         builder: (context) {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 10.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Bình luận (${post.binhluan.length})",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    post.binhluan.isEmpty
-                        ? const Expanded(
-                            child: Center(
-                              child: Text(
-                                "Chưa có bình luận nào",
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                            ),
-                          )
-                        : Expanded(
-                            child: ListView.builder(
-                              itemCount: post.binhluan.length,
-                              itemBuilder: (context, index) {
-                                final PhanHoi comment = post.binhluan[index];
-                                final user = comment.userId;
-                                final userName =
-                                    user.tenNguoiDung ?? 'Unknown User';
-                                final userImage = user.anhDaiDien;
-
-                                final isCurrentUser = user.id == currentUserId;
-                                final displayName = isCurrentUser
-                                    ? "$userName (bạn)"
-                                    : userName;
-
-                                return GestureDetector(
-                                  onLongPress: () {
-                                    _showCommentOptions(
-                                      context,
-                                      isCurrentUser,
-                                      comment,
-                                      post.id,
-                                      (updatedComment) {
-                                        setState(() {
-                                          post.binhluan[index].binhLuan =
-                                              updatedComment;
-                                        });
-                                      },
-                                      post,
-                                      setState, // Pass setState to update the parent widget
-                                    );
-                                  },
-                                  child: ListTile(
-                                    title: Row(
-                                      children: [
-                                        userImage != null
-                                            ? ClipOval(
-                                                child: Image.network(
-                                                  height: 30,
-                                                  width: 30,
-                                                  userImage,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return const Icon(
-                                                        Icons.account_circle,
-                                                        size: 30);
-                                                  },
-                                                ),
-                                              )
-                                            : const Icon(Icons.account_circle),
-                                        const SizedBox(width: 8),
-                                        Text(displayName),
-                                      ],
-                                    ),
-                                    subtitle: Text(comment.binhLuan ?? ''),
-                                    trailing: Text(
-                                      "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
-                                      style: const TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: commentController,
-                              decoration: const InputDecoration(
-                                hintText: "Viết bình luận...",
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: () async {
-                              final userId = prefs.getString('userId');
-                              final name = prefs.getString('tenNguoiDung');
-
-                              final newComment = commentController.text.trim();
-                              if (newComment.isNotEmpty && userId != null) {
-                                try {
-                                  List<PhanHoi> updatedComments =
-                                      await commentApiService.addBinhLuan(
-                                    baivietId: post.id,
-                                    userId: userId,
-                                    binhLuan: newComment,
-                                  );
-
-                                  commentController.clear();
-
-                                  setState(() {
-                                    post.binhluan = updatedComments;
-                                  });
-
-                                  onCommentAdded();
-                                } catch (e) {
-                                  print('Failed to add comment: $e');
-                                }
-                              } else if (userId == null) {
-                                print('Error: User ID is null.');
-                              }
+              return Stack(
+                children: [
+                  // Your existing content
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 10.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const SizedBox(height: 20),
+                        AppBar(
+                          leading: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.pop(context);
                             },
                           ),
-                        ],
+                          title: Text(
+                            "Bình luận(${post.binhluan.length})",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          centerTitle: true,
+                        ),
+                        const SizedBox(height: 10),
+                        post.binhluan.isEmpty
+                            ? const Expanded(
+                                child: Center(
+                                  child: Text(
+                                    "Chưa có bình luận nào",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.grey),
+                                  ),
+                                ),
+                              )
+                            : Expanded(
+                                child: ListView.builder(
+                                  itemCount: post.binhluan.length,
+                                  itemBuilder: (context, index) {
+                                    final PhanHoi comment =
+                                        post.binhluan[index];
+                                    final user = comment.userId;
+                                    final userName =
+                                        user.tenNguoiDung ?? 'Unknown User';
+                                    final userImage = user.anhDaiDien;
+
+                                    final isCurrentUser =
+                                        user.id == currentUserId;
+                                    final displayName = isCurrentUser
+                                        ? "$userName (bạn)"
+                                        : userName;
+
+                                    return GestureDetector(
+                                      onLongPress: () {
+                                        _showCommentOptions(
+                                          context,
+                                          isCurrentUser,
+                                          comment,
+                                          post.id,
+                                          (updatedComment) {
+                                            setState(() {
+                                              post.binhluan[index].binhLuan =
+                                                  updatedComment;
+                                            });
+                                          },
+                                          post,
+                                          setState, // Pass setState to update the parent widget
+                                        );
+                                      },
+                                      child: ListTile(
+                                        title: Row(
+                                          children: [
+                                            userImage != null
+                                                ? ClipOval(
+                                                    child: Image.network(
+                                                      height: 30,
+                                                      width: 30,
+                                                      userImage,
+                                                      errorBuilder: (context,
+                                                          error, stackTrace) {
+                                                        return const Icon(
+                                                            Icons
+                                                                .account_circle,
+                                                            size: 30);
+                                                      },
+                                                    ),
+                                                  )
+                                                : const Icon(
+                                                    Icons.account_circle),
+                                            const SizedBox(width: 8),
+                                            Text(displayName),
+                                          ],
+                                        ),
+                                        subtitle: Text(comment.binhLuan ?? ''),
+                                        trailing: Text(
+                                          "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
+                                          style: const TextStyle(
+                                              color: Colors.grey, fontSize: 12),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: commentController,
+                                  decoration: InputDecoration(
+                                    hintText: "Viết bình luận...",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      borderSide:
+                                          const BorderSide(color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                      borderSide: const BorderSide(
+                                          color: Color.fromRGBO(41, 87, 35, 1)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.send),
+                                onPressed: () async {
+                                  if (isLoading) return;
+
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+
+                                  final userId = prefs.getString('userId');
+                                  final name = prefs.getString('tenNguoiDung');
+
+                                  final newComment =
+                                      commentController.text.trim();
+                                  if (newComment.isNotEmpty && userId != null) {
+                                    try {
+                                      List<PhanHoi> updatedComments =
+                                          await commentApiService.addBinhLuan(
+                                        baivietId: post.id,
+                                        userId: userId,
+                                        binhLuan: newComment,
+                                      );
+
+                                      commentController.clear();
+
+                                      setState(() {
+                                        post.binhluan = updatedComments;
+                                        isLoading =
+                                            false; // Set loading to false after the API call
+                                      });
+
+                                      onCommentAdded();
+                                    } catch (e) {
+                                      setState(() {
+                                        isLoading =
+                                            false; // Set loading to false in case of error
+                                      });
+                                      print('Failed to add comment: $e');
+                                    }
+                                  } else if (userId == null) {
+                                    setState(() {
+                                      isLoading =
+                                          false; // Set loading to false if user ID is null
+                                    });
+                                    print('Error: User ID is null.');
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Overlay with loading indicator
+                  if (isLoading)
+                    Container(
+                      color: Colors.black.withOpacity(0.5), // Dark overlay
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               );
             },
           );
@@ -554,129 +606,147 @@ class _HomeThumuaState extends State<HomeThumua> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return SafeArea(
-    child: Scaffold(
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(), 
-            )
-          : RefreshIndicator(
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    if (chooseRole != 'khachmuahang') ...[
-                      Container(
-                        color: const Color.fromRGBO(59, 99, 53, 1),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                  height: 100,
-                                  width: 200,
-                                  child: Image.asset(
-                                    'lib/assets/logo_xinchao.png',
-                                    fit: BoxFit.contain,
-                                  )),
-                              GestureDetector(
-                                onTap: () {
-                                  print('Setting');
-                                },
-                                child: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: Colors.white,
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromRGBO(41, 87, 35, 1)),
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (chooseRole != 'khachmuahang') ...[
+                        Container(
+                          color: const Color.fromRGBO(59, 99, 53, 1),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    height: 100,
+                                    width: 200,
+                                    child: Image.asset(
+                                      'lib/assets/logo_xinchao.png',
+                                      fit: BoxFit.contain,
+                                    )),
+                                GestureDetector(
+                                  onTap: () {
+                                    print('Setting');
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: Colors.white,
+                                    ),
+                                    child: Image.asset(
+                                        'lib/assets/caidat_icon.png'),
                                   ),
-                                  child: Image.asset('lib/assets/caidat_icon.png'),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/creat_blog_screen').then((result) {
-                            if (result == true) {
-                              // Gọi hàm để tải lại dữ liệu
-                              _fetchBlogPosts();
-                            }
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: Image.asset('lib/assets/logo_app.png',
-                                      fit: BoxFit.contain),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/creat_blog_screen')
+                                .then((result) {
+                              if (result == true) {
+                                // Gọi hàm để tải lại dữ liệu
+                                _fetchBlogPosts();
+                              }
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 20, right: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: Image.asset(
+                                        'lib/assets/logo_app.png',
+                                        fit: BoxFit.contain),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                flex: 9,
-                                child: Container(
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                      border: const Border.fromBorderSide(
-                                          BorderSide(color: Color.fromARGB(255, 184, 182, 182))),
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Đăng bài viết của bạn.',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Color.fromARGB(255, 158, 156, 156),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  flex: 9,
+                                  child: Container(
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                        border: const Border.fromBorderSide(
+                                            BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 184, 182, 182))),
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 20),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Đăng bài viết của bạn.',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Color.fromARGB(
+                                                  255, 158, 156, 156),
+                                            ),
                                           ),
-                                        ),
-                                        Icon(Icons.camera_alt_outlined),
-                                      ],
+                                          Icon(Icons.camera_alt_outlined),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
+                      ],
+                      const SizedBox(
+                        height: 10,
                       ),
+                      isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color.fromRGBO(41, 87, 35, 1)),
+                              ), // Loading indicator
+                            )
+                          : Column(
+                              children: _blogPosts
+                                  .map((post) => _buildPostItem(post))
+                                  .toList(),
+                            ),
                     ],
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: CircularProgressIndicator(), // Loading indicator
-                          )
-                        : Column(
-                            children: _blogPosts.map((post) => _buildPostItem(post)).toList(),
-                          ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   Widget _buildPostItem(BlogModel post) {
     return Padding(
