@@ -27,7 +27,7 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
     // Check if transactionId is neither 0 nor 111 and payment status is false, then show the extension notification
     if (widget.orderModel.transactionId != 0 &&
         widget.orderModel.transactionId != 111 &&
-        !widget.orderModel.thanhToan) {
+        !widget.orderModel.thanhToan && widget.orderModel.TrangThai < 3) {
       _checkBaoKimStatus();
     }
   }

@@ -352,7 +352,6 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-     print("badgeKey.currentState: ${badgeKey.currentState}");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

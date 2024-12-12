@@ -29,17 +29,16 @@ class _HomeThumuaState extends State<HomeThumua> {
   void initState() {
     super.initState();
     _fetchBlogPosts();
-     _loadChooseRole();
+    _loadChooseRole();
   }
 
-   Future<void> _loadChooseRole() async {
+  Future<void> _loadChooseRole() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       chooseRole = prefs.getString('chooseRole');
       isLoading = false; // Đã tải xong
     });
   }
-
 
 // Hàm tải lại dữ liệu
   Future<void> _refreshData() async {
@@ -316,7 +315,7 @@ class _HomeThumuaState extends State<HomeThumua> {
                                               )
                                             : const Icon(Icons.account_circle),
                                         const SizedBox(width: 8),
-                                        Text(displayName),
+                                        Text(displayName, style: const TextStyle(fontSize: 12)),
                                       ],
                                     ),
                                     subtitle: Text(comment.binhLuan ?? ''),
@@ -554,129 +553,142 @@ class _HomeThumuaState extends State<HomeThumua> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return SafeArea(
-    child: Scaffold(
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(), 
-            )
-          : RefreshIndicator(
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    if (chooseRole != 'khachmuahang') ...[
-                      Container(
-                        color: const Color.fromRGBO(59, 99, 53, 1),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                  height: 100,
-                                  width: 200,
-                                  child: Image.asset(
-                                    'lib/assets/logo_xinchao.png',
-                                    fit: BoxFit.contain,
-                                  )),
-                              GestureDetector(
-                                onTap: () {
-                                  print('Setting');
-                                },
-                                child: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: Colors.white,
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (chooseRole != 'khachmuahang') ...[
+                        Container(
+                          color: const Color.fromRGBO(59, 99, 53, 1),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    height: 100,
+                                    width: 200,
+                                    child: Image.asset(
+                                      'lib/assets/logo_xinchao.png',
+                                      fit: BoxFit.contain,
+                                    )),
+                                GestureDetector(
+                                  onTap: () {
+                                    print('Setting');
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: Colors.white,
+                                    ),
+                                    child: Image.asset(
+                                        'lib/assets/caidat_icon.png'),
                                   ),
-                                  child: Image.asset('lib/assets/caidat_icon.png'),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/creat_blog_screen').then((result) {
-                            if (result == true) {
-                              // Gọi hàm để tải lại dữ liệu
-                              _fetchBlogPosts();
-                            }
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: Image.asset('lib/assets/logo_app.png',
-                                      fit: BoxFit.contain),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/creat_blog_screen')
+                                .then((result) {
+                              if (result == true) {
+                                // Gọi hàm để tải lại dữ liệu
+                                _fetchBlogPosts();
+                              }
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 20, right: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: Image.asset(
+                                        'lib/assets/logo_app.png',
+                                        fit: BoxFit.contain),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                flex: 9,
-                                child: Container(
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                      border: const Border.fromBorderSide(
-                                          BorderSide(color: Color.fromARGB(255, 184, 182, 182))),
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Đăng bài viết của bạn.',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Color.fromARGB(255, 158, 156, 156),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  flex: 9,
+                                  child: Container(
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                        border: const Border.fromBorderSide(
+                                            BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 184, 182, 182))),
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 20),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Đăng bài viết của bạn.',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Color.fromARGB(
+                                                  255, 158, 156, 156),
+                                            ),
                                           ),
-                                        ),
-                                        Icon(Icons.camera_alt_outlined),
-                                      ],
+                                          Icon(Icons.camera_alt_outlined),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
+                      ],
+                      const SizedBox(
+                        height: 10,
                       ),
+                      isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child:
+                                  CircularProgressIndicator(), // Loading indicator
+                            )
+                          : Column(
+                              children: _blogPosts
+                                  .map((post) => _buildPostItem(post))
+                                  .toList(),
+                            ),
                     ],
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: CircularProgressIndicator(), // Loading indicator
-                          )
-                        : Column(
-                            children: _blogPosts.map((post) => _buildPostItem(post)).toList(),
-                          ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   Widget _buildPostItem(BlogModel post) {
     return Padding(
