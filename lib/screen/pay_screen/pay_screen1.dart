@@ -57,6 +57,8 @@ class _PayScreen1State extends State<PayScreen1> {
   String selectedPromoId = '';
   int giaTriGiam = 0;
 
+  Map<String, double> userPromotions = {};
+
   final OrderApiService _orderApiService = OrderApiService();
 
   @override
@@ -66,31 +68,39 @@ class _PayScreen1State extends State<PayScreen1> {
     _fetchDefaultAddress();
   }
 
-  void _showPromotionBottomSheet(double usertotal) {
-    final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
-    int total = paymentInfo.totalPrice.toInt();
+  void _showPromotionBottomSheet(double userTotal, String userId) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allows the bottom sheet to take up more space
+      isScrollControlled: true,
       builder: (context) {
         return SizedBox(
-          height: MediaQuery.of(context).size.height *
-              0.75, // Adjust height as needed
+          height: MediaQuery.of(context).size.height * 0.75,
           child: KhuyenMaiScreen(
-            totalAmount: usertotal.toInt(),
-            onPromotionSelected: updatePromoCode,
-          ), // Use the existing KhuyenMaiScreen
+            totalAmount: userTotal.toInt(),
+            onPromotionSelected: (discountValue) {
+              updatePromoCode(userId, discountValue);
+            },
+          ),
         );
       },
     );
   }
 
-  void updatePromoCode(KhuyenMaiModel promotion) {
+  void updatePromoCode(String userId, KhuyenMaiModel promotion) {
     setState(() {
       selectedPromoId = promotion
           .id; // Assuming you want to store the promotion ID for later use
       selectedPromoCode = promotion.tenKhuyenMai;
       giaTriGiam = promotion.giaTriGiam;
+      userPromotions[userId] = promotion.giaTriGiam.toDouble();
+
+      for (var cart in selectedItems) {
+        for (var mergedCart in cart.mergedCart) {
+          if (mergedCart.user.id == userId) {
+            mergedCart.giaTriKhuyenMai = promotion.giaTriGiam.toDouble();
+          }
+        }
+      }
     });
   }
 
@@ -357,12 +367,31 @@ class _PayScreen1State extends State<PayScreen1> {
 
       double totalPrice = calculateTotal(selectedItems);
       CartModel selectedItem = selectedItems[0];
+      // CartModel chiTietGioHang = CartModel(
+      //   id: selectedItem.id,
+      //   user: selectedItem.user,
+      //   mergedCart: selectedItem.mergedCart.map((mergedCartItem) {
+      //     return SanPhamCart(
+      //       user: mergedCartItem.user,
+      //       sanPhamList: mergedCartItem.sanPhamList.map((sanPhamItem) {
+      //         return SanPhamList(
+      //           user: sanPhamItem.user,
+      //           sanPham: sanPhamItem.sanPham,
+      //           chiTietGioHangs: sanPhamItem.chiTietGioHangs,
+      //         );
+      //       }).toList(),
+      //     );
+      //   }).toList(),
+      // );
+
       CartModel chiTietGioHang = CartModel(
         id: selectedItem.id,
         user: selectedItem.user,
         mergedCart: selectedItem.mergedCart.map((mergedCartItem) {
           return SanPhamCart(
             user: mergedCartItem.user,
+            giaTriKhuyenMai:
+                mergedCartItem.giaTriKhuyenMai, // Thêm giá trị khuyến mãi
             sanPhamList: mergedCartItem.sanPhamList.map((sanPhamItem) {
               return SanPhamList(
                 user: sanPhamItem.user,
@@ -580,7 +609,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                 }),
                                 GestureDetector(
                                   onTap: () {
-                                    _showPromotionBottomSheet(userTotal);
+                                    _showPromotionBottomSheet(
+                                        userTotal, sanPhamCart.user.id!);
                                     print('show vourcher');
                                   },
                                   child: Padding(
@@ -600,7 +630,8 @@ class _PayScreen1State extends State<PayScreen1> {
                                             ),
                                           ),
                                           Text(
-                                              '- ${NumberFormat("#,##0").format(giaTriGiam)} đ'),
+                                            '- ${NumberFormat("#,##0").format(userPromotions[sanPhamCart.user.id] ?? 0)} đ',
+                                          ),
                                         ],
                                       ),
                                     ),

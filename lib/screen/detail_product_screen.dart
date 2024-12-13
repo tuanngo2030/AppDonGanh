@@ -1125,29 +1125,29 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                     SizedBox(height: 10),
                                   ],
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => OrderReviewScreen(
-                                          title: 'sản phẩm',
-                                          id: widget.product.id,
-                                        ),
-                                      ),
-                                    ).then((_) {
-                                      _fetchReviews();
-                                    });
-                                  },
-                                  child: Text(
-                                    'Đánh giá',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Color.fromRGBO(41, 87, 35, 1),
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) => OrderReviewScreen(
+                                //           title: 'sản phẩm',
+                                //           id: widget.product.id,
+                                //         ),
+                                //       ),
+                                //     ).then((_) {
+                                //       _fetchReviews();
+                                //     });
+                                //   },
+                                //   child: Text(
+                                //     'Đánh giá',
+                                //     style: TextStyle(
+                                //       fontWeight: FontWeight.w600,
+                                //       color: Color.fromRGBO(41, 87, 35, 1),
+                                //       decoration: TextDecoration.underline,
+                                //     ),
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),

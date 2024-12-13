@@ -254,8 +254,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           controller: maSoThueController,
           decoration: InputDecoration(
             labelText: 'Mã số thuế',
+            labelStyle: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5),
+              borderSide:
+                  const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
             ),
           ),
         ),
@@ -328,8 +340,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 controller: hoTenController,
                 decoration: InputDecoration(
                   labelText: 'Họ và tên',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),
@@ -345,8 +369,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: 'Số điện thoại',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),
@@ -361,8 +397,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             labelText: 'Email',
+            labelStyle: TextStyle(
+              color: Color.fromRGBO(41, 87, 35, 1),
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5),
+              borderSide:
+                  const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
             ),
           ),
         ),
@@ -385,8 +433,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 value: _selectedTinhThanhPhoCode,
                 decoration: InputDecoration(
                   labelText: "Chọn Tỉnh/Thành phố",
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
                 items: _tinhThanhPhoList.map((province) {
@@ -424,8 +484,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 value: _selectedQuanHuyenCode,
                 decoration: InputDecoration(
                   labelText: "Chọn Quận/Huyện",
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
                 items: _quanHuyenList.map((district) {
@@ -460,8 +532,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 value: _selectedPhuongXaCode,
                 decoration: InputDecoration(
                   labelText: "Chọn Phường/Xã",
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
                 items: _phuongXaList.map((ward) {
@@ -488,8 +572,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 controller: duongThonController,
                 decoration: InputDecoration(
                   labelText: 'Đường/Thôn xóm',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),
@@ -562,8 +658,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 keyboardType: TextInputType.number, // Hiển thị bàn phím số
                 decoration: InputDecoration(
                   labelText: 'Số lượng loại sản phẩm(Dự kiến)',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),
@@ -578,8 +686,20 @@ class _DangKyThuMuaScreenState extends State<DangKyThuMuaScreen> {
                 keyboardType: TextInputType.number, // Hiển thị bàn phím số
                 decoration: InputDecoration(
                   labelText: 'Số lượng sản phẩm(Dự kiến)',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(41, 87, 35, 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        const BorderSide(color: Color.fromRGBO(41, 87, 35, 1)),
                   ),
                 ),
               ),

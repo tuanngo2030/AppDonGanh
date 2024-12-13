@@ -33,6 +33,9 @@ class _HomeThumuaState extends State<HomeThumua> {
   }
 
   Future<void> _loadChooseRole() async {
+      setState(() {
+      isLoading = true; // Hiển thị trạng thái loading
+    });
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       chooseRole = prefs.getString('chooseRole');
@@ -232,153 +235,203 @@ class _HomeThumuaState extends State<HomeThumua> {
         builder: (context) {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 10.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Bình luận (${post.binhluan.length})",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    post.binhluan.isEmpty
-                        ? const Expanded(
-                            child: Center(
-                              child: Text(
-                                "Chưa có bình luận nào",
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                            ),
-                          )
-                        : Expanded(
-                            child: ListView.builder(
-                              itemCount: post.binhluan.length,
-                              itemBuilder: (context, index) {
-                                final PhanHoi comment = post.binhluan[index];
-                                final user = comment.userId;
-                                final userName =
-                                    user.tenNguoiDung ?? 'Unknown User';
-                                final userImage = user.anhDaiDien;
-
-                                final isCurrentUser = user.id == currentUserId;
-                                final displayName = isCurrentUser
-                                    ? "$userName (bạn)"
-                                    : userName;
-
-                                return GestureDetector(
-                                  onLongPress: () {
-                                    _showCommentOptions(
-                                      context,
-                                      isCurrentUser,
-                                      comment,
-                                      post.id,
-                                      (updatedComment) {
-                                        setState(() {
-                                          post.binhluan[index].binhLuan =
-                                              updatedComment;
-                                        });
-                                      },
-                                      post,
-                                      setState, // Pass setState to update the parent widget
-                                    );
-                                  },
-                                  child: ListTile(
-                                    title: Row(
-                                      children: [
-                                        userImage != null
-                                            ? ClipOval(
-                                                child: Image.network(
-                                                  height: 30,
-                                                  width: 30,
-                                                  userImage,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return const Icon(
-                                                        Icons.account_circle,
-                                                        size: 30);
-                                                  },
-                                                ),
-                                              )
-                                            : const Icon(Icons.account_circle),
-                                        const SizedBox(width: 8),
-                                        Text(displayName, style: const TextStyle(fontSize: 12)),
-                                      ],
-                                    ),
-                                    subtitle: Text(comment.binhLuan ?? ''),
-                                    trailing: Text(
-                                      "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
-                                      style: const TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: commentController,
-                              decoration: const InputDecoration(
-                                hintText: "Viết bình luận...",
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: () async {
-                              final userId = prefs.getString('userId');
-                              final name = prefs.getString('tenNguoiDung');
-
-                              final newComment = commentController.text.trim();
-                              if (newComment.isNotEmpty && userId != null) {
-                                try {
-                                  List<PhanHoi> updatedComments =
-                                      await commentApiService.addBinhLuan(
-                                    baivietId: post.id,
-                                    userId: userId,
-                                    binhLuan: newComment,
-                                  );
-
-                                  commentController.clear();
-
-                                  setState(() {
-                                    post.binhluan = updatedComments;
-                                  });
-
-                                  onCommentAdded();
-                                } catch (e) {
-                                  print('Failed to add comment: $e');
-                                }
-                              } else if (userId == null) {
-                                print('Error: User ID is null.');
-                              }
+              return Stack(
+                children: [
+                  // Your existing content
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 10.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const SizedBox(height: 20),
+                        AppBar(
+                          leading: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.pop(context);
                             },
                           ),
-                        ],
+                          title: Text(
+                            "Bình luận(${post.binhluan.length})",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          centerTitle: true,
+                        ),
+                        const SizedBox(height: 10),
+                        post.binhluan.isEmpty
+                            ? const Expanded(
+                                child: Center(
+                                  child: Text(
+                                    "Chưa có bình luận nào",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.grey),
+                                  ),
+                                ),
+                              )
+                            : Expanded(
+                                child: ListView.builder(
+                                  itemCount: post.binhluan.length,
+                                  itemBuilder: (context, index) {
+                                    final PhanHoi comment =
+                                        post.binhluan[index];
+                                    final user = comment.userId;
+                                    final userName =
+                                        user.tenNguoiDung ?? 'Unknown User';
+                                    final userImage = user.anhDaiDien;
+
+                                    final isCurrentUser =
+                                        user.id == currentUserId;
+                                    final displayName = isCurrentUser
+                                        ? "$userName (bạn)"
+                                        : userName;
+
+                                    return GestureDetector(
+                                      onLongPress: () {
+                                        _showCommentOptions(
+                                          context,
+                                          isCurrentUser,
+                                          comment,
+                                          post.id,
+                                          (updatedComment) {
+                                            setState(() {
+                                              post.binhluan[index].binhLuan =
+                                                  updatedComment;
+                                            });
+                                          },
+                                          post,
+                                          setState, // Pass setState to update the parent widget
+                                        );
+                                      },
+                                      child: ListTile(
+                                        title: Row(
+                                          children: [
+                                            userImage != null
+                                                ? ClipOval(
+                                                    child: Image.network(
+                                                      height: 30,
+                                                      width: 30,
+                                                      userImage,
+                                                      errorBuilder: (context,
+                                                          error, stackTrace) {
+                                                        return const Icon(
+                                                            Icons
+                                                                .account_circle,
+                                                            size: 30);
+                                                      },
+                                                    ),
+                                                  )
+                                                : const Icon(
+                                                    Icons.account_circle),
+                                            const SizedBox(width: 8),
+                                            Text(displayName),
+                                          ],
+                                        ),
+                                        subtitle: Text(comment.binhLuan ?? ''),
+                                        trailing: Text(
+                                          "${comment.ngayTao.day}/${comment.ngayTao.month}/${comment.ngayTao.year}",
+                                          style: const TextStyle(
+                                              color: Colors.grey, fontSize: 12),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: commentController,
+                                  decoration: InputDecoration(
+                                    hintText: "Viết bình luận...",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      borderSide:
+                                          const BorderSide(color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                      borderSide: const BorderSide(
+                                          color: Color.fromRGBO(41, 87, 35, 1)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.send),
+                                onPressed: () async {
+                                  if (isLoading) return;
+
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+
+                                  final userId = prefs.getString('userId');
+                                  final name = prefs.getString('tenNguoiDung');
+
+                                  final newComment =
+                                      commentController.text.trim();
+                                  if (newComment.isNotEmpty && userId != null) {
+                                    try {
+                                      List<PhanHoi> updatedComments =
+                                          await commentApiService.addBinhLuan(
+                                        baivietId: post.id,
+                                        userId: userId,
+                                        binhLuan: newComment,
+                                      );
+
+                                      commentController.clear();
+
+                                      setState(() {
+                                        post.binhluan = updatedComments;
+                                        isLoading =
+                                            false; // Set loading to false after the API call
+                                      });
+
+                                      onCommentAdded();
+                                    } catch (e) {
+                                      setState(() {
+                                        isLoading =
+                                            false; // Set loading to false in case of error
+                                      });
+                                      print('Failed to add comment: $e');
+                                    }
+                                  } else if (userId == null) {
+                                    setState(() {
+                                      isLoading =
+                                          false; // Set loading to false if user ID is null
+                                    });
+                                    print('Error: User ID is null.');
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Overlay with loading indicator
+                  if (isLoading)
+                    Container(
+                      color: Colors.black.withOpacity(0.5), // Dark overlay
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               );
             },
           );
@@ -558,7 +611,10 @@ class _HomeThumuaState extends State<HomeThumua> {
       child: Scaffold(
         body: isLoading
             ? const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromRGBO(41, 87, 35, 1)),
+                ),
               )
             : RefreshIndicator(
                 onRefresh: _refreshData,
@@ -674,8 +730,10 @@ class _HomeThumuaState extends State<HomeThumua> {
                       isLoading
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 20),
-                              child:
-                                  CircularProgressIndicator(), // Loading indicator
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color.fromRGBO(41, 87, 35, 1)),
+                              ), // Loading indicator
                             )
                           : Column(
                               children: _blogPosts

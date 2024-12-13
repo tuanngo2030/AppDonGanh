@@ -86,6 +86,9 @@ class _ListConversationState extends State<ListConversation> {
   }
 
   Future<void> _loadUserId() async {
+      setState(() {
+      _isLoading = true; // Bắt đầu trạng thái tải
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
     setState(() {}); // Update UI after userId is loaded
@@ -93,6 +96,9 @@ class _ListConversationState extends State<ListConversation> {
     if (userId != null) {
       await getListConversationsByUserId(userId!);
     }
+        setState(() {
+      _isLoading = false; // Kết thúc trạng thái tải
+    });
   }
 
   // Fetch conversations and filter by userId
@@ -131,7 +137,6 @@ class _ListConversationState extends State<ListConversation> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -149,63 +154,70 @@ class _ListConversationState extends State<ListConversation> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(
-              child: Text('Chưa có đoạn hội thoại'),
-            )
-          : ListView.builder(
-              itemCount: conversations.length,
-              itemBuilder: (context, index) {
-                var conversation = conversations[index];
-                var sender = conversation.senderId;
-                var receiver = conversation.receiverId;
-
-                // Kiểm tra userId lấy từ SharedPreferences có trùng với senderId
-                var isCurrentUserSender = sender?.id == userId;
-
-                // Nếu là sender thì hiển thị thông tin sender, nếu không thì hiển thị thông tin receiver
-                var displayUser = isCurrentUserSender ? receiver : sender;
-
-                // Bỏ qua nếu không có tin nhắn
-                if (conversation.messageIds.isEmpty) {
-                  return const SizedBox.shrink(); // Không hiển thị gì
-                }
-
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 20, // Adjust the size as needed
-                    backgroundColor:
-                        Colors.grey.shade200, // Optional background color
-                    child: ClipOval(
-                      child: displayUser?.anhDaiDien != null
-                          ? Image.network(
-                              displayUser!.anhDaiDien!,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.person,
-                                    color: Colors.grey); // Fallback icon
-                              },
-                            )
-                          : const Icon(Icons.person,
-                              color: Colors.grey), // Default icon if no image
+      body: Stack(
+        children: [
+          _isLoading
+              ? Container(
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Color.fromRGBO(41, 87, 35, 1)),
                     ),
                   ),
-                  title: Text(
-                    displayUser?.tenNguoiDung ?? 'Unknown User',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                )
+              : SizedBox
+                  .shrink(), 
+          ListView.builder(
+            itemCount: conversations.length,
+            itemBuilder: (context, index) {
+              var conversation = conversations[index];
+              var sender = conversation.senderId;
+              var receiver = conversation.receiverId;
+
+              var isCurrentUserSender = sender?.id == userId;
+
+              var displayUser = isCurrentUserSender ? receiver : sender;
+
+              if (conversation.messageIds.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return ListTile(
+                leading: CircleAvatar(
+                  radius: 20,
+                  backgroundColor:
+                      Colors.grey.shade200,
+                  child: ClipOval(
+                    child: displayUser?.anhDaiDien != null
+                        ? Image.network(
+                            displayUser!.anhDaiDien!,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person,
+                                  color: Colors.grey);
+                            },
+                          )
+                        : const Icon(Icons.person,
+                            color: Colors.grey), 
                   ),
-                  subtitle: const Text('Nhấn để bắt đầu trò chuyện'),
-                  onTap: () {
-                    // Nếu là sender thì gửi receiverId, nếu không thì gửi senderId
-                    _onChat(isCurrentUserSender
-                        ? receiver?.id ?? 'Unknown'
-                        : sender?.id ?? 'Unknown');
-                  },
-                );
-              },
-            ),
+                ),
+                title: Text(
+                  displayUser?.tenNguoiDung ?? 'Unknown User',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text('Nhấn để bắt đầu trò chuyện'),
+                onTap: () {
+                  _onChat(isCurrentUserSender
+                      ? receiver?.id ?? 'Unknown'
+                      : sender?.id ?? 'Unknown');
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

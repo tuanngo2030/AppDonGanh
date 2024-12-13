@@ -42,32 +42,37 @@ class CartModel {
 class SanPhamCart {
   final NguoiDung user;
   final List<SanPhamList> sanPhamList;
+  double? giaTriKhuyenMai; // Số tiền khuyến mãi cho user này
 
   SanPhamCart({
     required this.user,
     required this.sanPhamList,
+    this.giaTriKhuyenMai,
   });
 
   factory SanPhamCart.fromJSON(Map<String, dynamic> data) {
     return SanPhamCart(
       user: NguoiDung.fromJson(data['user'] as Map<String, dynamic>),
+      
       sanPhamList: (data['sanPhamList'] as List<dynamic>?)
               ?.map(
                   (item) => SanPhamList.fromJSON(item as Map<String, dynamic>))
               .toList() ??
           [],
+        giaTriKhuyenMai: data['SoTienKhuyenMai'],
     );
   }
 
     @override
   String toString() {
-    return 'SanPhamCart(user: $user, sanPhamList: $sanPhamList)';
+    return 'SanPhamCart(user: $user, sanPhamList: $sanPhamList, giaTriKhuyenMai: $giaTriKhuyenMai)';
   }
 
   Map<String, dynamic> toJson() {
     return {
       'user': user.toJson(),
       'sanPhamList': sanPhamList.map((item) => item.toJson()).toList(),
+      'giaTriKhuyenMai': giaTriKhuyenMai,
     };
   }
 }

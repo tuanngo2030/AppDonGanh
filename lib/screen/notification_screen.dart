@@ -140,7 +140,7 @@ Future<void> _refreshNotifications() async {
       }
 
       // Gọi API để cập nhật trạng thái đã đọc
-      await NotificationApi.updateAllNotificationsRead(userId);
+       NotificationApi.updateAllNotificationsRead(userId);
 
       if (!mounted) return;
 
@@ -177,8 +177,8 @@ Future<void> _refreshNotifications() async {
   void _showFullNotificationDialog(NotificationModel notification) async {
     if (!notification.daDoc) {
       // Gọi API để đánh dấu thông báo đã đọc
-      await NotificationApi.updateNotificationRead(notification.id);
-
+      // await NotificationApi.updateNotificationRead(notification.id);
+     NotificationApi.updateNotificationRead(notification.id);
       // Cập nhật giao diện
       setState(() {
         final index =
@@ -209,48 +209,58 @@ Future<void> _refreshNotifications() async {
     );
   }
 
-  void deleteAllNotifications() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId');
-      if (userId == null) {
-        throw Exception("Không tìm thấy userId trong SharedPreferences.");
-      }
+void deleteAllNotifications() async {
+  try {
+    // setState(() {
+    //   isLoading = true; // Set loading state to true when action starts
+    // });
 
-      // Call API to delete all notifications
-      await NotificationApi.deleteAllThongBao(userId);
-
-      if (!mounted) return;
-
-      // Update UI
-      setState(() {
-        notifications.clear(); // Clear the list of notifications
-      });
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Tất cả thông báo đã được xóa."),
-        ),
-      );
-    } 
-    catch (e) {
-      // Handle error
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Lỗi"),
-          content: Text(e.toString()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Đóng"),
-            ),
-          ],
-        ),
-      );
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+    if (userId == null) {
+      throw Exception("Không tìm thấy userId trong SharedPreferences.");
     }
+
+    // Call API to delete all notifications
+     NotificationApi.deleteAllThongBao(userId);
+
+    if (!mounted) return;
+
+    // Update UI
+    setState(() {
+      notifications.clear(); // Clear the list of notifications
+      // isLoading = false; // Set loading state to false once action is complete
+    });
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Tất cả thông báo đã được xóa."),
+      ),
+    );
+  } 
+  catch (e) {
+    // setState(() {
+    //   isLoading = false; // Set loading state to false if an error occurs
+    // });
+
+    // Handle error
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Lỗi"),
+        content: Text(e.toString()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Đóng"),
+          ),
+        ],
+      ),
+    );
   }
+}
+
 
   Future<void> _removeNotification(NotificationModel notification) async {
     try {
@@ -260,7 +270,7 @@ Future<void> _refreshNotifications() async {
       });
 
       // Call API to delete notification (optional)
-      await NotificationApi.deleteThongBao(notification.id);
+       NotificationApi.deleteThongBao(notification.id);
     } catch (e) {
       // Handle the error (e.g., show an alert, log, etc.)
       print("Error removing notification: $e");
@@ -336,191 +346,207 @@ Widget build(BuildContext context) {
     groupedNotifications[formattedDate]!.add(notification);
   }
 
-  return Scaffold(
-    appBar: AppBar(
-      leading: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: GestureDetector(),
-      ),
-      title: const Text(
-        'Thông báo',
-        style: TextStyle(
-            color: Color.fromRGBO(41, 87, 35, 1),
-            fontWeight: FontWeight.bold),
-      ),
-      centerTitle: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
+ return Scaffold(
+  appBar: AppBar(
+    leading: Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: GestureDetector(),
     ),
-    body: RefreshIndicator(
-      onRefresh: _refreshNotifications, // Hàm gọi lại để làm mới dữ liệu
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  TextButton(
-                    onPressed: markAllAsRead,
-                    child: const Text(
-                      "Đánh dấu tin đã đọc",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+    title: const Text(
+      'Thông báo',
+      style: TextStyle(
+          color: Color.fromRGBO(41, 87, 35, 1),
+          fontWeight: FontWeight.bold),
+    ),
+    centerTitle: true,
+    backgroundColor: Colors.white,
+    elevation: 0,
+  ),
+  body: Stack(
+    children: [
+      RefreshIndicator(
+        onRefresh: _refreshNotifications, // Hàm gọi lại để làm mới dữ liệu
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    TextButton(
+                      onPressed: markAllAsRead,
+                      child: const Text(
+                        "Đánh dấu tin đã đọc",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: deleteAllNotifications,
-                    child: const Text(
-                      "Xóa tất cả",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                    TextButton(
+                      onPressed: deleteAllNotifications,
+                      child: const Text(
+                        "Xóa tất cả",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : groupedNotifications.isEmpty
-                    ? const Center(child: Text("Không có thông báo nào."))
-                    : ListView.builder(
-                        itemCount: groupedNotifications.keys.length,
-                        itemBuilder: (context, index) {
-                          String dateGroup =
-                              groupedNotifications.keys.elementAt(index);
-                          List<NotificationModel> notificationsForDate =
-                              groupedNotifications[dateGroup]!;
+            Expanded(
+              child: isLoading
+                  ? const Center()
+                  : groupedNotifications.isEmpty
+                      ? const Center(child: Text("Không có thông báo nào."))
+                      : ListView.builder(
+                          itemCount: groupedNotifications.keys.length,
+                          itemBuilder: (context, index) {
+                            String dateGroup =
+                                groupedNotifications.keys.elementAt(index);
+                            List<NotificationModel> notificationsForDate =
+                                groupedNotifications[dateGroup]!;
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  dateGroup,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    dateGroup,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: notificationsForDate.length,
-                                itemBuilder: (context, index) {
-                                  final notification =
-                                      notificationsForDate[index];
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: notificationsForDate.length,
+                                  itemBuilder: (context, index) {
+                                    final notification =
+                                        notificationsForDate[index];
 
-                                  return GestureDetector(
-                                    onTap: () => _showFullNotificationDialog(
-                                        notification),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 16),
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.grey,
-                                            width: 0.5,
+                                    return GestureDetector(
+                                      onTap: () => _showFullNotificationDialog(
+                                          notification),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10, horizontal: 16),
+                                        decoration: const BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Colors.grey,
+                                              width: 0.5,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Avatar
-                                          CircleAvatar(
-                                            radius: 25,
-                                            backgroundColor: Colors.grey[300],
-                                          ),
-                                          const SizedBox(width: 16),
-                                          // Notification content
-                                          Expanded(
-                                            child: Column(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Avatar
+                                            CircleAvatar(
+                                              radius: 25,
+                                              // backgroundColor: Colors.grey[300],
+                                              //  child: Image.network(notification.hinhAnh),
+                                              child: Image.asset(
+                                                  "lib/assets/logo_app.png"),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            // Notification content
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    notification.tieude,
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          notification.daDoc
+                                                              ? FontWeight.w500
+                                                              : FontWeight.bold,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    notification.noidung,
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            // Time
+                                            Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.end,
                                               children: [
                                                 Text(
-                                                  notification.tieude,
+                                                  notification.daDoc
+                                                      ? "Đã xem"
+                                                      : getTimeAgo(
+                                                          notification.ngayTao),
                                                   style: TextStyle(
-                                                    fontWeight:
-                                                        notification.daDoc
-                                                            ? FontWeight.w500
-                                                            : FontWeight.bold,
-                                                    fontSize: 16,
+                                                    color: notification.daDoc
+                                                        ? const Color.fromRGBO(
+                                                            41, 87, 35, 1)
+                                                        : Colors.grey,
+                                                    fontSize: 12,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  notification.noidung,
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey,
+                                                const SizedBox(height: 8),
+                                                // Trash IconButton
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
                                                   ),
+                                                  onPressed: () {
+                                                    _showDeleteDialog(
+                                                        notification);
+                                                  },
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          // Time
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                notification.daDoc
-                                                    ? "Đã xem"
-                                                    : getTimeAgo(
-                                                        notification.ngayTao),
-                                                style: TextStyle(
-                                                  color: notification.daDoc
-                                                      ? const Color.fromRGBO(
-                                                          41, 87, 35, 1)
-                                                      : Colors.grey,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              // Trash IconButton
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.red,
-                                                ),
-                                                onPressed: () {
-                                                  _showDeleteDialog(
-                                                      notification);
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-          ),
-        ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+      if (isLoading)
+        Container(
+          // color: Colors.black.withOpacity(0.5),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+            ),
+          ),
+        ),
+    ],
+  ),
+);
+
 }
 }
