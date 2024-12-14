@@ -18,48 +18,72 @@ class HomeThumua extends StatefulWidget {
   State<HomeThumua> createState() => _HomeThumuaState();
 }
 
-class _HomeThumuaState extends State<HomeThumua> {
+class _HomeThumuaState extends State<HomeThumua>
+    with SingleTickerProviderStateMixin {
   final BlogApiService _blogApiService = BlogApiService();
   List<BlogModel> _blogPosts = [];
   String? userId;
   String? chooseRole;
   bool isLoading = true; // Track loading state
+  String? image;
+  late TabController _tabController; // Khai báo TabController
 
   @override
   void initState() {
     super.initState();
-    _fetchBlogPosts();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged); // Listen for tab changes
     _loadChooseRole();
+    _fetchBlogPosts();
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.index == 0) {
+      _fetchBlogPosts(); // Fetch posts for "Hiện Tại" tab
+    } else if (_tabController.index == 1) {
+      _fetchBlogPostsFollowing(); // Fetch posts for "Đang Theo Dõi" tab
+    }
   }
 
   Future<void> _loadChooseRole() async {
-      setState(() {
+    setState(() {
       isLoading = true; // Hiển thị trạng thái loading
     });
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       chooseRole = prefs.getString('chooseRole');
+      image = prefs.getString('anhDaiDien');
       isLoading = false; // Đã tải xong
     });
   }
 
-// Hàm tải lại dữ liệu
-  Future<void> _refreshData() async {
-    setState(() {
-      isLoading = true; // Hiển thị trạng thái loading
-    });
+Future<void> _refreshData() async {
+  setState(() {
+    isLoading = true; // Hiển thị trạng thái loading
+  });
 
-    try {
-      // Gọi API hoặc tải lại dữ liệu từ nguồn
-      await _fetchBlogPosts(); // Thay bằng hàm của bạn để lấy dữ liệu
-    } catch (error) {
-      print('Lỗi khi tải dữ liệu: $error');
-    } finally {
-      setState(() {
-        isLoading = false; // Ẩn trạng thái loading
-      });
+  try {
+    // Check which tab is selected and call the corresponding API
+    if (_tabController.index == 0) {
+      await _fetchBlogPosts(); // Fetch posts for "Hiện Tại" tab
+    } else if (_tabController.index == 1) {
+      await _fetchBlogPostsFollowing(); // Fetch posts for "Đang Theo Dõi" tab
     }
+  } catch (error) {
+    print('Lỗi khi tải dữ liệu: $error');
+  } finally {
+    setState(() {
+      isLoading = false; // Ẩn trạng thái loading
+    });
   }
+}
 
   void showFullScreenImages(
       BuildContext context, List<String> images, int initialIndex) {
@@ -113,31 +137,6 @@ class _HomeThumuaState extends State<HomeThumua> {
     );
   }
 
-//  Future<void> _fetchBlogPosts() async {
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   final userId = prefs.getString('userId');
-
-//   if (!mounted) return; // Check if widget is still in the tree
-//   setState(() {
-//     isLoading = true; // Show loading indicator
-//   });
-
-//   try {
-//     List<BlogModel> blogPosts = await _blogApiService
-//         .getListBaiViet(userId!); // Replace with actual user ID
-//     if (!mounted) return; // Check again before updating state
-//     setState(() {
-//       _blogPosts = blogPosts;
-//     });
-//   } catch (e) {
-//     print('Error fetching blog posts: $e');
-//   } finally {
-//     if (!mounted) return; // Final check
-//     setState(() {
-//       isLoading = false; // Hide loading indicator
-//     });
-//   }
-// }
   Future<void> _fetchBlogPosts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
@@ -148,15 +147,46 @@ class _HomeThumuaState extends State<HomeThumua> {
     });
 
     try {
-      List<BlogModel> blogPosts = await _blogApiService
-          .getListBaiViet(userId!); // Replace with actual user ID
+      // Fetch the blog posts
+      List<BlogModel> blogPosts = await _blogApiService.getListBaiViet(userId!);
 
-      // Shuffle the blog posts to make their order random
-      blogPosts.shuffle();
+      // Sắp xếp theo bài viết mới nhất (giả sử `createdAt` là kiểu DateTime)
+      blogPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       if (!mounted) return; // Check again before updating state
       setState(() {
-        _blogPosts = blogPosts;
+        _blogPosts = blogPosts; // Update sorted blog posts
+      });
+    } catch (e) {
+      print('Error fetching blog posts: $e');
+    } finally {
+      if (!mounted) return; // Final check
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
+    }
+  }
+
+  Future<void> _fetchBlogPostsFollowing() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
+    if (!mounted) return; // Check if widget is still in the tree
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
+
+    try {
+      // Fetch the blog posts
+      List<BlogModel> blogPosts =
+          await _blogApiService.getListBaiVietTheoDoi(userId!);
+
+      // Sắp xếp theo bài viết mới nhất (giả sử `createdAt` là kiểu DateTime)
+      blogPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      if (!mounted) return; // Check again before updating state
+      setState(() {
+        _blogPosts = blogPosts; // Update sorted blog posts
       });
     } catch (e) {
       print('Error fetching blog posts: $e');
@@ -605,148 +635,161 @@ class _HomeThumuaState extends State<HomeThumua> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                      Color.fromRGBO(41, 87, 35, 1)),
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: _refreshData,
-                child: SingleChildScrollView(
-                  child: Column(
+@override
+Widget build(BuildContext context) {
+  return SafeArea(
+    child: Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: Column(
+          children: [
+            if (chooseRole != 'khachmuahang') ...[
+              Container(
+                color: const Color.fromRGBO(59, 99, 53, 1),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (chooseRole != 'khachmuahang') ...[
-                        Container(
-                          color: const Color.fromRGBO(59, 99, 53, 1),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    height: 100,
-                                    width: 200,
-                                    child: Image.asset(
-                                      'lib/assets/logo_xinchao.png',
-                                      fit: BoxFit.contain,
-                                    )),
-                                GestureDetector(
-                                  onTap: () {
-                                    print('Setting');
-                                  },
-                                  child: Container(
-                                    height: 40,
-                                    width: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50),
-                                      color: Colors.white,
-                                    ),
-                                    child: Image.asset(
-                                        'lib/assets/caidat_icon.png'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                      SizedBox(
+                        height: 100,
+                        width: 200,
+                        child: Image.asset(
+                          'lib/assets/logo_xinchao.png',
+                          fit: BoxFit.contain,
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/creat_blog_screen')
-                                .then((result) {
-                              if (result == true) {
-                                // Gọi hàm để tải lại dữ liệu
-                                _fetchBlogPosts();
-                              }
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                top: 20, left: 20, right: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 1,
-                                  child: Container(
-                                    height: 40,
-                                    width: 40,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(50)),
-                                    child: Image.asset(
-                                        'lib/assets/logo_app.png',
-                                        fit: BoxFit.contain),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Expanded(
-                                  flex: 9,
-                                  child: Container(
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                        border: const Border.fromBorderSide(
-                                            BorderSide(
-                                                color: Color.fromARGB(
-                                                    255, 184, 182, 182))),
-                                        borderRadius:
-                                            BorderRadius.circular(50)),
-                                    child: const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 20),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Đăng bài viết của bạn.',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Color.fromARGB(
-                                                  255, 158, 156, 156),
-                                            ),
-                                          ),
-                                          Icon(Icons.camera_alt_outlined),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(
-                        height: 10,
                       ),
-                      isLoading
-                          ? const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color.fromRGBO(41, 87, 35, 1)),
-                              ), // Loading indicator
-                            )
-                          : Column(
-                              children: _blogPosts
-                                  .map((post) => _buildPostItem(post))
-                                  .toList(),
-                            ),
+                      GestureDetector(
+                        onTap: () {
+                          print('Setting');
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.white,
+                          ),
+                          child: Image.asset('lib/assets/caidat_icon.png'),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/creat_blog_screen')
+                      .then((result) {
+                    if (result == true) {
+                      _fetchBlogPosts(); // Tải lại dữ liệu
+                    }
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: image != null && image!.isNotEmpty
+                              ? NetworkImage(image!)
+                              : null,
+                          child: image == null || image!.isEmpty
+                              ? const Icon(
+                                  Icons.account_circle,
+                                  size: 40,
+                                  color: Colors.grey,
+                                )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 9,
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: const Border.fromBorderSide(
+                                BorderSide(color: Color.fromARGB(255, 184, 182, 182))),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Đăng bài viết của bạn.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color.fromARGB(255, 158, 156, 156),
+                                  ),
+                                ),
+                                Icon(Icons.camera_alt_outlined),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Container(
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: const Color.fromRGBO(41, 87, 35, 1),
+                tabs: const [
+                  Tab(text: 'Dành cho bạn'),
+                  Tab(text: 'Đang Theo Dõi'),
+                ],
+              ),
+            ),
+            // Using Expanded here to ensure the TabBarView fills available space.
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // "Hiện Tại" Tab
+                  isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: _blogPosts
+                                .map((post) => _buildPostItem(post))
+                                .toList(),
+                          ),
+                        ),
+                  // "Đang Theo Dõi" Tab
+                  isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: _blogPosts
+                                .map((post) => _buildPostItem(post))
+                                .toList(),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildPostItem(BlogModel post) {
     return Padding(

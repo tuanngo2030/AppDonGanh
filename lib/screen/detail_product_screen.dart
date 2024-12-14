@@ -727,27 +727,27 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                                               ? Colors.green
                                                               : Colors.white,
                                                         ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: variant[
-                                                                  index]
-                                                              .ketHopThuocTinh
-                                                              .map((item) {
-                                                            return Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(4.0),
-                                                              child: Text(item
-                                                                  .giaTriThuocTinh
-                                                                  .GiaTri),
-                                                            );
-                                                          }).toList(),
+                                                        child: Center(
+                                                          child: Wrap(
+                                                            crossAxisAlignment: WrapCrossAlignment.center, // Căn giữa theo chiều dọc
+                                                            alignment: WrapAlignment.center, // Căn giữa theo chiều ngang
+                                                            spacing: 4.0, // Khoảng cách giữa các phần tử ngang
+                                                            runSpacing: 4.0, // Khoảng cách giữa các hàng
+                                                            children: variant[index].ketHopThuocTinh.map((item) {
+                                                              return Padding(
+                                                                padding: const EdgeInsets.all(4.0),
+                                                                child: Text(
+                                                                  item.giaTriThuocTinh.GiaTri,
+                                                                  textAlign: TextAlign.center, // Căn giữa nội dung của từng Text
+                                                                  style: TextStyle(
+                                                                    fontSize: 14.0, // Kích thước chữ
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }).toList(),
+                                                          ),
                                                         ),
+
                                                       ),
                                                     );
                                                   },
@@ -1125,29 +1125,29 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                     SizedBox(height: 10),
                                   ],
                                 ),
-                                // GestureDetector(
-                                //   onTap: () {
-                                //     Navigator.push(
-                                //       context,
-                                //       MaterialPageRoute(
-                                //         builder: (context) => OrderReviewScreen(
-                                //           title: 'sản phẩm',
-                                //           id: widget.product.id,
-                                //         ),
-                                //       ),
-                                //     ).then((_) {
-                                //       _fetchReviews();
-                                //     });
-                                //   },
-                                //   child: Text(
-                                //     'Đánh giá',
-                                //     style: TextStyle(
-                                //       fontWeight: FontWeight.w600,
-                                //       color: Color.fromRGBO(41, 87, 35, 1),
-                                //       decoration: TextDecoration.underline,
-                                //     ),
-                                //   ),
-                                // ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OrderReviewScreen(
+                                          title: 'sản phẩm',
+                                          id: widget.product.id,
+                                        ),
+                                      ),
+                                    ).then((_) {
+                                      _fetchReviews();
+                                    });
+                                  },
+                                  child: Text(
+                                    'Đánh giá',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color.fromRGBO(41, 87, 35, 1),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

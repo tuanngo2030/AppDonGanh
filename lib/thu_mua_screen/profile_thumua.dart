@@ -142,23 +142,23 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Text(
-                              '45',
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              'Bài viết',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Expanded(
+                      //   flex: 1,
+                      //   child: Column(
+                      //     children: [
+                      //       Text(
+                      //         '45',
+                      //         style: TextStyle(
+                      //             fontSize: 15, fontWeight: FontWeight.w700),
+                      //       ),
+                      //       Text(
+                      //         'Bài viết',
+                      //         style: TextStyle(
+                      //             fontSize: 18, fontWeight: FontWeight.w700),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                       Expanded(
                         flex: 1,
                         child: GestureDetector(

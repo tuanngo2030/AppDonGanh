@@ -86,19 +86,31 @@ class _ListConversationState extends State<ListConversation> {
   }
 
   Future<void> _loadUserId() async {
+    // Start loading state
+    if (mounted) {
       setState(() {
-      _isLoading = true; // Bắt đầu trạng thái tải
-    });
+        _isLoading = true;
+      });
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
-    setState(() {}); // Update UI after userId is loaded
+
+    // Ensure setState is called only if the widget is still in the tree
+    if (mounted) {
+      setState(() {}); // Update UI after userId is loaded
+    }
 
     if (userId != null) {
       await getListConversationsByUserId(userId!);
     }
-        setState(() {
-      _isLoading = false; // Kết thúc trạng thái tải
-    });
+
+    // End loading state
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   // Fetch conversations and filter by userId
@@ -165,8 +177,7 @@ class _ListConversationState extends State<ListConversation> {
                     ),
                   ),
                 )
-              : SizedBox
-                  .shrink(), 
+              : const SizedBox.shrink(),
           ListView.builder(
             itemCount: conversations.length,
             itemBuilder: (context, index) {
@@ -185,8 +196,7 @@ class _ListConversationState extends State<ListConversation> {
               return ListTile(
                 leading: CircleAvatar(
                   radius: 20,
-                  backgroundColor:
-                      Colors.grey.shade200,
+                  backgroundColor: Colors.grey.shade200,
                   child: ClipOval(
                     child: displayUser?.anhDaiDien != null
                         ? Image.network(
@@ -199,8 +209,7 @@ class _ListConversationState extends State<ListConversation> {
                                   color: Colors.grey);
                             },
                           )
-                        : const Icon(Icons.person,
-                            color: Colors.grey), 
+                        : const Icon(Icons.person, color: Colors.grey),
                   ),
                 ),
                 title: Text(
