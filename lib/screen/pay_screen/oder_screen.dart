@@ -47,7 +47,6 @@ class _OderScreenState extends State<OderScreen> {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-//nút
             leading: Padding(
               padding: const EdgeInsets.all(10.0),
               child: GestureDetector(
@@ -69,8 +68,6 @@ class _OderScreenState extends State<OderScreen> {
                 ),
               ),
             ),
-
-//
             title: const Text(
               'Đơn hàng',
               style: TextStyle(
@@ -159,7 +156,10 @@ class _OderScreenState extends State<OderScreen> {
                   orderModel: orders[index],
                 ),
               ),
-            );
+            ).then((_) {
+              // Tải lại dữ liệu khi quay lại
+              _loadUserId();
+            });
           },
           child: Card(
             elevation: 3,
@@ -192,28 +192,28 @@ class _OderScreenState extends State<OderScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            const Text(
-                              'Số lượng: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Color.fromARGB(255, 155, 154, 154),
-                              ),
-                            ),
-                            Text(
-                              NumberFormat.currency(locale: 'vi', symbol: '₫')
-                                  .format(orders[index].TongTien),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      // Expanded(
+                      //   child: Row(
+                      //     children: [
+                      //       const Text(
+                      //         'Số lượng: ',
+                      //         style: TextStyle(
+                      //           fontWeight: FontWeight.w500,
+                      //           color: Color.fromARGB(255, 155, 154, 154),
+                      //         ),
+                      //       ),
+                      //       Text(
+                      //         NumberFormat.currency(locale: 'vi', symbol: '₫')
+                      //             .format(orders[index].TongTien),
+                      //         style: const TextStyle(
+                      //           fontWeight: FontWeight.w600,
+                      //           color: Colors.black,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // const SizedBox(width: 8),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +276,12 @@ class _OderScreenState extends State<OderScreen> {
                                   orderModel: orders[index],
                                 ),
                               ),
-                            );
+                            ).then((result) {
+                              if (result == true) {
+                                // Gọi hàm để tải lại dữ liệu
+                                _loadUserId();
+                              }
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:

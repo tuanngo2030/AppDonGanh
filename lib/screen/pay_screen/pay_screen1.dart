@@ -88,8 +88,7 @@ class _PayScreen1State extends State<PayScreen1> {
 
   void updatePromoCode(String userId, KhuyenMaiModel promotion) {
     setState(() {
-      selectedPromoId = promotion
-          .id; // Assuming you want to store the promotion ID for later use
+      selectedPromoId = promotion.id; // Lưu ID khuyến mãi
       selectedPromoCode = promotion.tenKhuyenMai;
       giaTriGiam = promotion.giaTriGiam;
       userPromotions[userId] = promotion.giaTriGiam.toDouble();
@@ -97,7 +96,11 @@ class _PayScreen1State extends State<PayScreen1> {
       for (var cart in selectedItems) {
         for (var mergedCart in cart.mergedCart) {
           if (mergedCart.user.id == userId) {
-            mergedCart.giaTriKhuyenMai = promotion.giaTriGiam.toDouble();
+            for (var sanPham in mergedCart.sanPhamList) {
+              // Gán giá trị khuyến mãi cho từng sản phẩm trong danh sách
+              sanPham.giaTriKhuyenMai = promotion.giaTriGiam.toDouble();
+              sanPham.khuyenMaiId = promotion.id;
+            }
           }
         }
       }
@@ -390,13 +393,14 @@ class _PayScreen1State extends State<PayScreen1> {
         mergedCart: selectedItem.mergedCart.map((mergedCartItem) {
           return SanPhamCart(
             user: mergedCartItem.user,
-            giaTriKhuyenMai:
-                mergedCartItem.giaTriKhuyenMai, // Thêm giá trị khuyến mãi
             sanPhamList: mergedCartItem.sanPhamList.map((sanPhamItem) {
               return SanPhamList(
                 user: sanPhamItem.user,
                 sanPham: sanPhamItem.sanPham,
                 chiTietGioHangs: sanPhamItem.chiTietGioHangs,
+                giaTriKhuyenMai: sanPhamItem
+                    .giaTriKhuyenMai, // Gán giá trị khuyến mãi tại đây
+                khuyenMaiId: sanPhamItem.khuyenMaiId
               );
             }).toList(),
           );
@@ -638,30 +642,61 @@ class _PayScreen1State extends State<PayScreen1> {
                                   ),
                                 ),
                                 Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10, horizontal: 16),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        text:
-                                            'Tổng số tiền ($totalProducts sản phẩm): ',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors
-                                              .black, // Default color for the main text
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                '${NumberFormat("#,###").format(userTotal)} VND',
-                                            style: const TextStyle(
-                                              color: Colors
-                                                  .red, // Red color for the specific part
-                                            ),
-                                          ),
-                                        ],
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text:
+                                          'Tổng số tiền ($totalProducts sản phẩm): ',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
-                                    )),
+                                      children: userPromotions[
+                                                      sanPhamCart.user.id] !=
+                                                  null &&
+                                              userPromotions[
+                                                      sanPhamCart.user.id]! >
+                                                  0
+                                          ? [
+                                              TextSpan(
+                                                text:
+                                                    '${NumberFormat("#,###").format(userTotal)} VND', // Tiền cũ
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  decoration: TextDecoration
+                                                      .lineThrough, // Gạch ngang tiền cũ
+                                                ),
+                                              ),
+                                              const TextSpan(
+                                                text:
+                                                    '  ', // Khoảng cách giữa tiền cũ và tiền mới
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    '${NumberFormat("#,###").format(userTotal - userPromotions[sanPhamCart.user.id]!)} VND',
+                                                style: const TextStyle(
+                                                  color: Colors
+                                                      .red, // Tiền mới màu đỏ
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ]
+                                          : [
+                                              TextSpan(
+                                                text:
+                                                    '${NumberFormat("#,###").format(userTotal)} VND', // Tiền cũ không bị gạch
+                                                style: const TextStyle(
+                                                  color: Colors
+                                                      .red, // Giữ nguyên màu chữ
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                    ),
+                                  ),
+                                ),
                                 const Divider(),
                               ],
                             );

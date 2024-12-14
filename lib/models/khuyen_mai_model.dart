@@ -48,9 +48,9 @@ class KhuyenMaiModel {
       idLoaiKhuyenMai: json['IDLoaiKhuyenMai'],
       idDanhMucCon: json['IDDanhMucCon'],
       trangThai: json['TrangThai'],
-      isDeleted: json['isDeleted'],
-      isEligible: json['isEligible'],
-      giaTriGiam: json['giaTriGiam'],
+      isDeleted: json['isDeleted'] ?? false,
+      isEligible: json['isEligible'] ?? false,
+      giaTriGiam: json['giaTriGiam'] ?? 0,
     );
   }
 

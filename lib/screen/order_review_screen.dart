@@ -33,49 +33,87 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
     });
   }
 
+  // Future<void> _submitReview() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userId = prefs.getString('userId');
+
+  //   setState(() {
+  //     _isLoading = true; // Start loading
+  //   });
+
+  //   // if(_selectedStars < 1){
+  //   //   setState(() {
+  //   //     _isSendReview == false;
+  //   //   });
+  //   // }else{
+  //   //    _isSendReview == true;
+  //   // }
+
+  //   try {
+  //     // Call API to create review
+  //     await ReviewApiService().createReview(
+  //       userId: userId!,
+  //       sanphamId: widget.id,
+  //       xepHang: _selectedStars,
+  //       binhLuan: _reviewController.text,
+  //       imageFiles: _imageFiles, // Send the list of images
+  //     );
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Đánh giá của bạn đã được gửi!')),
+  //     );
+  //     Navigator.pop(context);
+  //   } catch (e) {
+  //     print('Error submitting review: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //        SnackBar(content: Text('$e')),
+  //     );
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false; // Stop loading
+  //     });
+  //   }
+  // }
+
   Future<void> _submitReview() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
 
     setState(() {
-      _isLoading = true; // Start loading
+      _isLoading = true; // Bắt đầu loading
     });
 
-    // if(_selectedStars < 1){
-    //   setState(() {
-    //     _isSendReview == false;
-    //   });
-    // }else{
-    //    _isSendReview == true;
-    // }
-
     try {
-      // Call API to create review
-      await ReviewApiService().createReview(
+      // Gửi yêu cầu tạo đánh giá và nhận phản hồi
+      String resultMessage = await ReviewApiService().createReview(
         userId: userId!,
         sanphamId: widget.id,
         xepHang: _selectedStars,
         binhLuan: _reviewController.text,
-        imageFiles: _imageFiles, // Send the list of images
+        imageFiles: _imageFiles,
       );
+
+      // Hiển thị phản hồi qua SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đánh giá của bạn đã được gửi!')),
+        SnackBar(content: Text(resultMessage)),
       );
+
+      // Quay lại màn hình trước đó
       Navigator.pop(context);
     } catch (e) {
-      print('Error submitting review: $e');
+      print('Lỗi khi gửi đánh giá: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lỗi khi gửi đánh giá')),
+        SnackBar(content: Text('Lỗi khi gửi đánh giá: $e')),
       );
     } finally {
       setState(() {
-        _isLoading = false; // Stop loading
+        _isLoading = false; // Kết thúc loading
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.id);
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(

@@ -1,9 +1,12 @@
 import 'package:don_ganh_app/api_services/order_api_service.dart';
+import 'package:don_ganh_app/models/oder_model_for_hokinhdoanh.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:don_ganh_app/models/paymentInfo.dart';
+import 'package:don_ganh_app/screen/order_review_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/choose_payment_screen.dart';
 import 'package:don_ganh_app/screen/pay_screen/exprire_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class OderStatusScreen extends StatefulWidget {
@@ -18,16 +21,20 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
   late int status;
   bool dialogShown = false;
   bool showExprireButton = false;
+  late Future<OrderModelForHoKinhDoanh> _orderFuture;
+  String? selectedProductId; // Biến để lưu ID sản phẩm hiện tại
 
   @override
   void initState() {
     super.initState();
     status = widget.orderModel.TrangThai;
+    _orderFuture = OrderApiService().getHoaDonByHoaDonId(widget.orderModel.id);
 
     // Check if transactionId is neither 0 nor 111 and payment status is false, then show the extension notification
     if (widget.orderModel.transactionId != 0 &&
         widget.orderModel.transactionId != 111 &&
-        !widget.orderModel.thanhToan && widget.orderModel.TrangThai < 3) {
+        !widget.orderModel.thanhToan &&
+        widget.orderModel.TrangThai < 3) {
       _checkBaoKimStatus();
     }
   }
@@ -45,6 +52,13 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
         _showPaymentMethodDialog();
       });
     }
+  }
+
+  // Hàm lưu ID vào biến
+  void saveProductId(String? productId) {
+    setState(() {
+      selectedProductId = productId; // Lưu ID vào biến
+    });
   }
 
   Future<void> _checkBaoKimStatus() async {
@@ -208,6 +222,8 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
   @override
   Widget build(BuildContext context) {
     final paymentInfo = Provider.of<PaymentInfo>(context, listen: false);
+    final currencyFormatter =
+        NumberFormat.currency(locale: 'vi_VN', symbol: 'VND');
 
     // Determine button text and action based on status
     String buttonText = "";
@@ -226,6 +242,12 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
       buttonText = "Đánh giá đơn hàng";
       buttonAction = () {
         // Navigator.pushNamed(context, '/oder_review_screen');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderReviewScreen(
+                  title: 'Đơn hàng', id: selectedProductId!),
+            ));
       };
     } else if (status == 4) {
       buttonText = "Mua lại đơn hàng";
@@ -246,6 +268,20 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
             ),
           ),
           centerTitle: true,
+          leading: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context, true);
+              },
+              child: Container(
+                child: const ImageIcon(
+                  AssetImage('lib/assets/arrow_back.png'),
+                  size: 49,
+                ),
+              ),
+            ),
+          ),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -329,6 +365,166 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                         ),
                       ),
                   ],
+                ),
+
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  child: FutureBuilder<OrderModelForHoKinhDoanh>(
+                    future: _orderFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Lỗi: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        final order = snapshot.data!;
+                        if (order.chiTietHoaDon == null ||
+                            order.chiTietHoaDon!.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Không có sản phẩm trong hóa đơn.',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: order.chiTietHoaDon!.length,
+                          itemBuilder: (context, index) {
+                            final detail = order.chiTietHoaDon![index];
+                            final bienThe = detail.bienThe;
+
+                          // Lưu ID sản phẩm mà không gọi setState
+        if (bienThe?.idSanPham.id != null) {
+          selectedProductId = bienThe!.idSanPham.id; // Không dùng setState
+        }
+
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 12.0),
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Image
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: bienThe?.idSanPham.imageProduct !=
+                                              null
+                                          ? Image.network(
+                                              bienThe!.idSanPham.imageProduct,
+                                              width: 60,
+                                              height: 60,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : const Icon(
+                                              Icons.image_not_supported,
+                                              size: 60,
+                                              color: Colors.grey,
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12.0),
+
+                                    // Details
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            bienThe?.idSanPham.nameProduct ??
+                                                'N/A',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4.0),
+                                          Text(
+                                            'Giá: ${currencyFormatter.format(detail.donGia)}',
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          ),
+                                          Text(
+                                            'Số lượng: ${detail.soLuong}',
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          ),
+                                          if (bienThe?.ketHopThuocTinh
+                                                  .isNotEmpty ??
+                                              false)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 4.0),
+                                              child: Text(
+                                                'Biến thể: ${bienThe?.ketHopThuocTinh.map((e) => e.giaTriThuocTinh.giaTri).join(", ")}',
+                                                style: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                  fontSize: 14,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // Total
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          'Tổng:',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        Text(
+                                          currencyFormatter.format(
+                                              detail.soLuong * detail.donGia),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: Text(
+                            'Không tìm thấy dữ liệu.',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
 
                 const SizedBox(height: 15),

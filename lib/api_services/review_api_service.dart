@@ -9,14 +9,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewApiService {
-   final String baseUrl = '${dotenv.env['API_URL']}';
-   String? userId;
-    
+  final String baseUrl = '${dotenv.env['API_URL']}';
+  String? userId;
+
   // Method to fetch reviews for a specific product
   Future<List<DanhGia>> getReviewsByProductId(String productId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
-    final url = Uri.parse('$baseUrl/danhgia/getListDanhGiaInSanPhamById/$productId/$userId');
+    final url = Uri.parse(
+        '$baseUrl/danhgia/getListDanhGiaInSanPhamById/$productId/$userId');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -31,7 +32,53 @@ class ReviewApiService {
     }
   }
 
- Future<void> createReview({
+//  Future<void> createReview({
+//   required String userId,
+//   required String sanphamId,
+//   required int xepHang,
+//   required String binhLuan,
+//   List<File>? imageFiles,
+// }) async {
+//   final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
+
+//   // Create a multipart request
+//   var request = http.MultipartRequest('POST', url);
+
+//   // Add the fields for the review
+//   request.fields['userId'] = userId;
+//   request.fields['sanphamId'] = sanphamId;
+//   request.fields['XepHang'] = xepHang.toString();
+//   request.fields['BinhLuan'] = binhLuan;
+
+//   // If there's an image file, add it to the request
+//   if (imageFiles != null) {
+//     for (var imageFile in imageFiles) {
+//       // Thêm file hình ảnh vào request
+//       var multipartFile = await http.MultipartFile.fromPath(
+//         'files', // Tên trường trong API phải khớp với tên ở đây
+//         imageFile.path,
+//         contentType: MediaType('image', 'jpeg'), // Use MediaType instead of a string
+//       );
+//       request.files.add(multipartFile);
+//     }
+//   }
+
+//   try {
+//     // Send the request
+//     var response = await request.send();
+
+//     // Get the response status code
+//     if (response.statusCode == 200) {
+//       print('Review created successfully');
+//     } else {
+//       print('Failed to create review: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     throw Exception('Error creating review: $e');
+//   }
+// }
+
+ Future<String> createReview({
   required String userId,
   required String sanphamId,
   required int xepHang,
@@ -40,58 +87,63 @@ class ReviewApiService {
 }) async {
   final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
 
-  // Create a multipart request
+  // Tạo một multipart request
   var request = http.MultipartRequest('POST', url);
 
-  // Add the fields for the review
+  // Thêm các trường dữ liệu
   request.fields['userId'] = userId;
   request.fields['sanphamId'] = sanphamId;
   request.fields['XepHang'] = xepHang.toString();
   request.fields['BinhLuan'] = binhLuan;
 
-  // If there's an image file, add it to the request
+  // Thêm các file hình ảnh nếu có
   if (imageFiles != null) {
     for (var imageFile in imageFiles) {
-      // Thêm file hình ảnh vào request
       var multipartFile = await http.MultipartFile.fromPath(
-        'files', // Tên trường trong API phải khớp với tên ở đây
+        'files', // Tên trường trong API
         imageFile.path,
-        contentType: MediaType('image', 'jpeg'), // Use MediaType instead of a string
+        contentType: MediaType('image', 'jpeg'),
       );
       request.files.add(multipartFile);
     }
   }
 
   try {
-    // Send the request
+    // Gửi yêu cầu
     var response = await request.send();
 
-    // Get the response status code
+    // Đọc nội dung phản hồi
+    var responseBody = await response.stream.bytesToString();
+
+    // Phân tích cú pháp JSON phản hồi
+    final jsonResponse = jsonDecode(responseBody);
+
     if (response.statusCode == 200) {
-      print('Review created successfully');
+      // Lấy thông báo từ trường `message` trong phản hồi
+      return jsonResponse['message'] ?? 'Đánh giá thành công';
     } else {
-      print('Failed to create review: ${response.statusCode}');
+      // Xử lý lỗi, trả về thông báo lỗi từ phản hồi
+      return jsonResponse['message'] ?? 'Đánh giá thất bại';
     }
   } catch (e) {
-    throw Exception('Error creating review: $e');
+    throw Exception('Lỗi khi tạo đánh giá: $e');
   }
 }
 
-
-
-  Future<void> deleteReview(String spId,String reviewId) async {
-  final url = Uri.parse('$baseUrl/danhgia/deleteDanhGia/$spId/$reviewId'); // Adjust the endpoint if necessary
-  try {
-    final response = await http.delete(url);
-    if (response.statusCode == 200) {
-      print('Review deleted successfully');
-    } else {
-      print('Failed to delete review: ${response.statusCode}');
+  Future<void> deleteReview(String spId, String reviewId) async {
+    final url = Uri.parse(
+        '$baseUrl/danhgia/deleteDanhGia/$spId/$reviewId'); // Adjust the endpoint if necessary
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        print('Review deleted successfully');
+      } else {
+        print('Failed to delete review: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting review: $e');
     }
-  } catch (e) {
-    throw Exception('Error deleting review: $e');
   }
-}
 
   Future<void> updateReview({
     required String danhGiaId,
@@ -123,7 +175,7 @@ class ReviewApiService {
     }
   }
 
- Future<void> updateLike(String phanHoiId, String userId) async {
+  Future<void> updateLike(String phanHoiId, String userId) async {
     final url = Uri.parse('$baseUrl/danhgia/updateLike/$phanHoiId/$userId');
 
     try {
@@ -140,5 +192,4 @@ class ReviewApiService {
       print('Error updating like: $e');
     }
   }
-
 }

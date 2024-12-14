@@ -42,12 +42,11 @@ class CartModel {
 class SanPhamCart {
   final NguoiDung user;
   final List<SanPhamList> sanPhamList;
-  double? giaTriKhuyenMai; // Số tiền khuyến mãi cho user này
+  
 
   SanPhamCart({
     required this.user,
     required this.sanPhamList,
-    this.giaTriKhuyenMai,
   });
 
   factory SanPhamCart.fromJSON(Map<String, dynamic> data) {
@@ -59,20 +58,18 @@ class SanPhamCart {
                   (item) => SanPhamList.fromJSON(item as Map<String, dynamic>))
               .toList() ??
           [],
-        giaTriKhuyenMai: data['SoTienKhuyenMai'],
     );
   }
 
     @override
   String toString() {
-    return 'SanPhamCart(user: $user, sanPhamList: $sanPhamList, giaTriKhuyenMai: $giaTriKhuyenMai)';
+    return 'SanPhamCart(user: $user, sanPhamList: $sanPhamList)';
   }
 
   Map<String, dynamic> toJson() {
     return {
       'user': user.toJson(),
       'sanPhamList': sanPhamList.map((item) => item.toJson()).toList(),
-      'giaTriKhuyenMai': giaTriKhuyenMai,
     };
   }
 }
@@ -82,11 +79,14 @@ class SanPhamList {
   final NguoiDung user;
   final ProductModel sanPham;
   final List<ChiTietGioHang> chiTietGioHangs;
-
+  double? giaTriKhuyenMai;
+  String? khuyenMaiId;
   SanPhamList({
     required this.user,
     required this.sanPham,
     required this.chiTietGioHangs,
+    this.giaTriKhuyenMai,
+    this.khuyenMaiId,
   });
 
   factory SanPhamList.fromJSON(Map<String, dynamic> data) {
@@ -97,12 +97,15 @@ class SanPhamList {
           ?.map((item) => ChiTietGioHang.fromJSON(item as Map<String, dynamic>))
           .toList() ??
           [],
+        giaTriKhuyenMai: data['giaTriKhuyenMai'],
+        khuyenMaiId: data['khuyenMaiId'],
+      
     );
   }
 
    @override
   String toString() {
-    return 'SanPhamList(user: $user, sanPham: $sanPham, chiTietGioHangs: $chiTietGioHangs)';
+    return 'SanPhamList(user: $user, sanPham: $sanPham, chiTietGioHangs: $chiTietGioHangs, giaTriKhuyenMai: $giaTriKhuyenMai, khuyenMaiId: $khuyenMaiId)';
   }
 
   Map<String, dynamic> toJson() {
@@ -110,6 +113,9 @@ class SanPhamList {
       'user': user.toJson(),
       'sanPham': sanPham.toJson(),
       'chiTietGioHangs': chiTietGioHangs.map((item) => item.toJson()).toList(),
+      'giaTriKhuyenMai': giaTriKhuyenMai,
+      'khuyenMaiId': khuyenMaiId,
+      
     };
   }
 }

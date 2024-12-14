@@ -299,13 +299,13 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                       ],
                     ),
                     // Title input field
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: "Nhập tiêu đề",
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                    ),
+                    // TextFormField(
+                    //   controller: _titleController,
+                    //   decoration: const InputDecoration(
+                    //     hintText: "Nhập tiêu đề",
+                    //     contentPadding: EdgeInsets.all(15),
+                    //   ),
+                    // ),
 
                     const SizedBox(height: 15),
                     Expanded(
