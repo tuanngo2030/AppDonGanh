@@ -22,6 +22,7 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
   bool dialogShown = false;
   bool showExprireButton = false;
   late Future<OrderModelForHoKinhDoanh> _orderFuture;
+  String? selectedProductId; // Biến để lưu ID sản phẩm hiện tại
 
   @override
   void initState() {
@@ -51,6 +52,13 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
         _showPaymentMethodDialog();
       });
     }
+  }
+
+  // Hàm lưu ID vào biến
+  void saveProductId(String? productId) {
+    setState(() {
+      selectedProductId = productId; // Lưu ID vào biến
+    });
   }
 
   Future<void> _checkBaoKimStatus() async {
@@ -234,7 +242,12 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
       buttonText = "Đánh giá đơn hàng";
       buttonAction = () {
         // Navigator.pushNamed(context, '/oder_review_screen');
-        // Navigator.push(context, MaterialPageRoute(builder: (context) =>  OrderReviewScreen(title: 'Đơn hàng', id:  widget.orderModel.id),));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderReviewScreen(
+                  title: 'Đơn hàng', id: selectedProductId!),
+            ));
       };
     } else if (status == 4) {
       buttonText = "Mua lại đơn hàng";
@@ -391,6 +404,11 @@ class _OderStatusScreenState extends State<OderStatusScreen> {
                           itemBuilder: (context, index) {
                             final detail = order.chiTietHoaDon![index];
                             final bienThe = detail.bienThe;
+
+                          // Lưu ID sản phẩm mà không gọi setState
+        if (bienThe?.idSanPham.id != null) {
+          selectedProductId = bienThe!.idSanPham.id; // Không dùng setState
+        }
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12.0),
