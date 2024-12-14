@@ -19,7 +19,7 @@ class CommentApiService {
         body: jsonEncode({'userId': userId, 'BinhLuan': binhLuan}),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         print(responseData);
 
