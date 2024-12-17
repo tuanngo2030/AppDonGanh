@@ -127,7 +127,7 @@ Widget build(BuildContext context) {
       title: const Text('Thông Tin Tài Khoản'),
     ),
     body: isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))))
         : userData == null
             ? const Center(child: Text("Không có dữ liệu"))
             : SingleChildScrollView(

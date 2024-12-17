@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:don_ganh_app/models/order_model.dart';
+import 'package:intl/intl.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class ExprireScreen extends StatefulWidget {
@@ -20,6 +21,11 @@ class ExprireScreen extends StatefulWidget {
 
 class _ExprireScreenState extends State<ExprireScreen> {
   late final WebViewController _webViewController;
+
+   String formatCurrency(int amount) {
+    final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    return formatter.format(amount);
+  }
 
   @override
   void initState() {
@@ -71,7 +77,7 @@ class _ExprireScreenState extends State<ExprireScreen> {
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${widget.orderModel.TongTien} đ',
+                          formatCurrency(widget.orderModel.TongTien),
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],
@@ -85,7 +91,7 @@ class _ExprireScreenState extends State<ExprireScreen> {
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${widget.orderModel.TongTien} đ',
+                          formatCurrency(widget.orderModel.TongTien),
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],

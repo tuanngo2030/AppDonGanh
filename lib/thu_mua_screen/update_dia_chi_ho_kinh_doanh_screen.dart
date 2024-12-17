@@ -315,7 +315,7 @@ Future<bool?> _showConfirmationDialog() async {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _updateDiaChi,
                   child: _isLoading
-                      ? const CircularProgressIndicator()
+                      ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)))
                       : const Text("Cập nhật địa chỉ"),
                 ),
               ],

@@ -441,31 +441,31 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                                   fit: BoxFit.cover,
                                 )),
                           ),
-                          Positioned(
-                            top: 30,
-                            left: 0,
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 25,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    topRight: Radius.circular(20),
-                                    bottomRight: Radius.circular(20)),
-                                color: Colors.green,
-                              ),
-                              child: Text(
-                                '-${widget.product.phanTramGiamGia}%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
+                          // Positioned(
+                          //   top: 30,
+                          //   left: 0,
+                          //   child: Container(
+                          //     alignment: Alignment.center,
+                          //     height: 25,
+                          //     width: 50,
+                          //     decoration: BoxDecoration(
+                          //       borderRadius: BorderRadius.only(
+                          //           topLeft: Radius.circular(5),
+                          //           topRight: Radius.circular(20),
+                          //           bottomRight: Radius.circular(20)),
+                          //       color: Colors.green,
+                          //     ),
+                          //     child: Text(
+                          //       '-${widget.product.phanTramGiamGia}%',
+                          //       style: TextStyle(
+                          //         fontSize: 14,
+                          //         fontWeight: FontWeight.w500,
+                          //         color: Colors.white,
+                          //       ),
+                          //       textAlign: TextAlign.center,
+                          //     ),
+                          //   ),
+                          // ),
                           Positioned(
                             top: 15,
                             right: 10,

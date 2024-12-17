@@ -161,7 +161,7 @@ Widget build(BuildContext context) {
       elevation: 0,
     ),
     body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))))
         : _addresses.isEmpty
             ? const Center(child: Text('Không có địa chỉ nào.'))
             : ListView.builder(

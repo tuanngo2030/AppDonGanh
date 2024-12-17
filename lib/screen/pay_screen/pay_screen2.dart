@@ -246,7 +246,12 @@ class _PayScreen2State extends State<PayScreen2> {
                                               ConnectionState.waiting) {
                                             return const Center(
                                                 child:
-                                                    CircularProgressIndicator());
+                                                    CircularProgressIndicator(
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Color.fromRGBO(
+                                                          41, 87, 35, 1)),
+                                            ));
                                           } else if (snapshot.hasError) {
                                             return Text(
                                                 'Error: ${snapshot.error}');
@@ -350,10 +355,9 @@ class _PayScreen2State extends State<PayScreen2> {
               ),
               // paymentInfo.assetPath.isEmpty
               buildPaymentMethodsList(),
-                    SizedBox(height: 60),
+              SizedBox(height: 60),
               // : buildSelectedMethodDetails(),
             ],
-            
           ),
         ),
       ),
@@ -439,7 +443,7 @@ class _PayScreen2State extends State<PayScreen2> {
             title,
             subtitle,
           );
-        }else if (value == 'VNPAY') {
+        } else if (value == 'VNPAY') {
           await _updateTransaction(
             hoadonId,
             transactionIdVNPAY,
@@ -641,12 +645,12 @@ class _PayScreen2State extends State<PayScreen2> {
               ),
               child: _isProcessing
                   ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Color.fromRGBO(41, 87, 35, 1)),
                     )
                   : const Text('Tiếp tục'),
             ),
           ),
-      
         )
       ],
     );

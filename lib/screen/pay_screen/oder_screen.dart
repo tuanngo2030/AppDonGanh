@@ -96,7 +96,11 @@ class _OderScreenState extends State<OderScreen> {
               future: orderModel,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                      child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Color.fromRGBO(41, 87, 35, 1)),
+                  ));
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Lỗi: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

@@ -338,7 +338,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: Container(
-                width: double.infinity, // Chiếm toàn bộ chiều rộng có sẵn
+                width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
@@ -478,24 +478,23 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  Future<void> signIn() async {
-    setState(() {
-      _isLoadinggg = true;
+ Future<void> signIn() async {
+   setState(() {
+      _isLoadinggg= true;
     });
+  
+    final user = await LoginWithApiGoogle.login();
 
-    try {
-      final user = await LoginWithApiGoogle.login();
-
-      if (user == null) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
-        setState(() {
+    if (user == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
+                setState(() {
           _isLoadinggg = false;
         });
-        return;
-      }
+      return;
+    }
 
+    try {
       // Gọi API để đăng ký người dùng Google
       await _apiGoogle.registerUserGoogle(
           user.displayName ?? '', user.email, user.id);
@@ -505,11 +504,26 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('userDisplayName', user.displayName ?? '');
       await prefs.setString('userEmail', user.email);
       await prefs.setString('googleId', user.id);
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công')),
       );
 
+      // Lấy fcmToken từ Firebase
+      final String? fcmToken = prefs.getString('fcmToken');
+      final String? userId = prefs.getString('userId');
+      if (fcmToken != null) {
+        // Gọi API saveFcmTokenFirebase
+        final response = await NotificationApi()
+            .saveFcmTokenFirebase(userId: userId!, fcmToken: fcmToken);
+
+        if (response['success'] == true) {
+          print('FCM token saved successfully: ${response['message']}');
+        } else {
+          print('Failed to save FCM token: ${response['message']}');
+        }
+      } else {
+        print('Failed to retrieve FCM token.');
+      }
       // Điều hướng đến màn hình BanLa
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const BanLa()),

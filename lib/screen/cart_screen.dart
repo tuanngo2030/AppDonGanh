@@ -174,7 +174,11 @@ class _CartScreenState extends State<CartScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Show a loading indicator only if data is not ready
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+                child: CircularProgressIndicator(
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+            ));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -243,6 +247,10 @@ class _CartScreenState extends State<CartScreen> {
                                       }
                                     });
                                   },
+                                  activeColor:
+                                      const Color.fromRGBO(41, 87, 35, 1),
+                                  visualDensity:
+                                      const VisualDensity(horizontal: -4.0),
                                 ),
                                 Text(
                                   sanPhamCart.user.tenNguoiDung!,
@@ -288,6 +296,10 @@ class _CartScreenState extends State<CartScreen> {
                                               }
                                             });
                                           },
+                                          activeColor: const Color.fromRGBO(
+                                              41, 87, 35, 1),
+                                          visualDensity: const VisualDensity(
+                                              horizontal: -4.0),
                                         ),
                                         ClipRRect(
                                           borderRadius:

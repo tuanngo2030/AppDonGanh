@@ -368,7 +368,7 @@ class _OState extends State<O> {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const Center(
-                                child: CircularProgressIndicator());
+                                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))));
                           } else if (snapshot.hasError) {
                             return Center(
                                 child: Text('Error: ${snapshot.error}'));
@@ -393,7 +393,7 @@ class _OState extends State<O> {
                               ConnectionState.waiting) {
                             // Show loading indicator when waiting for the API response
                             return const Center(
-                                child: CircularProgressIndicator());
+                                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))));
                           } else if (snapshot.hasError) {
                             // Display error if the API call fails
                             return Center(

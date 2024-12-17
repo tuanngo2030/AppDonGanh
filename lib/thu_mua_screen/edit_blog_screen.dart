@@ -253,7 +253,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                         backgroundColor: Colors.white,
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator()
+                          ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)))
                           : Text(
                               "Chỉnh sửa",
                               style: TextStyle(
@@ -378,7 +378,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                     child: _buildActionButton(
                       imagePath:
                           "lib/assets/anhvideo.png", // Replace with your image path
-                      label: "Ảnh/video",
+                      label: "Ảnh  ",
                       onPressed: _pickImages,
                     ),
                   ),

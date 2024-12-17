@@ -121,7 +121,7 @@ class _SoDuScreenState extends State<SoDuScreen> {
                   if (isLoading)
                     const Padding(
                       padding: EdgeInsets.only(top: 10),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))),
                     ),
                 ],
               ),

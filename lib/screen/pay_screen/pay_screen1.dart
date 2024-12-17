@@ -508,7 +508,7 @@ class _PayScreen1State extends State<PayScreen1> {
 
     return Scaffold(
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),))
           : SingleChildScrollView(
               child: Column(
                 children: [
@@ -970,7 +970,9 @@ class _PayScreen1State extends State<PayScreen1> {
                           const SizedBox(height: 20),
                           // Submit Button
                           _isOrderProcessing
-                              ? const Center(child: CircularProgressIndicator())
+                              ? const Center(child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)),
+                              ))
                               : SizedBox(
                                   width: double.infinity,
                                   height: 50,

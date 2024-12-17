@@ -713,7 +713,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               aspectRatio: _controller.value.aspectRatio,
               child: VideoPlayer(_controller),
             )
-          : const Center(child: CircularProgressIndicator()),
+          : const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)))),
     );
   }
 }

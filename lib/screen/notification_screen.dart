@@ -295,7 +295,7 @@ void deleteAllNotifications() async {
           content: isLoading
               ? const Center(
                   child:
-                      CircularProgressIndicator()) // Hiển thị loading khi isLoading = true
+                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1)))) // Hiển thị loading khi isLoading = true
               : const Text('Bạn có chắc chắn muốn xóa thông báo này?'),
           actions: <Widget>[
             // Nút Hủy

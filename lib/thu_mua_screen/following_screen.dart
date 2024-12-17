@@ -85,7 +85,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
         title: Text(widget.title),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(41, 87, 35, 1))))
           : userData == null
               ? const Center(child: Text('No data available'))
               : ListView(

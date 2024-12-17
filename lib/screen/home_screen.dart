@@ -391,12 +391,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    Text(
-                      "Ngày đếm ngược ưu đãi",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
+                    // Text(
+                    //   "Ngày đếm ngược ưu đãi",
+                    //   style: TextStyle(
+                    //     fontSize: 20,
+                    //   ),
+                    // ),
                   ],
                 ),
 
@@ -453,34 +453,34 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   // Discount Badge
-                                  Visibility(
-                                    visible: product.phanTramGiamGia > 0,
-                                    child: Positioned(
-                                      top: 15,
-                                      child: Container(
-                                        width: 50,
-                                        height: 25,
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(5),
-                                            topRight: Radius.circular(10),
-                                            bottomRight: Radius.circular(10),
-                                          ),
-                                          color: const Color.fromRGBO(
-                                              142, 198, 65, 1),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            "- ${product.phanTramGiamGia}%",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  // Visibility(
+                                  //   visible: product.phanTramGiamGia > 0,
+                                  //   child: Positioned(
+                                  //     top: 15,
+                                  //     child: Container(
+                                  //       width: 50,
+                                  //       height: 25,
+                                  //       decoration: BoxDecoration(
+                                  //         borderRadius: const BorderRadius.only(
+                                  //           topLeft: Radius.circular(5),
+                                  //           topRight: Radius.circular(10),
+                                  //           bottomRight: Radius.circular(10),
+                                  //         ),
+                                  //         color: const Color.fromRGBO(
+                                  //             142, 198, 65, 1),
+                                  //       ),
+                                  //       child: Center(
+                                  //         child: Text(
+                                  //           "- ${product.phanTramGiamGia}%",
+                                  //           style: const TextStyle(
+                                  //             color: Colors.white,
+                                  //             fontWeight: FontWeight.w500,
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
 
                                   // Favorite Icon
                                   Positioned(
@@ -554,31 +554,31 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.only(top: 7.0),
                               child: Row(
                                 children: [
-                                  if (product.phanTramGiamGia > 0) ...[
-                                    // Hiển thị giá gốc, gạch ngang, màu mờ
-                                    Text(
-                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        decoration: TextDecoration.lineThrough,
-                                        color: Colors.grey, // Màu mờ
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                        width:
-                                            5), // Khoảng cách giữa giá cũ và giá giảm
-                                    // Hiển thị giá giảm
-                                    Text(
-                                      '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan * (1 - product.phanTramGiamGia / 100))} đ/kg',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors
-                                            .red, // Màu nổi bật cho giá giảm
-                                      ),
-                                    ),
-                                  ] else ...[
+                                  // if (product.phanTramGiamGia > 0) ...[
+                                  //   // Hiển thị giá gốc, gạch ngang, màu mờ
+                                  //   Text(
+                                  //     '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
+                                  //     style: TextStyle(
+                                  //       fontSize: 12,
+                                  //       fontWeight: FontWeight.w400,
+                                  //       decoration: TextDecoration.lineThrough,
+                                  //       color: Colors.grey, // Màu mờ
+                                  //     ),
+                                  //   ),
+                                  //   const SizedBox(
+                                  //       width:
+                                  //           5), // Khoảng cách giữa giá cũ và giá giảm
+                                  //   // Hiển thị giá giảm
+                                  //   Text(
+                                  //     '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan * (1 - product.phanTramGiamGia / 100))} đ/kg',
+                                  //     style: TextStyle(
+                                  //       fontSize: 12,
+                                  //       fontWeight: FontWeight.bold,
+                                  //       color: Colors
+                                  //           .red, // Màu nổi bật cho giá giảm
+                                  //     ),
+                                  //   ),
+                                  // ] else ...[
                                     // Hiển thị giá bình thường nếu không giảm giá
                                     Text(
                                       '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
@@ -587,7 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
-                                  ],
+                                  // ],
                                 ],
                               ),
                             ),
