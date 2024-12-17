@@ -378,7 +378,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                     child: _buildActionButton(
                       imagePath:
                           "lib/assets/anhvideo.png", // Replace with your image path
-                      label: "Ảnh/video",
+                      label: "Ảnh  ",
                       onPressed: _pickImages,
                     ),
                   ),
