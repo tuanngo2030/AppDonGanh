@@ -48,7 +48,7 @@ android {
         versionName = flutterVersionName
     }
     signingConfigs{
-        debug{
+        release{
             storeFile file('mykey.jks')
             storePassword 'android'
             keyAlias 'androiddebugkey'
@@ -56,11 +56,11 @@ android {
         }
     }
     buildTypes {
-        debug {
+        release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug           // signingConfig = signingConfigs.debug
-            // signingConfig = signingConfigs.release
+//            signingConfig = signingConfigs.debug
+             signingConfig = signingConfigs.release
         }
     }
 }
@@ -69,6 +69,6 @@ flutter {
     source = "../.."
 }
 apply plugin: 'com.google.gms.google-services'
-// dependencies {
-//     implementation("com.google.android.material:material:1.6.1")
-// }
+ dependencies {
+     implementation("com.google.android.material:material:1.6.1")
+ }

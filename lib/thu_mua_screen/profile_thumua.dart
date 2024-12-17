@@ -332,7 +332,7 @@ class _ProfileThumuaState extends State<ProfileThumua> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   child: SizedBox(
-                    height: 700,
+                    height: 600,
                     width: double.infinity,
                     child: GridView.count(
                       physics: NeverScrollableScrollPhysics(),

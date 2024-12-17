@@ -349,9 +349,11 @@ class _PayScreen2State extends State<PayScreen2> {
                 ),
               ),
               // paymentInfo.assetPath.isEmpty
-              buildPaymentMethodsList()
+              buildPaymentMethodsList(),
+                    SizedBox(height: 60),
               // : buildSelectedMethodDetails(),
             ],
+            
           ),
         ),
       ),
@@ -644,6 +646,7 @@ class _PayScreen2State extends State<PayScreen2> {
                   : const Text('Tiếp tục'),
             ),
           ),
+      
         )
       ],
     );

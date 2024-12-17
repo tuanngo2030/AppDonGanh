@@ -992,9 +992,10 @@ class _PayScreen1State extends State<PayScreen1> {
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                    ),
+                                    ), 
                                   ),
                                 ),
+                                SizedBox(height: 40)
                         ],
                       ),
                     ),

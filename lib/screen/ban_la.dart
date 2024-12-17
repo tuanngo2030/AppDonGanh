@@ -39,8 +39,10 @@ class BanLa extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 80, left: 16.0, right: 16.0),
           child: Center(
+            
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
+
               children: <Widget>[
                 Image.asset("lib/assets/logo_xinchao.png"),
                 const Text(

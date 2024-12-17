@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _emailError;
   String? _passwordError;
   bool _isLoading = false; // Biến trạng thái cho loading
+  bool _isLoadinggg = false;
   bool _rememberMe = false; // Biến lưu trạng thái ghi nhớ mật khẩu
 
   @override
@@ -97,82 +98,82 @@ class _LoginScreenState extends State<LoginScreen> {
   // }
 
   Future<void> _login() async {
-  final String gmail = _emailController.text.trim();
-  final String matKhau = _passwordController.text.trim();
+    final String gmail = _emailController.text.trim();
+    final String matKhau = _passwordController.text.trim();
 
-  setState(() {
-    _emailError = null;
-    _passwordError = null;
-  });
-
-  if (gmail.isEmpty || matKhau.isEmpty) {
     setState(() {
-      if (gmail.isEmpty) _emailError = 'Vui lòng nhập email.';
-      if (matKhau.isEmpty) _passwordError = 'Vui lòng nhập mật khẩu.';
+      _emailError = null;
+      _passwordError = null;
     });
-    return;
-  }
 
-  setState(() {
-    _isLoading = true; // Bắt đầu loading
-  });
-
-  try {
-    final NguoiDung? user = await _apiService.login(gmail, matKhau);
-    print('Response from API: $user');
-    if (user != null) {
-      // Lưu thông tin người dùng vào SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
-      await prefs.setString('userId', user.id ?? '');
-
-      // Nếu người dùng chọn "Ghi nhớ mật khẩu", lưu email và mật khẩu
-      if (_rememberMe) {
-        await prefs.setString('email', gmail);
-        await prefs.setString('password', matKhau);
-        await prefs.setBool('rememberMe', true);
-      } else {
-        await prefs.remove('email');
-        await prefs.remove('password');
-        await prefs.setBool('rememberMe', false);
-      }
-
-      // Lấy fcmToken từ Firebase
-      final String? fcmToken = prefs.getString('fcmToken');
-      if (fcmToken != null) {
-        // Gọi API saveFcmTokenFirebase
-        final userId = user.id ?? '';
-        final response = await NotificationApi().saveFcmTokenFirebase(userId: userId, fcmToken: fcmToken);
-
-        if (response['success'] == true) {
-          print('FCM token saved successfully: ${response['message']}');
-        } else {
-          print('Failed to save FCM token: ${response['message']}');
-        }
-      } else {
-        print('Failed to retrieve FCM token.');
-      }
-
-      // Điều hướng đến màn hình khác sau khi đăng nhập thành công
-      Navigator.pushNamed(context, '/ban_la');
-    } else {
-      // Hiển thị lỗi khi đăng nhập không thành công
+    if (gmail.isEmpty || matKhau.isEmpty) {
       setState(() {
-        _emailError = 'Email hoặc mật khẩu không chính xác.';
+        if (gmail.isEmpty) _emailError = 'Vui lòng nhập email.';
+        if (matKhau.isEmpty) _passwordError = 'Vui lòng nhập mật khẩu.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // Bắt đầu loading
+    });
+
+    try {
+      final NguoiDung? user = await _apiService.login(gmail, matKhau);
+      print('Response from API: $user');
+      if (user != null) {
+        // Lưu thông tin người dùng vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
+        await prefs.setString('userId', user.id ?? '');
+
+        // Nếu người dùng chọn "Ghi nhớ mật khẩu", lưu email và mật khẩu
+        if (_rememberMe) {
+          await prefs.setString('email', gmail);
+          await prefs.setString('password', matKhau);
+          await prefs.setBool('rememberMe', true);
+        } else {
+          await prefs.remove('email');
+          await prefs.remove('password');
+          await prefs.setBool('rememberMe', false);
+        }
+
+        // Lấy fcmToken từ Firebase
+        final String? fcmToken = prefs.getString('fcmToken');
+        if (fcmToken != null) {
+          // Gọi API saveFcmTokenFirebase
+          final userId = user.id ?? '';
+          final response = await NotificationApi()
+              .saveFcmTokenFirebase(userId: userId, fcmToken: fcmToken);
+
+          if (response['success'] == true) {
+            print('FCM token saved successfully: ${response['message']}');
+          } else {
+            print('Failed to save FCM token: ${response['message']}');
+          }
+        } else {
+          print('Failed to retrieve FCM token.');
+        }
+
+        // Điều hướng đến màn hình khác sau khi đăng nhập thành công
+        Navigator.pushNamed(context, '/ban_la');
+      } else {
+        // Hiển thị lỗi khi đăng nhập không thành công
+        setState(() {
+          _emailError = 'Email hoặc mật khẩu không chính xác.';
+        });
+      }
+    } catch (e) {
+      // Xử lý lỗi
+      setState(() {
+        _emailError = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // Kết thúc loading
       });
     }
-  } catch (e) {
-    // Xử lý lỗi
-    setState(() {
-      _emailError = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
-    });
-  } finally {
-    setState(() {
-      _isLoading = false; // Kết thúc loading
-    });
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -226,16 +227,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
-                       enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                      borderSide: const BorderSide(
-                          color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromRGBO(41, 87, 35, 1)),
-                    ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
                       hintText: "abc@gmail.com",
                       errorText: _emailError, // Hiển thị lỗi ở đây
                     ),
@@ -270,16 +270,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
-                         enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                      borderSide: const BorderSide(
-                          color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromRGBO(41, 87, 35, 1)),
-                    ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(41, 87, 35, 1)),
+                      ),
                       hintText: "Nhập mật khẩu",
                       errorText: _passwordError,
                     ),
@@ -338,25 +337,28 @@ class _LoginScreenState extends State<LoginScreen> {
             // login button
             Padding(
               padding: const EdgeInsets.all(15.0),
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(395, 55),
-                  backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+              child: Container(
+                width: double.infinity, // Chiếm toàn bộ chiều rộng có sẵn
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: const Size(395, 55),
+                    backgroundColor: const Color.fromRGBO(41, 87, 35, 1),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    elevation: 5,
                   ),
-                  padding: const EdgeInsets.all(10),
-                  elevation: 5,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Đăng nhập",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "Đăng nhập",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
               ),
             ),
 
@@ -394,7 +396,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              padding: const EdgeInsets.all(15.0),
               child: InkWell(
                 onTap: () {
                   signIn();
@@ -408,16 +410,33 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: Border.fromBorderSide(
                             BorderSide(width: 1, color: Colors.grey))),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, // Căn giữa các phần tử trong Row
                       children: [
-                        Container(
-                          height: 40,
-                          padding: const EdgeInsets.all(0),
-                          child: Image.asset('lib/assets/gg_icon.png'),
-                        ),
-                        const Expanded(
-                          child: Text("Đăng nhập với Google",
-                              textAlign: TextAlign.center),
-                        ),
+                        _isLoadinggg
+                            ? const CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color.fromRGBO(41, 87, 35, 1),
+                                ),
+                              ) // Hiển thị CircularProgressIndicator nếu đang tải
+                            : Container(
+                                height: 40,
+                                padding: const EdgeInsets.all(0),
+                                child: Image.asset(
+                                    'lib/assets/gg_icon.png'), // Hình ảnh sẽ được hiển thị khi tải xong
+                              ),
+                        const SizedBox(
+                            width: 10), // Khoảng cách giữa icon và chữ
+                        _isLoadinggg
+                            ? const SizedBox
+                                .shrink() // Không hiển thị chữ khi đang tải
+                            : const Expanded(
+                                child: Text(
+                                  "Đăng nhập với Google",
+                                  textAlign:
+                                      TextAlign.center, // Căn giữa văn bản
+                                ),
+                              ),
                       ],
                     )),
               ),
@@ -459,16 +478,24 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  Future<void> signIn() async {
-    final user = await LoginWithApiGoogle.login();
 
-    if (user == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
-      return;
-    }
+  Future<void> signIn() async {
+    setState(() {
+      _isLoadinggg = true;
+    });
 
     try {
+      final user = await LoginWithApiGoogle.login();
+
+      if (user == null) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại')));
+        setState(() {
+          _isLoadinggg = false;
+        });
+        return;
+      }
+
       // Gọi API để đăng ký người dùng Google
       await _apiGoogle.registerUserGoogle(
           user.displayName ?? '', user.email, user.id);
@@ -478,9 +505,11 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('userDisplayName', user.displayName ?? '');
       await prefs.setString('userEmail', user.email);
       await prefs.setString('googleId', user.id);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công')),
       );
+
       // Điều hướng đến màn hình BanLa
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const BanLa()),
@@ -488,6 +517,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (error) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Lỗi: $error')));
+    } finally {
+      setState(() {
+        _isLoadinggg = false;
+      });
     }
   }
 }

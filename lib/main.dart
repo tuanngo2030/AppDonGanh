@@ -77,6 +77,7 @@ void main() async {
   await Firebase.initializeApp();
   await NotificationService.instance.initialize();
   await dotenv.load(fileName: "lib/.env");
+  
   runApp(
     ChangeNotifierProvider(
       create: (context) => PaymentInfo(),
