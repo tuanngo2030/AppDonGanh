@@ -91,36 +91,36 @@ class OrderApiService {
     }
   }
 
-  Future<String> updateOrderStatus(String hoadonId, int trangThai) async {
-    final url =
-        '${dotenv.env['API_URL']}/hoadon/updatetrangthaiHoaDOn/$hoadonId'; // Replace with your actual URL
+ Future<String> updateOrderStatus(String hoadonId, int trangThai, String token) async {
+  final url =
+      '${dotenv.env['API_URL']}/hoadon/updatetrangthaiHoaDOn/$hoadonId'; // Replace with your actual URL
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'TrangThai': trangThai,
-        }),
-      );
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Add the token here
+      },
+      body: json.encode({
+        'TrangThai': trangThai,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        // Success: Order status updated successfully
-        return 'Cập nhập đơn hàng thành công';
-      } else {
-        // Error: Handle failure
-        final errorResponse = json.decode(response.body);
-        return errorResponse['message'] ??
-            'Lỗi khi cập nhật trang thái hóa đơn';
-      }
-    } catch (error) {
-      // Catch network errors or unexpected issues
-      print('Error: $error');
-      return 'Lỗi kết nối mạng';
+    if (response.statusCode == 200) {
+      // Success: Order status updated successfully
+      return 'Cập nhật đơn hàng thành công';
+    } else {
+      // Error: Handle failure
+      final errorResponse = json.decode(response.body);
+      return errorResponse['message'] ?? 'Lỗi khi cập nhật trạng thái hóa đơn';
     }
+  } catch (error) {
+    // Catch network errors or unexpected issues
+    print('Error: $error');
+    return 'Lỗi kết nối mạng';
   }
+}
 
   Future<OrderModel> createUserDiaChivaThongTinGiaoHang({
     required BuildContext context, // Add BuildContext here

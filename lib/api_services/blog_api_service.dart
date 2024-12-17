@@ -112,7 +112,7 @@ class BlogApiService {
     try {
       var response = await request.send();
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         // Decode the response body into a string (since the response is now just text)
         var responseData = await http.Response.fromStream(response);
         var data = responseData.body;

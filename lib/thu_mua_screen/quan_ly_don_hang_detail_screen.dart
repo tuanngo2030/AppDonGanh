@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:don_ganh_app/api_services/order_api_service.dart';
 import 'package:don_ganh_app/models/order_model.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuanLyDonHangDetailScreen extends StatefulWidget {
   final String hoadonId;
@@ -34,8 +35,8 @@ class _QuanLyDonHangDetailScreenState extends State<QuanLyDonHangDetailScreen> {
     _orderFuture = OrderApiService().getHoaDonByHoaDonId(widget.hoadonId);
   }
 
-   // Function to handle status update
- Future<void> _updateStatus(int newStatus) async {
+
+Future<void> _updateStatus(int newStatus) async {
   if (newStatus == 3) {
     // Nếu trạng thái là 3, hiển thị thông báo và không thực hiện API
     ScaffoldMessenger.of(context).showSnackBar(
@@ -51,8 +52,23 @@ class _QuanLyDonHangDetailScreenState extends State<QuanLyDonHangDetailScreen> {
       _isUpdating = true; // Set updating flag to true
     });
 
+    // Retrieve the token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token'); // Replace 'authToken' with your token key
+
+    if (token == null) {
+      setState(() {
+        _isUpdating = false; // Stop updating if token is missing
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lỗi: Không tìm thấy token xác thực.')),
+      );
+      return;
+    }
+
     // Call the API to update the status
-    await OrderApiService().updateOrderStatus(widget.hoadonId, newStatus);
+    await OrderApiService().updateOrderStatus(widget.hoadonId, newStatus, token);
 
     if (mounted) {
       setState(() {
