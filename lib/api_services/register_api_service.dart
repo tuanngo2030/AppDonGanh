@@ -17,7 +17,7 @@ class ApiService {
         'tenNguoiDung': user.tenNguoiDung,
         'gmail': user.gmail,
         'matKhau': user.matKhau,
-        'otp': user.otp,  
+        'otp': user.otp,
       }),
     );
 

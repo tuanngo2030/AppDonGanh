@@ -156,42 +156,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     }
   }
-// void _register() async {
-//   setState(() {
-//     _isLoading = true;
-//   });
-
-//   // Tạo đối tượng người dùng với thông tin từ các trường nhập liệu
-//   NguoiDung newUser = NguoiDung(
-//     tenNguoiDung: _usernameController.text,
-//     gmail: _emailController.text,
-//     matKhau: _passwordController.text,
-//     ngayTao: DateTime.now(),
-//   );
-
-//   // Lưu thông tin người dùng vào SharedPreferences
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   prefs.setString('username', newUser.tenNguoiDung!);
-//   prefs.setString('email', newUser.gmail!);
-//   prefs.setString('password', newUser.matKhau!);
-//   prefs.setString('ngayTao', newUser.ngayTao!.toIso8601String());
-
-//   setState(() {
-//     _isLoading = false;
-//   });
-
-//   // Chuyển hướng đến màn hình xác minh tài khoản
-//   Navigator.pushNamed(
-//     context,
-//     '/xacminhtk',
-//     arguments: _emailController.text,
-//   );
-
-//   ScaffoldMessenger.of(context).showSnackBar(
-//     const SnackBar(content: Text('Đã lưu thông tin đăng ký')),
-//   );
-// }
-// Hiển thị hộp thoại CAPTCHA
 
   Future<void> _showCaptchaDialog() async {
     _generateCaptcha();
