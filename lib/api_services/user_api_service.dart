@@ -4,16 +4,13 @@ import 'package:don_ganh_app/models/user_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decode/jwt_decode.dart'; 
+import 'package:jwt_decode/jwt_decode.dart';
 
 class UserApiService {
-  final String baseUrl =
-      '${dotenv.env['API_URL']}/user/login';
-  final String baseUrlid =
-      '${dotenv.env['API_URL']}/user/showUserID';
+  final String baseUrl = '${dotenv.env['API_URL']}/user/login';
+  final String baseUrlid = '${dotenv.env['API_URL']}/user/showUserID';
 
-  final String updateUserUrl =
-      '${dotenv.env['API_URL']}/user/updateUser';
+  final String updateUserUrl = '${dotenv.env['API_URL']}/user/updateUser';
 
   Future<NguoiDung?> login(String gmail, String matKhau) async {
     final uri = Uri.parse(baseUrl);
@@ -84,11 +81,24 @@ class UserApiService {
     return null;
   }
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(
+        'token'); // Replace 'token' with the actual key you use for storing the token
+  }
+
   Future<NguoiDung?> fetchUserDetails(String userId) async {
     final uri = Uri.parse('$baseUrlid/$userId');
+    final token = await getToken(); // Retrieve the token
 
     try {
-      final response = await http.get(uri);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Add token to header
+        },
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -105,97 +115,120 @@ class UserApiService {
     return null;
   }
 
-  Future<bool> updateUserInformation(String userId, String loaiThongTin, dynamic value) async {
-    final url = Uri.parse(updateUserUrl);
+ Future<bool> updateUserInformation(String userId, String loaiThongTin, dynamic value) async {
+  final url = Uri.parse(updateUserUrl);
+  final token = await getToken(); // Retrieve the token
 
-    // Tạo body request dựa trên loại thông tin cần cập nhật
-    Map<String, dynamic> requestBody = {
-      'UserID': userId,
-      'LoaiThongTinUpdate': loaiThongTin,
-    };
+  Map<String, dynamic> requestBody = {
+    'UserID': userId,
+    'LoaiThongTinUpdate': loaiThongTin,
+  };
 
-    switch (loaiThongTin) {
-      case 'tenNguoiDung':
-        requestBody['tenNguoiDung'] = value;
-        break;
-      case 'soDienThoai':
-        requestBody['soDienThoai'] = value;
-        break;
-      case 'gmail':
-        requestBody['gmail'] = value;
-        break;
-      case 'GioiTinh':
-        requestBody['GioiTinh'] = value;
-        break;
-      case 'matKhau':
-        requestBody['matKhau'] = value;
-        break;
-      case 'ngaySinh':
-        requestBody['ngaySinh'] = value;
-        break;
-      default:
-        print('Invalid update type');
-        return false;
-    }
-
-    try {
-      final response = await http.put(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        print('Response from API: $data');
-        if (data.containsKey('_id')) {
-          print('Update successful');
-          return true;
-        } else {
-          print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
-          return false;
-        }
-      } else {
-        print('Failed to update information. Status code: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error updating information: $e');
+  switch (loaiThongTin) {
+    case 'tenNguoiDung':
+      requestBody['tenNguoiDung'] = value;
+      break;
+    case 'soDienThoai':
+      requestBody['soDienThoai'] = value;
+      break;
+    case 'gmail':
+      requestBody['gmail'] = value;
+      break;
+    case 'GioiTinh':
+      requestBody['GioiTinh'] = value;
+      break;
+    case 'matKhau':
+      requestBody['matKhau'] = value;
+      break;
+    case 'ngaySinh':
+      requestBody['ngaySinh'] = value;
+      break;
+    default:
+      print('Invalid update type');
       return false;
-    }
   }
 
-  Future<Map<String, dynamic>> fetchUserData(String userId, String me) async {
-  final url = Uri.parse('${dotenv.env['API_URL']}/user/findUserById/$userId/$me');
-  final response = await http.get(url);
+  try {
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token', // Add token to header
+      },
+      body: jsonEncode(requestBody),
+    );
 
-  if (response.statusCode == 200) {
-    // Parse the JSON response directly without using a model
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load user data');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      print('Response from API: $data');
+      if (data.containsKey('_id')) {
+        print('Update successful');
+        return true;
+      } else {
+        print('Update failed. Reason: ${data['message'] ?? 'Unknown error'}');
+        return false;
+      }
+    } else {
+      print('Failed to update information. Status code: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Error updating information: $e');
+    return false;
   }
 }
 
-  Future<Map<String, dynamic>> getUserFollowers(String userId) async {
-    final url = Uri.parse("${dotenv.env['API_URL']}/user/getUserFollowers/$userId");
+ Future<Map<String, dynamic>> fetchUserData(String userId, String me) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/user/findUserById/$userId/$me');
+  final token = await getToken(); // Retrieve the token from SharedPreferences
 
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
-      } else {
-        throw Exception('Failed to load followers');
-      }
-    } catch (e) {
-      throw Exception('Error: $e');
+  try {
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Add the token to the request header
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Parse the JSON response directly without using a model
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load user data');
     }
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Failed to fetch user data');
   }
+}
 
+Future<Map<String, dynamic>> getUserFollowers(String userId) async {
+  final url = Uri.parse("${dotenv.env['API_URL']}/user/getUserFollowers/$userId");
+  final token = await getToken(); // Retrieve the token from SharedPreferences
 
-  Future<Map<String, dynamic>> loginXacMinh(String email, String password, String userId) async {
+  try {
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Add the token to the request header
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load followers');
+    }
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Error occurred while fetching followers');
+  }
+}
+
+  Future<Map<String, dynamic>> loginXacMinh(
+      String email, String password, String userId) async {
     final url = Uri.parse('${dotenv.env['API_URL']}/user/loginXacMinh/$userId');
     try {
       final response = await http.post(

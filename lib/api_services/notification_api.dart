@@ -7,7 +7,6 @@ class NotificationApi {
   static String baseUrl =
       "${dotenv.env['API_URL']}/user";
 
-  // Lấy danh sách thông báo
   static Future<List<NotificationModel>> fetchNotifications(String userId) async {
     final url = Uri.parse("$baseUrl/getListThongBao/$userId");
     final response = await http.get(url);
@@ -25,7 +24,6 @@ class NotificationApi {
     }
   }
 
-  // Cập nhật trạng thái đã đọc của một thông báo
   static Future<void> updateNotificationRead(String thongBaoId) async {
     final url = Uri.parse("$baseUrl/updateDaDoc/$thongBaoId");
     final response = await http.put(url);
@@ -35,7 +33,6 @@ class NotificationApi {
     }
   }
 
-  // Cập nhật tất cả thông báo thành đã đọc
   static Future<void> updateAllNotificationsRead(String userId) async {
     final url = Uri.parse("$baseUrl/updateDaDocAll/$userId");
     final response = await http.put(url);
@@ -56,7 +53,6 @@ class NotificationApi {
 
   }
 
-  // Xóa tất cả thông báo của người dùng
   static Future<void> deleteAllThongBao(String userId) async {
     final url = Uri.parse("$baseUrl/deleteAllThongBao/$userId");
     final response = await http.delete(url);

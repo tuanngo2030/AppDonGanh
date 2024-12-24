@@ -4,7 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';  // Import SharedPreferences
 
 class ForgotpasswordApi {
-  
+
+  // Helper method to get the resetToken from SharedPreferences
+  Future<String?> _getResetToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('resetToken');
+  }
+
   // Gửi OTP
   static Future<void> sendOtpForgotPassword(String gmail) async {
     final url = Uri.parse('${dotenv.env['API_URL']}/user/SendOtpForgotPassword');
@@ -29,57 +35,66 @@ class ForgotpasswordApi {
     }
   }
 
-Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
-  final url = Uri.parse('${dotenv.env['API_URL']}/user/CheckOtpForgotPassword');
+  Future<bool> CheckOtpForgotPassword(String otp, String gmail) async {
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/CheckOtpForgotPassword');
   
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'otp': otp,
-        'gmail': gmail,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      // Giải mã JSON từ phản hồi API
-      final Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-      // Kiểm tra nếu message là 'otp đã được kiểm tra thành công'
-      if (responseBody['message'] == 'otp đã được kiểm tra thành công') {
-        String resetToken = responseBody['resetToken'];
-        
-        // Lưu resetToken vào SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('resetToken', resetToken);
-
-        print('OTP verification successful. Reset token saved: $resetToken');
-        return true;
-      } else {
-        return false; // OTP không hợp lệ
-      }
-    } else {
-      print('Failed with status code: ${response.statusCode}');
-      return false;
-    }
-  } catch (e) {
-    print('Error during OTP verification: $e');
-    return false;
-  }
-}
-
- static Future<void> sendNewPassword(String gmail, String matKhauMoi, String resetToken) async {
-    final url = Uri.parse('${dotenv.env['API_URL']}/user/SendPassword');
-
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          'otp': otp,
+          'gmail': gmail,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Giải mã JSON từ phản hồi API
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        // Kiểm tra nếu message là 'otp đã được kiểm tra thành công'
+        if (responseBody['message'] == 'otp đã được kiểm tra thành công') {
+          String resetToken = responseBody['resetToken'];
+          
+          // Lưu resetToken vào SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('resetToken', resetToken);
+
+          print('OTP verification successful. Reset token saved: $resetToken');
+          return true;
+        } else {
+          return false; // OTP không hợp lệ
+        }
+      } else {
+        print('Failed with status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error during OTP verification: $e');
+      return false;
+    }
+  }
+
+  // Send the new password with reset token in the header
+  static Future<void> sendNewPassword(String gmail, String matKhauMoi) async {
+    final url = Uri.parse('${dotenv.env['API_URL']}/user/SendPassword');
+    final resetToken = await ForgotpasswordApi()._getResetToken(); // Get reset token
+
+    if (resetToken == null) {
+      print('No reset token found.');
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $resetToken', // Add reset token to header
+        },
+        body: jsonEncode({
           'gmail': gmail,
           'matKhauMoi': matKhauMoi,
-          'resetToken': resetToken,
         }),
       );
 
