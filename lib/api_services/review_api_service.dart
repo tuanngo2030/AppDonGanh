@@ -1,27 +1,42 @@
 import 'dart:io';
-
 import 'package:don_ganh_app/models/review_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewApiService {
   final String baseUrl = '${dotenv.env['API_URL']}';
   String? userId;
 
-  // Method to fetch reviews for a specific product
+  // Phương thức lấy token từ SharedPreferences
+  Future<String?> _getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token'); // Giả sử bạn lưu token với khóa 'token'
+  }
+
+  // Phương thức lấy danh sách đánh giá sản phẩm
   Future<List<DanhGia>> getReviewsByProductId(String productId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
-    final url = Uri.parse(
-        '$baseUrl/danhgia/getListDanhGiaInSanPhamById/$productId/$userId');
+    final url = Uri.parse('$baseUrl/danhgia/getListDanhGiaInSanPhamById/$productId/$userId');
+
+    // Lấy token từ SharedPreferences và thêm vào header
+    String? token = await _getToken();
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Thêm token vào header
+        },
+      );
       if (response.statusCode == 200) {
-        // Parse the JSON response
         final List<dynamic> jsonResponse = json.decode(response.body);
         return jsonResponse.map((json) => DanhGia.fromJson(json)).toList();
       } else {
@@ -32,109 +47,73 @@ class ReviewApiService {
     }
   }
 
-//  Future<void> createReview({
-//   required String userId,
-//   required String sanphamId,
-//   required int xepHang,
-//   required String binhLuan,
-//   List<File>? imageFiles,
-// }) async {
-//   final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
+  // Phương thức tạo đánh giá
+  Future<String> createReview({
+    required String userId,
+    required String sanphamId,
+    required int xepHang,
+    required String binhLuan,
+    List<File>? imageFiles,
+  }) async {
+    final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
 
-//   // Create a multipart request
-//   var request = http.MultipartRequest('POST', url);
+    var request = http.MultipartRequest('POST', url);
 
-//   // Add the fields for the review
-//   request.fields['userId'] = userId;
-//   request.fields['sanphamId'] = sanphamId;
-//   request.fields['XepHang'] = xepHang.toString();
-//   request.fields['BinhLuan'] = binhLuan;
+    request.fields['userId'] = userId;
+    request.fields['sanphamId'] = sanphamId;
+    request.fields['XepHang'] = xepHang.toString();
+    request.fields['BinhLuan'] = binhLuan;
 
-//   // If there's an image file, add it to the request
-//   if (imageFiles != null) {
-//     for (var imageFile in imageFiles) {
-//       // Thêm file hình ảnh vào request
-//       var multipartFile = await http.MultipartFile.fromPath(
-//         'files', // Tên trường trong API phải khớp với tên ở đây
-//         imageFile.path,
-//         contentType: MediaType('image', 'jpeg'), // Use MediaType instead of a string
-//       );
-//       request.files.add(multipartFile);
-//     }
-//   }
-
-//   try {
-//     // Send the request
-//     var response = await request.send();
-
-//     // Get the response status code
-//     if (response.statusCode == 200) {
-//       print('Review created successfully');
-//     } else {
-//       print('Failed to create review: ${response.statusCode}');
-//     }
-//   } catch (e) {
-//     throw Exception('Error creating review: $e');
-//   }
-// }
-
- Future<String> createReview({
-  required String userId,
-  required String sanphamId,
-  required int xepHang,
-  required String binhLuan,
-  List<File>? imageFiles,
-}) async {
-  final url = Uri.parse('$baseUrl/danhgia/createDanhGia');
-
-  // Tạo một multipart request
-  var request = http.MultipartRequest('POST', url);
-
-  // Thêm các trường dữ liệu
-  request.fields['userId'] = userId;
-  request.fields['sanphamId'] = sanphamId;
-  request.fields['XepHang'] = xepHang.toString();
-  request.fields['BinhLuan'] = binhLuan;
-
-  // Thêm các file hình ảnh nếu có
-  if (imageFiles != null) {
-    for (var imageFile in imageFiles) {
-      var multipartFile = await http.MultipartFile.fromPath(
-        'files', // Tên trường trong API
-        imageFile.path,
-        contentType: MediaType('image', 'jpeg'),
-      );
-      request.files.add(multipartFile);
+    if (imageFiles != null) {
+      for (var imageFile in imageFiles) {
+        var multipartFile = await http.MultipartFile.fromPath(
+          'files',
+          imageFile.path,
+          contentType: MediaType('image', 'jpeg'),
+        );
+        request.files.add(multipartFile);
+      }
     }
-  }
 
-  try {
-    // Gửi yêu cầu
-    var response = await request.send();
-
-    // Đọc nội dung phản hồi
-    var responseBody = await response.stream.bytesToString();
-
-    // Phân tích cú pháp JSON phản hồi
-    final jsonResponse = jsonDecode(responseBody);
-
-    if (response.statusCode == 200) {
-      // Lấy thông báo từ trường `message` trong phản hồi
-      return jsonResponse['message'] ?? 'Đánh giá thành công';
-    } else {
-      // Xử lý lỗi, trả về thông báo lỗi từ phản hồi
-      return jsonResponse['message'] ?? 'Đánh giá thất bại';
+    // Lấy token từ SharedPreferences và thêm vào header
+    String? token = await _getToken();
+    if (token == null) {
+      throw Exception('Token not found');
     }
-  } catch (e) {
-    throw Exception('Lỗi khi tạo đánh giá: $e');
-  }
-}
+    request.headers['Authorization'] = 'Bearer $token'; // Thêm token vào header
 
-  Future<void> deleteReview(String spId, String reviewId) async {
-    final url = Uri.parse(
-        '$baseUrl/danhgia/deleteDanhGia/$spId/$reviewId'); // Adjust the endpoint if necessary
     try {
-      final response = await http.delete(url);
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+      final jsonResponse = jsonDecode(responseBody);
+
+      if (response.statusCode == 200) {
+        return jsonResponse['message'] ?? 'Đánh giá thành công';
+      } else {
+        return jsonResponse['message'] ?? 'Đánh giá thất bại';
+      }
+    } catch (e) {
+      throw Exception('Lỗi khi tạo đánh giá: $e');
+    }
+  }
+
+  // Phương thức xóa đánh giá
+  Future<void> deleteReview(String spId, String reviewId) async {
+    final url = Uri.parse('$baseUrl/danhgia/deleteDanhGia/$spId/$reviewId');
+
+    // Lấy token từ SharedPreferences và thêm vào header
+    String? token = await _getToken();
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token', // Thêm token vào header
+        },
+      );
       if (response.statusCode == 200) {
         print('Review deleted successfully');
       } else {
@@ -145,6 +124,7 @@ class ReviewApiService {
     }
   }
 
+  // Phương thức cập nhật đánh giá
   Future<void> updateReview({
     required String danhGiaId,
     required int xepHang,
@@ -152,12 +132,18 @@ class ReviewApiService {
   }) async {
     final url = Uri.parse('$baseUrl/danhgia/updateDanhGia/$danhGiaId');
 
+    // Lấy token từ SharedPreferences và thêm vào header
+    String? token = await _getToken();
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+
     try {
-      // Create a PUT request with JSON body
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Thêm token vào header
         },
         body: json.encode({
           'XepHang': xepHang,
@@ -175,11 +161,23 @@ class ReviewApiService {
     }
   }
 
+  // Phương thức cập nhật like
   Future<void> updateLike(String phanHoiId, String userId) async {
     final url = Uri.parse('$baseUrl/danhgia/updateLike/$phanHoiId/$userId');
 
+    // Lấy token từ SharedPreferences và thêm vào header
+    String? token = await _getToken();
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+
     try {
-      final response = await http.put(url);
+      final response = await http.put(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token', // Thêm token vào header
+        },
+      );
 
       if (response.statusCode == 200) {
         print('Like updated successfully');

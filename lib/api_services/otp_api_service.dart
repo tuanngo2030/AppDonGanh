@@ -1,14 +1,27 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpApiService {
   static String baseUrl = '${dotenv.env['API_URL']}/user/verifyOtp';
-   static String resendUrl= '${dotenv.env['API_URL']}/user/resendOTP';
+  static String resendUrl = '${dotenv.env['API_URL']}/user/resendOTP';
+
+  // Phương thức lấy token từ SharedPreferences
+  Future<String?> _getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token'); // Giả sử bạn lưu token với khóa 'token'
+  }
 
   // Phương thức xác minh OTP
   Future<bool> verifyOtp(String otp, String gmail) async {
     try {
+      String? token = await _getToken(); // Lấy token từ SharedPreferences
+      if (token == null) {
+        print('Token not found');
+        return false;
+      }
+
       Map<String, dynamic> requestData = {
         'gmail': gmail,
         'otp': otp,
@@ -16,7 +29,10 @@ class OtpApiService {
 
       final response = await http.post(
         Uri.parse(baseUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Thêm token vào header
+        },
         body: jsonEncode(requestData),
       );
 
@@ -49,13 +65,22 @@ class OtpApiService {
   // Phương thức gửi lại OTP
   Future<bool> resendOtp(String gmail) async {
     try {
+      String? token = await _getToken(); // Lấy token từ SharedPreferences
+      if (token == null) {
+        print('Token not found');
+        return false;
+      }
+
       Map<String, dynamic> requestData = {
         'gmail': gmail,
       };
 
       final response = await http.post(
         Uri.parse(resendUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Thêm token vào header
+        },
         body: jsonEncode(requestData),
       );
 

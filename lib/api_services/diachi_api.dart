@@ -2,66 +2,80 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:don_ganh_app/models/dia_chi_model.dart';
- 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class DiaChiApiService {
   final String baseUrl = '${dotenv.env['API_URL']}/diachi';
 
-// Lấy danh sách địa chỉ theo userId
-Future<List<diaChiList>> getDiaChiByUserId(String userId) async {
-  final uri = Uri.parse('$baseUrl/getDiaChiByUserId/$userId');
+  // Helper method to get the token from SharedPreferences
+  Future<String?> _getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
 
-  print('Fetching addresses for userId: $userId'); // In ra userId
+  // Lấy danh sách địa chỉ theo userId
+  Future<List<diaChiList>> getDiaChiByUserId(String userId) async {
+    final uri = Uri.parse('$baseUrl/getDiaChiByUserId/$userId');
+    final token = await _getToken();
 
-  try {
-    final response = await http.get(uri);
+    print('Fetching addresses for userId: $userId'); // In ra userId
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}'); // In ra phản hồi
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      print('Decoded response: $data'); // In ra phản hồi đã được giải mã
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}'); // In ra phản hồi
 
-      // Kiểm tra xem có thông tin địa chỉ hay không
-      if (data.containsKey('diaChiList') && data['diaChiList'] is List) {
-        List<dynamic> addressesJson = data['diaChiList'];
-        
-        // Lọc địa chỉ chưa bị đánh dấu xóa
-        List<diaChiList> addresses = addressesJson
-            .map((item) => diaChiList.fromJson(item))
-            .toList();
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('Decoded response: $data'); // In ra phản hồi đã được giải mã
 
-        if (addresses.isNotEmpty) {
-          return addresses;
+        // Kiểm tra xem có thông tin địa chỉ hay không
+        if (data.containsKey('diaChiList') && data['diaChiList'] is List) {
+          List<dynamic> addressesJson = data['diaChiList'];
+
+          // Lọc địa chỉ chưa bị đánh dấu xóa
+          List<diaChiList> addresses = addressesJson
+              .map((item) => diaChiList.fromJson(item))
+              .toList();
+
+          if (addresses.isNotEmpty) {
+            return addresses;
+          } else {
+            print('Addresses list is empty');
+            return [];
+          }
         } else {
-          print('Addresses list is empty');
+          print('No diaChiList key found in response or it is not a list');
           return [];
         }
       } else {
-        print('No diaChiList key found in response or it is not a list');
+        print('Failed to fetch addresses: ${response.statusCode}, Response: ${response.body}');
         return [];
       }
-    } else {
-      print('Failed to fetch addresses: ${response.statusCode}, Response: ${response.body}');
+    } catch (e) {
+      print('Error fetching addresses: $e');
       return [];
     }
-  } catch (e) {
-    print('Error fetching addresses: $e');
-    return [];
   }
-}
-
-
 
   // Tạo địa chỉ mới cho userId
   Future<bool> createDiaChi(String userId, diaChiList diaChi) async {
     final uri = Uri.parse('$baseUrl/createDiaChi/$userId');
+    final token = await _getToken();
 
     try {
       final response = await http.post(
         uri,
-        headers: <String, String>{
+        headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(diaChi.toJson()),
       );
@@ -78,17 +92,19 @@ Future<List<diaChiList>> getDiaChiByUserId(String userId) async {
       return false;
     }
   }
- 
+
   // Cập nhật địa chỉ cho userId và diaChiId
   Future<bool> updateDiaChi(
       String userId, String diaChiId, diaChiList diaChi) async {
     final uri = Uri.parse('$baseUrl/updateDiaChi/$userId/$diaChiId');
+    final token = await _getToken();
 
     try {
       final response = await http.post(
         uri,
-        headers: <String, String>{
+        headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(diaChi.toJson()),
       );
@@ -109,9 +125,15 @@ Future<List<diaChiList>> getDiaChiByUserId(String userId) async {
   // Xóa địa chỉ theo userId và diaChiId
   Future<bool> deleteDiaChi(String userId, String diaChiId) async {
     final uri = Uri.parse('$baseUrl/deleteDiaChi/$userId/$diaChiId');
+    final token = await _getToken();
 
     try {
-      final response = await http.delete(uri);
+      final response = await http.delete(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       if (response.statusCode == 200) {
         print('Address deleted successfully');
@@ -125,5 +147,4 @@ Future<List<diaChiList>> getDiaChiByUserId(String userId) async {
       return false;
     }
   }
-  
 }
