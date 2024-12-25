@@ -150,7 +150,7 @@ class _CreatBlogScreenState extends State<CreatBlogScreen> {
       anhDaiDien = prefs.getString('anhDaiDien') ?? 'lib/assets/avatar2.png';
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return SafeArea(

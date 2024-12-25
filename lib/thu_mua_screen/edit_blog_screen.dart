@@ -278,9 +278,14 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                   children: [
                     Row(
                       children: [
-                        const CircleAvatar(
+                       CircleAvatar(
                           radius: 25,
-                          backgroundImage: AssetImage('lib/assets/avatar2.png'),
+                          backgroundImage:
+                              anhDaiDien != null && anhDaiDien!.isNotEmpty
+                                  ? NetworkImage(
+                                      anhDaiDien!) // Dùng ảnh từ URL nếu hợp lệ
+                                  : const AssetImage('lib/assets/avt1.jpg')
+                                      as ImageProvider, // Ảnh mặc định
                         ),
                         const SizedBox(width: 10),
                         Column(
