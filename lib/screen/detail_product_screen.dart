@@ -586,6 +586,7 @@ class _DetailProductScreenState extends State<DetailProductScreen> {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
+                        
                         GestureDetector(
                           onTap: () {
                             setState(() {

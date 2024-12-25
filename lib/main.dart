@@ -79,9 +79,13 @@ void main() async {
   await dotenv.load(fileName: "lib/.env");
   
   runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) =>
     ChangeNotifierProvider(
       create: (context) => PaymentInfo(),
       child: const MyApp(),
+    ),
     ),
   );
 }
@@ -158,6 +162,7 @@ class MyApp extends StatelessWidget {
             );
           }
         }
+        
         return null;
       },
     );

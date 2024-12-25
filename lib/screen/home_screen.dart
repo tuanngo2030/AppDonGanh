@@ -391,12 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    // Text(
-                    //   "Ngày đếm ngược ưu đãi",
-                    //   style: TextStyle(
-                    //     fontSize: 20,
-                    //   ),
-                    // ),
+            
                   ],
                 ),
 
@@ -579,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   //     ),
                                   //   ),
                                   // ] else ...[
-                                    // Hiển thị giá bình thường nếu không giảm giá
+                                  //   // Hiển thị giá bình thường nếu không giảm giá
                                     Text(
                                       '${NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(product.donGiaBan)} đ/kg',
                                       style: TextStyle(
@@ -587,8 +582,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
-                                  // ],
-                                ],
+                                  ],
+                                // ],
                               ),
                             ),
 
