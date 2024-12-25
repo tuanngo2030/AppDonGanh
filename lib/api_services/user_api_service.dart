@@ -41,12 +41,12 @@ class UserApiService {
 
           if (userId != null) {
             // Fetch user details by userId
-            NguoiDung? user = await fetchUserDetails(userId);
+            NguoiDung? user = await fetchUserDetails(userId, token);
             if (user != null) {
               // Save user information and token in SharedPreferences
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.setString('id', user.id ?? '');
-              await prefs.setString('token', token ?? '');
+              await prefs.setString('token', token);
               await prefs.setString('anhDaiDien', user.anhDaiDien ?? '');
               await prefs.setString('tenNguoiDung', user.tenNguoiDung ?? '');
               await prefs.setString('soDienThoai', user.soDienThoai ?? '');
@@ -87,9 +87,9 @@ class UserApiService {
         'token'); // Replace 'token' with the actual key you use for storing the token
   }
 
-  Future<NguoiDung?> fetchUserDetails(String userId) async {
+  Future<NguoiDung?> fetchUserDetails(String userId, String token) async {
     final uri = Uri.parse('$baseUrlid/$userId');
-    final token = await getToken(); // Retrieve the token
+    // final token = await getToken(); // Retrieve the token
 
     try {
       final response = await http.get(
@@ -103,8 +103,10 @@ class UserApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         print('User details: $data');
+       
         return NguoiDung.fromJson(data);
       } else {
+         print('token $token');
         print('Failed to fetch user details: ${response.statusCode}');
         print('Response body: ${response.body}');
       }

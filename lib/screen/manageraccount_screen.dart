@@ -33,9 +33,10 @@ class _ManageraccountScreen extends State<ManageraccountScreen> {
   Future<void> _loadUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedUserId = prefs.getString('userId');
+     String? token = prefs.getString('token');
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
-      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId);
+      NguoiDung? user = await UserApiService().fetchUserDetails(storedUserId, token!);
       if (user != null) {
         if (mounted) {
           setState(() {

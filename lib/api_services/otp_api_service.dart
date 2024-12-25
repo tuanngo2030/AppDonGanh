@@ -16,11 +16,11 @@ class OtpApiService {
   // Phương thức xác minh OTP
   Future<bool> verifyOtp(String otp, String gmail) async {
     try {
-      String? token = await _getToken(); // Lấy token từ SharedPreferences
-      if (token == null) {
-        print('Token not found');
-        return false;
-      }
+      // String? token = await _getToken(); // Lấy token từ SharedPreferences
+      // if (token == null) {
+      //   print('Token not found');
+      //   return false;
+      // }
 
       Map<String, dynamic> requestData = {
         'gmail': gmail,
@@ -31,7 +31,7 @@ class OtpApiService {
         Uri.parse(baseUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Thêm token vào header
+          // 'Authorization': 'Bearer $token', // Thêm token vào header
         },
         body: jsonEncode(requestData),
       );
@@ -65,11 +65,11 @@ class OtpApiService {
   // Phương thức gửi lại OTP
   Future<bool> resendOtp(String gmail) async {
     try {
-      String? token = await _getToken(); // Lấy token từ SharedPreferences
-      if (token == null) {
-        print('Token not found');
-        return false;
-      }
+      // String? token = await _getToken(); // Lấy token từ SharedPreferences
+      // if (token == null) {
+      //   print('Token not found');
+      //   return false;
+      // }
 
       Map<String, dynamic> requestData = {
         'gmail': gmail,
@@ -79,7 +79,7 @@ class OtpApiService {
         Uri.parse(resendUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Thêm token vào header
+          // 'Authorization': 'Bearer $token', // Thêm token vào header
         },
         body: jsonEncode(requestData),
       );

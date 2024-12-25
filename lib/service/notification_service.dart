@@ -29,7 +29,7 @@ class NotificationService {
 
     // Get FCM token
     final token = await _messaging.getToken();
-     final prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString('fcmToken', token!);
     print('FCM token saved to SharedPreferences');
     print('FCM Token: $token');

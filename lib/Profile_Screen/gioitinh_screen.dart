@@ -26,9 +26,10 @@ class _GioitinhScreen extends State<GioitinhScreen> {
   Future<void> _loadUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedUserId = prefs.getString('userId');
+    String? token = prefs.getString('token');
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
-      NguoiDung? user = await _apiService.fetchUserDetails(storedUserId);
+      NguoiDung? user = await _apiService.fetchUserDetails(storedUserId,token!);
       if (user != null) {
         setState(() {
           _userId = storedUserId;
