@@ -227,38 +227,50 @@ Future<Map<String, dynamic>> getUserFollowers(String userId) async {
   }
 }
 
-  Future<Map<String, dynamic>> loginXacMinh(
-      String email, String password, String userId) async {
-    final url = Uri.parse('${dotenv.env['API_URL']}/user/loginXacMinh/$userId');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'gmail': email,
-          'matKhau': password,
-        }),
-      );
 
-      if (response.statusCode == 200) {
-        // Login successful
-        return json.decode(response.body);
-      } else {
-        // Handle error responses
-        final error = json.decode(response.body);
-        return {
-          'error': true,
-          'message': error['message'] ?? 'Unknown error',
-        };
-      }
-    } catch (e) {
-      // Handle unexpected errors
+Future<Map<String, dynamic>> loginXacMinh(
+    String email, String password, String userId) async {
+  final url = Uri.parse('${dotenv.env['API_URL']}/user/loginXacMinh/$userId');
+  try {
+    // Retrieve the token from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');  // Assuming the token is stored with the key 'token'
+
+    // Prepare the headers with the token
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';  // Add the token to the header
+    }
+
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode({
+        'gmail': email,
+        'matKhau': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Login successful
+      return json.decode(response.body);
+    } else {
+      // Handle error responses
+      final error = json.decode(response.body);
       return {
         'error': true,
-        'message': 'Failed to connect to the server',
+        'message': error['message'] ?? 'Unknown error',
       };
     }
+  } catch (e) {
+    // Handle unexpected errors
+    return {
+      'error': true,
+      'message': 'Failed to connect to the server',
+    };
   }
+}
+
 }
